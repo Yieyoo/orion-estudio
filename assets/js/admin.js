@@ -55,7 +55,7 @@ const DEMO = [
 ];
 
 let clients = [];
-const state = { filter: 'all', query: '', sort: 'recent', view: 'table', openId: null, creating: false };
+const state = { filter: 'all', query: '', sort: 'recent', view: 'table', openId: null, creating: false, email: '', shownView: null };
 const $ = sel => document.querySelector(sel);
 const money = n => n ? '$' + n.toLocaleString('es-MX') : '—';
 const initials = name => name.split(' ').filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase();
@@ -188,12 +188,36 @@ function renderKanban(list) {
   }).join('');
 }
 
+const VIEWS = {
+  clientes: { title: 'Clientes', eyebrow: 'CRM · CLIENTES Y PROSPECTOS' },
+  propuestas: { title: 'Propuestas', eyebrow: 'CRM · COTIZACIONES ENVIADAS' },
+  seguimientos: { title: 'Seguimientos', eyebrow: 'CRM · AGENDA DE CONTACTO' },
+  reportes: { title: 'Reportes', eyebrow: 'CRM · MÉTRICAS DEL EMBUDO' },
+  ajustes: { title: 'Ajustes', eyebrow: 'CRM · CUENTA Y PREFERENCIAS' }
+};
+const currentView = () => VIEWS[location.hash.slice(1)] ? location.hash.slice(1) : 'clientes';
+
 function render() {
+  const view = currentView();
   renderStats();
-  const list = visibleClients();
-  $('#table-view').hidden = state.view !== 'table';
-  $('#kanban-view').hidden = state.view !== 'kanban';
-  state.view === 'table' ? renderTable(list) : renderKanban(list);
+  document.body.dataset.view = view;
+  document.querySelectorAll('.view').forEach(v => { v.hidden = v.dataset.view !== view; });
+  document.querySelectorAll('[data-nav]').forEach(a => a.classList.toggle('is-active', a.dataset.nav === view));
+  $('#view-title').textContent = VIEWS[view].title;
+  $('#view-eyebrow').textContent = VIEWS[view].eyebrow;
+
+  if (view === 'clientes') {
+    const list = visibleClients();
+    $('#table-view').hidden = state.view !== 'table';
+    $('#kanban-view').hidden = state.view !== 'kanban';
+    state.view === 'table' ? renderTable(list) : renderKanban(list);
+  }
+  if (view === 'propuestas') renderProposals();
+  if (view === 'seguimientos') renderFollowups();
+  if (view === 'reportes') renderReports();
+  // Ajustes solo se pinta al entrar, para no borrar lo que se está escribiendo
+  if (view === 'ajustes' && state.shownView !== 'ajustes') renderSettings();
+  state.shownView = view;
   if (state.openId) renderDrawer();
 }
 
@@ -303,19 +327,26 @@ function closeDrawer() {
   $('#backdrop').hidden = true;
 }
 
-async function setStatus(c, status) {
-  const entry = { d: 0, s: status, t: statusById[status].label, n: '' };
+// Guarda cambios de un cliente (columnas de Supabase) y, si hay título, lo anota en su historial
+async function updateClient(c, patch, title) {
+  const status = patch.status || c.status;
   if (db) {
-    const { error } = await db.from('clients').update({ status, last_contact: toISODate(0) }).eq('id', c.id);
+    const { error } = await db.from('clients').update(patch).eq('id', c.id);
     if (error) return toast('No se pudo guardar: ' + error.message);
-    const { error: histError } = await db.from('interactions').insert({ client_id: c.id, status, title: entry.t });
-    if (histError) toast('Estado guardado, pero no el historial: ' + histError.message);
+    if (title) {
+      const { error: histError } = await db.from('interactions').insert({ client_id: c.id, status, title });
+      if (histError) toast('Cambio guardado, pero no el historial: ' + histError.message);
+    }
   }
   c.status = status;
-  c.lastContact = 0;
-  c.history.unshift(entry);
+  if ('last_contact' in patch) c.lastContact = toOffset(patch.last_contact);
+  if ('next_step' in patch) c.nextStep = toOffset(patch.next_step);
+  if ('next_label' in patch) c.nextLabel = patch.next_label || '—';
+  if (title) c.history.unshift({ d: 0, s: status, t: title, n: '' });
   render();
 }
+
+const setStatus = (c, status) => updateClient(c, { status, last_contact: toISODate(0) }, statusById[status].label);
 
 async function saveNotes(c, notes) {
   if (notes === c.notes) return;
@@ -359,6 +390,289 @@ async function createClient(form) {
   toast('Cliente agregado');
 }
 
+// ---------- Acciones compartidas ----------
+const waLink = c => c.phone ? 'https://wa.me/' + c.phone.replace(/\D/g, '') : '';
+const contactButtons = c => [
+  waLink(c) && `<a class="mini-btn" href="${waLink(c)}" target="_blank" rel="noopener" title="WhatsApp" aria-label="Abrir WhatsApp"><svg viewBox="0 0 24 24">${CHANNELS.whatsapp.icon}</svg></a>`,
+  c.email && `<a class="mini-btn" href="mailto:${esc(c.email)}" title="Correo" aria-label="Enviar correo"><svg viewBox="0 0 24 24">${CHANNELS.email.icon}</svg></a>`
+].filter(Boolean).join('');
+
+function handleAction(act, el) {
+  const holder = el.closest('[data-id]');
+  const c = holder && findClient(holder.dataset.id);
+  if (act === 'won') return updateClient(c, { status: 'cliente', last_contact: toISODate(0) }, 'Propuesta aceptada');
+  if (act === 'lost') return updateClient(c, { status: 'perdido', last_contact: toISODate(0), next_step: null, next_label: null }, 'Propuesta rechazada');
+  if (act === 'done') return updateClient(c, { last_contact: toISODate(0), next_step: null, next_label: null }, 'Seguimiento: ' + c.nextLabel);
+  if (act === 'snooze') return updateClient(c, { next_step: toISODate(Math.max(c.nextStep ?? 0, 0) + 3) });
+  if (act === 'copy') {
+    const text = $('#tpl-' + el.dataset.key).value;
+    navigator.clipboard?.writeText(text).then(() => toast('Plantilla copiada'), () => toast('No se pudo copiar'));
+  }
+  if (act === 'export') return exportCsv();
+  if (act === 'logout') return logout();
+}
+
+const kpiHtml = (label, value, note, dark) =>
+  `<article class="kpi${dark ? ' kpi-dark' : ''}"><p>${label}</p><strong>${value}</strong><small>${note}</small></article>`;
+const sumValue = list => '$' + list.reduce((s, c) => s + c.value, 0).toLocaleString('es-MX');
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+const shortMonth = d => d.toLocaleString('es-MX', { month: 'short' }).replace('.', '');
+
+// ---------- Propuestas ----------
+function renderProposals() {
+  const open = clients.filter(c => c.status === 'propuesta');
+  const won = clients.filter(c => c.status === 'cliente');
+  const lost = clients.filter(c => c.status === 'perdido' && c.value);
+  const closeRate = won.length + lost.length ? Math.round(won.length / (won.length + lost.length) * 100) : 0;
+  const sentEntry = c => c.history.find(h => h.s === 'propuesta');
+  const stale = open.filter(c => sentEntry(c) && sentEntry(c).d <= -7);
+
+  const card = c => {
+    const sent = sentEntry(c);
+    const age = sent ? -sent.d : 0;
+    return `<article class="prop-card" data-id="${c.id}" style="--c:${statusById[c.status].color}">
+      <div class="prop-top">
+        <div><strong>${esc(c.name)}</strong><small>${esc(c.company) || '—'}</small></div>
+        <span class="prop-amount">${money(c.value)}</span>
+      </div>
+      <p class="prop-service">${esc(c.service) || 'Servicio sin definir'}</p>
+      <div class="prop-meta">
+        <span>${sent ? 'Enviada ' + relDay(sent.d).toLowerCase() : 'Sin fecha de envío'}</span>
+        ${c.status === 'propuesta' && age >= 7 ? `<span class="badge-warn">${age} días sin respuesta</span>` : ''}
+      </div>
+      ${c.status === 'propuesta' ? `<div class="prop-actions">
+        ${contactButtons(c)}
+        <button class="btn btn-ghost btn-sm" data-act="lost">Perdida</button>
+        <button class="btn btn-dark btn-sm" data-act="won">Ganada</button>
+      </div>` : ''}
+    </article>`;
+  };
+  const column = (title, color, list) => `<section class="prop-col">
+    <h3><i class="dot" style="background:${color}"></i>${title} <em>${list.length} · ${sumValue(list)}</em></h3>
+    ${list.length ? [...list].sort((a, b) => b.value - a.value).map(card).join('') : '<p class="col-empty">Nada por aquí todavía.</p>'}
+  </section>`;
+
+  $('#view-propuestas').innerHTML = `
+    <section class="kpis kpis-4">
+      ${kpiHtml('En espera', sumValue(open), plural(open.length, 'propuesta') + ' abierta' + (open.length === 1 ? '' : 's'), true)}
+      ${kpiHtml('Ganadas', sumValue(won), plural(won.length, 'cliente'))}
+      ${kpiHtml('Tasa de cierre', closeRate + '%', 'ganadas vs. perdidas')}
+      ${kpiHtml('Por reactivar', stale.length, 'más de 7 días sin respuesta')}
+    </section>
+    <div class="prop-cols">
+      ${column('En espera', statusById.propuesta.color, open)}
+      ${column('Ganadas', statusById.cliente.color, won)}
+      ${column('Perdidas', statusById.perdido.color, lost)}
+    </div>`;
+}
+
+// ---------- Seguimientos ----------
+function renderFollowups() {
+  const items = clients.filter(c => c.nextStep !== null && c.status !== 'perdido').sort((a, b) => a.nextStep - b.nextStep);
+  const groups = [
+    { title: 'Vencidos', tone: 'due', test: d => d < 0 },
+    { title: 'Hoy', tone: 'today', test: d => d === 0 },
+    { title: 'Mañana', tone: '', test: d => d === 1 },
+    { title: 'Próximos 7 días', tone: '', test: d => d > 1 && d <= 7 },
+    { title: 'Más adelante', tone: '', test: d => d > 7 }
+  ].map(g => ({ ...g, list: items.filter(c => g.test(c.nextStep)) }));
+  const noDate = clients.filter(c => c.nextStep === null && !['cliente', 'perdido'].includes(c.status));
+
+  const row = c => {
+    const date = startOfToday();
+    date.setDate(date.getDate() + c.nextStep);
+    const tone = c.nextStep < 0 ? 'due' : c.nextStep === 0 ? 'today' : '';
+    return `<div class="fu-item" data-id="${c.id}">
+      <div class="fu-date ${tone}"><b>${date.getDate()}</b><span>${shortMonth(date)}</span></div>
+      <div class="fu-main">
+        <strong>${esc(c.nextLabel)}</strong>
+        <small>${esc(c.name)}${c.company ? ' · ' + esc(c.company) : ''} · ${c.nextStep < 0 ? `<span class="due">vencido hace ${-c.nextStep} d</span>` : relDay(c.nextStep)}</small>
+      </div>
+      <div class="fu-status">${pill(c.status)}</div>
+      <div class="fu-actions">
+        ${contactButtons(c)}
+        <button class="mini-btn mini-text" data-act="snooze" title="Posponer 3 días">+3d</button>
+        <button class="btn btn-dark btn-sm" data-act="done">Hecho</button>
+      </div>
+    </div>`;
+  };
+
+  $('#view-seguimientos').innerHTML = `
+    <div class="fu-summary">
+      ${groups.slice(0, 4).map(g => `<div class="fu-stat ${g.tone}"><strong>${g.list.length}</strong><span>${g.title}</span></div>`).join('')}
+    </div>
+    <div class="fu-board">
+      ${items.length ? groups.filter(g => g.list.length).map(g => `
+        <section class="fu-group">
+          <h3 class="${g.tone}">${g.title} <em>${g.list.length}</em></h3>
+          ${g.list.map(row).join('')}
+        </section>`).join('') : '<div class="empty"><strong>Todo al día</strong><p>No tienes seguimientos programados.</p></div>'}
+      ${noDate.length ? `<section class="fu-group">
+          <h3>Sin fecha <em>${noDate.length}</em></h3>
+          <p class="col-empty">Prospectos sin próximo paso: ${noDate.map(c => `<a href="#" data-id="${c.id}" class="inline-link">${esc(c.name)}</a>`).join(', ')}.</p>
+        </section>` : ''}
+    </div>`;
+}
+
+// ---------- Reportes ----------
+function hbars(rows, max) {
+  return `<div class="hbars">${rows.map(r => `
+    <div class="hbar" data-tip="${esc(r.label)}: ${esc(r.display)}">
+      <span class="hbar-label">${r.dot ? `<i class="dot" style="background:${r.dot}"></i>` : ''}${esc(r.label)}</span>
+      <span class="hbar-track"><i style="width:${max ? Math.max(r.value / max * 100, r.value ? 1.5 : 0) : 0}%;background:${r.color || 'var(--blue)'}"></i></span>
+      <span class="hbar-value">${r.display}</span>
+    </div>`).join('')}</div>`;
+}
+
+function renderReports() {
+  const total = clients.length;
+  const repliedStates = ['respondio', 'propuesta', 'cliente', 'perdido'];
+  const contacted = clients.filter(c => c.status !== 'nuevo');
+  const answered = clients.filter(c => repliedStates.includes(c.status));
+  const proposed = clients.filter(c => ['propuesta', 'cliente'].includes(c.status) || (c.status === 'perdido' && c.value));
+  const won = clients.filter(c => c.status === 'cliente');
+  const pct = n => total ? Math.round(n / total * 100) : 0;
+
+  const funnel = [
+    ['En cartera', total], ['Contactados', contacted.length], ['Respondieron', answered.length],
+    ['Recibieron propuesta', proposed.length], ['Clientes', won.length]
+  ].map(([label, value]) => ({ label, value, display: `${value} · ${pct(value)}%` }));
+
+  const channels = Object.entries(CHANNELS).map(([id, ch]) => {
+    const reached = contacted.filter(c => c.channel === id);
+    const ok = reached.filter(c => repliedStates.includes(c.status)).length;
+    const rate = reached.length ? Math.round(ok / reached.length * 100) : 0;
+    return { label: ch.label, value: rate, display: reached.length ? `${rate}% · ${ok}/${reached.length}` : 'sin datos' };
+  }).sort((a, b) => b.value - a.value);
+
+  // 8 semanas: la última termina hoy
+  const weeks = Array.from({ length: 8 }, (_, i) => {
+    const to = -(7 - i) * 7, from = to - 6;
+    const start = startOfToday();
+    start.setDate(start.getDate() + from);
+    const n = clients.reduce((s, c) => s + c.history.filter(h => h.d >= from && h.d <= to).length, 0);
+    return { n, label: `${start.getDate()} ${shortMonth(start)}` };
+  });
+  const maxWeek = Math.max(...weeks.map(w => w.n), 1);
+
+  const valueRows = ['propuesta', 'cliente', 'perdido'].map(id => {
+    const v = clients.filter(c => c.status === id).reduce((s, c) => s + c.value, 0);
+    return { label: statusById[id].label, value: v, display: money(v), color: statusById[id].color, dot: statusById[id].color };
+  });
+  const avgTicket = won.length ? money(Math.round(won.reduce((s, c) => s + c.value, 0) / won.length)) : '—';
+
+  $('#view-reportes').innerHTML = `
+    <section class="kpis kpis-4">
+      ${kpiHtml('Tasa de respuesta', (contacted.length ? Math.round(answered.length / contacted.length * 100) : 0) + '%', `${answered.length} de ${contacted.length} contactados`)}
+      ${kpiHtml('Conversión total', pct(won.length) + '%', 'de cartera a cliente')}
+      ${kpiHtml('Ticket promedio', avgTicket, 'por cliente ganado')}
+      ${kpiHtml('Ingreso ganado', sumValue(won), plural(won.length, 'cliente'), true)}
+    </section>
+    <div class="report-grid">
+      <section class="panel">
+        <div class="panel-head"><h2>Embudo de conversión</h2><span class="eyebrow">CLIENTES · % DE LA CARTERA</span></div>
+        ${hbars(funnel, total)}
+      </section>
+      <section class="panel">
+        <div class="panel-head"><h2>Respuesta por canal</h2><span class="eyebrow">% QUE RESPONDIÓ</span></div>
+        ${hbars(channels, 100)}
+      </section>
+      <section class="panel">
+        <div class="panel-head"><h2>Actividad semanal</h2><span class="eyebrow">INTERACCIONES · 8 SEMANAS</span></div>
+        <div class="vbars">${weeks.map((w, i) => `
+          <div class="vbar${i === 7 ? ' is-current' : ''}" data-tip="Semana del ${w.label}: ${w.n} ${w.n === 1 ? 'interacción' : 'interacciones'}">
+            <span class="vbar-value">${w.n || ''}</span>
+            <span class="vbar-col"><i style="height:${w.n / maxWeek * 100}%"></i></span>
+            <span class="vbar-label">${w.label}</span>
+          </div>`).join('')}</div>
+      </section>
+      <section class="panel">
+        <div class="panel-head"><h2>Valor por estado</h2><span class="eyebrow">MXN</span></div>
+        ${hbars(valueRows, Math.max(...valueRows.map(r => r.value), 1))}
+      </section>
+    </div>`;
+}
+
+// ---------- Ajustes ----------
+// Las plantillas se guardan en este navegador (localStorage) por ahora.
+const DEFAULT_TEMPLATES = {
+  primer: { title: 'Primer contacto', text: 'Hola {nombre}, soy de Orion Studio. Vi el trabajo de {empresa} y creo que podemos ayudarles con su presencia digital. ¿Te puedo compartir algunas ideas?' },
+  seguimiento: { title: 'Seguimiento', text: 'Hola {nombre}, te escribo para dar seguimiento a mi mensaje anterior. ¿Tuviste oportunidad de revisarlo? Quedo atento.' },
+  propuesta: { title: 'Envío de propuesta', text: 'Hola {nombre}, te comparto la propuesta para {servicio}. Cualquier duda la revisamos en una llamada corta.' }
+};
+function loadTemplates() {
+  try { return { ...DEFAULT_TEMPLATES, ...JSON.parse(localStorage.getItem('orion-templates') || '{}') }; }
+  catch { return DEFAULT_TEMPLATES; }
+}
+function saveTemplates() {
+  const data = {};
+  Object.entries(DEFAULT_TEMPLATES).forEach(([key, t]) => { data[key] = { title: t.title, text: $('#tpl-' + key).value }; });
+  try { localStorage.setItem('orion-templates', JSON.stringify(data)); toast('Plantillas guardadas'); }
+  catch { toast('No se pudieron guardar en este navegador'); }
+}
+
+function renderSettings() {
+  const tpl = loadTemplates();
+  $('#view-ajustes').innerHTML = `
+    <div class="settings-grid">
+      <section class="panel">
+        <div class="panel-head"><h2>Cuenta</h2></div>
+        <div class="info">
+          <div><span>Correo</span><b>${esc(state.email) || 'Modo demo'}</b></div>
+          <div><span>Rol</span><b>Administrador</b></div>
+        </div>
+        <button class="btn btn-ghost panel-btn" data-act="logout">Cerrar sesión</button>
+      </section>
+      <section class="panel">
+        <div class="panel-head"><h2>Cambiar contraseña</h2></div>
+        <form id="pw-form">
+          <label class="field"><span>Nueva contraseña</span><input type="password" name="password" minlength="8" required autocomplete="new-password"></label>
+          <label class="field"><span>Confirmar contraseña</span><input type="password" name="confirm" minlength="8" required autocomplete="new-password"></label>
+          <button class="btn btn-dark" type="submit">Actualizar contraseña</button>
+        </form>
+      </section>
+      <section class="panel span-2">
+        <div class="panel-head"><h2>Plantillas de mensajes</h2><span class="eyebrow">USA {NOMBRE} · {EMPRESA} · {SERVICIO}</span></div>
+        <div class="tpl-grid">${Object.keys(DEFAULT_TEMPLATES).map(key => `
+          <div class="tpl">
+            <div class="tpl-head"><strong>${esc(tpl[key].title)}</strong><button class="mini-btn mini-text" data-act="copy" data-key="${key}">Copiar</button></div>
+            <textarea class="note-box" id="tpl-${key}" data-template="${key}">${esc(tpl[key].text)}</textarea>
+          </div>`).join('')}</div>
+      </section>
+      <section class="panel span-2">
+        <div class="panel-head"><h2>Datos</h2></div>
+        <p class="panel-text">Descarga todos tus clientes en un archivo que abre Excel o Google Sheets.</p>
+        <div class="settings-actions">
+          <button class="btn btn-dark" data-act="export">Exportar clientes (CSV)</button>
+          <button class="btn btn-ghost" disabled>Importar CSV · próximamente</button>
+        </div>
+      </section>
+    </div>`;
+}
+
+async function changePassword(form) {
+  const { password, confirm } = Object.fromEntries(new FormData(form));
+  if (password !== confirm) return toast('Las contraseñas no coinciden');
+  if (!db) return toast('En modo demo no se puede cambiar la contraseña');
+  const { error } = await db.auth.updateUser({ password });
+  if (error) return toast('No se pudo cambiar: ' + error.message);
+  form.reset();
+  toast('Contraseña actualizada');
+}
+
+function exportCsv() {
+  const cols = ['Nombre', 'Empresa', 'Puesto', 'Correo', 'Teléfono', 'Estado', 'Canal', 'Servicio', 'Valor', 'Último contacto', 'Próximo seguimiento', 'Próximo paso', 'Etiquetas', 'Notas'];
+  const dateOf = d => d === null ? '' : toISODate(d);
+  const rows = clients.map(c => [c.name, c.company, c.role, c.email, c.phone, statusById[c.status].label, CHANNELS[c.channel].label,
+    c.service, c.value, dateOf(c.lastContact), dateOf(c.nextStep), c.nextLabel === '—' ? '' : c.nextLabel, c.tags.join(', '), c.notes || '']);
+  const csv = [cols, ...rows].map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = `clientes-orion-${toISODate(0)}.csv`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
 $('#search').addEventListener('input', e => { state.query = e.target.value; render(); });
 $('#sort').addEventListener('change', e => { state.sort = e.target.value; render(); });
 $('#chips').addEventListener('click', e => {
@@ -370,10 +684,24 @@ document.querySelectorAll('.view-toggle button').forEach(b => b.addEventListener
   document.querySelectorAll('.view-toggle button').forEach(x => x.classList.toggle('is-active', x === b));
   render();
 }));
-$('.board').addEventListener('click', e => {
-  const row = e.target.closest('[data-id]');
-  if (row) openDrawer(row.dataset.id);
+$('#views').addEventListener('click', e => {
+  const act = e.target.closest('[data-act]');
+  if (act) return handleAction(act.dataset.act, act);
+  const item = e.target.closest('[data-id]');
+  if (!item) return;
+  if (e.target.closest('a:not([data-id]), input, textarea, select')) return;
+  e.preventDefault();
+  openDrawer(item.dataset.id);
 });
+$('#views').addEventListener('submit', e => {
+  e.preventDefault();
+  if (e.target.id === 'pw-form') changePassword(e.target);
+});
+$('#views').addEventListener('change', e => {
+  if (e.target.dataset.template) saveTemplates();
+});
+document.querySelectorAll('[data-nav]').forEach(a => a.addEventListener('click', () => $('#sidebar').classList.remove('is-open')));
+window.addEventListener('hashchange', render);
 $('#new-client').addEventListener('click', openNewForm);
 $('#drawer').addEventListener('click', e => {
   if (e.target.closest('[data-close]')) return closeDrawer();
@@ -400,11 +728,13 @@ document.addEventListener('click', e => {
     e.stopPropagation();
   }
 }, true);
-$('#logout').addEventListener('click', async e => {
-  if (!db) return;
-  e.preventDefault();
-  await db.auth.signOut();
+async function logout() {
+  if (db) await db.auth.signOut();
   location.replace('login.html');
+}
+$('#logout').addEventListener('click', e => {
+  e.preventDefault();
+  logout();
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeDrawer(); $('#sidebar').classList.remove('is-open'); }
@@ -422,6 +752,7 @@ async function init() {
   }
   const { data: { session } } = await db.auth.getSession();
   if (!session) return location.replace('login.html');
+  state.email = session.user.email;
   $('#user-email').textContent = session.user.email;
   render();
   const { data, error } = await db.from('clients').select('*, interactions(*)').order('created_at');
