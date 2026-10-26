@@ -391,6 +391,15 @@ $('#drawer').addEventListener('submit', e => {
 });
 $('#backdrop').addEventListener('click', closeDrawer);
 $('#menu-btn').addEventListener('click', () => $('#sidebar').classList.toggle('is-open'));
+// En móvil, tocar fuera del menú lo cierra (y ese toque no activa lo que hay debajo)
+document.addEventListener('click', e => {
+  const sidebar = $('#sidebar');
+  if (sidebar.classList.contains('is-open') && !sidebar.contains(e.target) && !e.target.closest('#menu-btn')) {
+    sidebar.classList.remove('is-open');
+    e.preventDefault();
+    e.stopPropagation();
+  }
+}, true);
 $('#logout').addEventListener('click', async e => {
   if (!db) return;
   e.preventDefault();
