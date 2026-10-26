@@ -43,11 +43,14 @@
 
     const showCard = (index) => {
       active = (index + cards.length) % cards.length;
-      track.style.setProperty("--carousel-rotation", `${active * -90}deg`);
       count.innerHTML = `${String(active + 1).padStart(2, "0")} <i>/</i> ${String(cards.length).padStart(2, "0")}`;
       cards.forEach((card, i) => {
-        card.setAttribute("aria-hidden", String(i !== active));
-        card.inert = i !== active;
+        const relative = (i - active + cards.length) % cards.length;
+        const position = relative === cards.length - 1 ? -1 : relative;
+        const hidden = Math.abs(position) > 1;
+        card.dataset.position = String(position);
+        card.setAttribute("aria-hidden", String(hidden));
+        card.inert = hidden;
       });
     };
 
