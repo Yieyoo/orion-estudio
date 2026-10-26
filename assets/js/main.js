@@ -1,6 +1,16 @@
 (() => {
   const menuButton = document.querySelector(".menu-toggle");
   const nav = document.querySelector(".nav");
+  const header = document.querySelector(".header");
+  const hero = document.querySelector(".hero-immersive");
+
+  if (header && hero) {
+    const updateHeader = () => {
+      header.classList.toggle("is-scrolled", window.scrollY > hero.offsetHeight - header.offsetHeight - 24);
+    };
+    window.addEventListener("scroll", updateHeader, { passive: true });
+    updateHeader();
+  }
 
   if (menuButton && nav) {
     const closeMenu = () => {
