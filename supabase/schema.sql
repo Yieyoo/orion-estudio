@@ -68,3 +68,5 @@ create policy "admins gestionan clientes" on public.clients
 
 create policy "admins gestionan historial" on public.interactions
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
+
+-- Tickets de pago: ver supabase/migrations/003_tickets.sql

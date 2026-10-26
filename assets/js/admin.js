@@ -191,6 +191,7 @@ function renderKanban(list) {
 
 const VIEWS = {
   prospectar: { title: 'Buscar prospectos', eyebrow: 'CRM · NEGOCIOS EN TU ZONA' },
+  tickets: { title: 'Tickets', eyebrow: 'CRM · COMPROBANTES DE PAGO' },
   clientes: { title: 'Clientes', eyebrow: 'CRM · CLIENTES Y PROSPECTOS' },
   propuestas: { title: 'Propuestas', eyebrow: 'CRM · COTIZACIONES ENVIADAS' },
   seguimientos: { title: 'Seguimientos', eyebrow: 'CRM · AGENDA DE CONTACTO' },
@@ -218,6 +219,7 @@ function render() {
   if (view === 'seguimientos') renderFollowups();
   if (view === 'reportes') renderReports();
   if (view === 'prospectar' && typeof renderProspects === 'function') renderProspects();
+  if (view === 'tickets' && typeof renderTickets === 'function') renderTickets();
   // Ajustes solo se pinta al entrar, para no borrar lo que se está escribiendo
   if (view === 'ajustes' && state.shownView !== 'ajustes') renderSettings();
   state.shownView = view;
@@ -247,6 +249,7 @@ function renderDrawer() {
           <button class="btn btn-ghost" data-status="respondio">Marcar respondió</button>
           <button class="btn btn-ghost" data-status="propuesta">Enviar propuesta</button>
           <button class="btn btn-ghost" data-status="silencio">Sin respuesta</button>
+          <button class="btn btn-ghost" data-tact="new-for-client" data-client="${c.id}">Crear ticket de pago</button>
         </div>
       </section>
       <section class="drawer-section">

@@ -425,3 +425,29 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round
 @media (prefers-reduced-motion: reduce) {
   *,*:before,*:after { transition-duration: .01ms !important; }
 }
+
+/* Tickets */
+.board-title { margin: 0; font: 600 16px var(--display); letter-spacing: -.02em; }
+.due-amount { color: #a96d12; }
+.items { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.item-row { display: grid; grid-template-columns: 1fr 64px 110px 34px; gap: 8px; align-items: center; }
+.item-row input { width: 100%; padding: 11px 12px; border: 1px solid var(--line); background: var(--card); font-size: 13px; outline: none; }
+.item-row input:focus { border-color: var(--blue); }
+.ticket-total { display: flex; justify-content: space-between; align-items: baseline; margin: 16px 0 26px; padding: 14px 0; border-top: 1px solid var(--ink); }
+.ticket-total strong { font: 600 22px var(--display); letter-spacing: -.03em; }
+.ticket-status { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 12px; }
+.ticket-meter { margin: 0 0 14px; }
+.ticket-meter i { background: var(--st-respondio); }
+.pay-list { list-style: none; margin: 0 0 12px; padding: 0; border: 1px solid var(--line); background: var(--card); }
+.pay-list li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 12px; border-bottom: 1px solid #ebe9e2; font-size: 13px; }
+.pay-list li:last-child { border-bottom: 0; }
+.pay-list b { font-family: var(--display); font-weight: 600; white-space: nowrap; }
+.pay-form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pay-form input, .pay-form select { width: 100%; padding: 10px 12px; border: 1px solid var(--line); background: var(--card); font-size: 13px; outline: none; }
+.pay-form .btn { grid-column: span 2; }
+.ticket-notes { margin: 0; padding: 12px; background: var(--paper-deep); color: #3e4248; font-size: 13px; white-space: pre-line; }
+.quick a.btn { text-align: center; }
+.link-danger { padding: 0; border: 0; background: none; color: var(--st-perdido); font-size: 12px; text-decoration: underline; cursor: pointer; }
+@media (max-width: 640px) {
+  .item-row { grid-template-columns: 1fr 56px 90px 30px; gap: 6px; }
+}
