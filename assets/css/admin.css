@@ -22,6 +22,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
 a { color: inherit; text-decoration: none; }
 h1,h2,h3,p { margin-top: 0; }
@@ -451,3 +452,14 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round
 @media (max-width: 640px) {
   .item-row { grid-template-columns: 1fr 56px 90px 30px; gap: 6px; }
 }
+.hint { margin: -6px 0 18px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.plan-box { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); background: var(--card); }
+.plan-box strong { display: block; font-size: 14px; }
+.plan-box small { color: var(--muted); font-size: 12px; }
+#price-form { margin-top: 10px; }
+#price-form .field { margin: 0; }
+#price-form .field span { margin-bottom: 6px; }
+.plans-grid { display: grid; grid-template-columns: repeat(3, 1fr) auto; gap: 12px; align-items: end; }
+.plans-grid .field { margin: 0; }
+.plans-grid .field input { padding: 12px; }
+@media (max-width: 900px) { .plans-grid { grid-template-columns: 1fr; } }

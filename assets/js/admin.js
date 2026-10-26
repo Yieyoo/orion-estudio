@@ -221,7 +221,10 @@ function render() {
   if (view === 'prospectar' && typeof renderProspects === 'function') renderProspects();
   if (view === 'tickets' && typeof renderTickets === 'function') renderTickets();
   // Ajustes solo se pinta al entrar, para no borrar lo que se está escribiendo
-  if (view === 'ajustes' && state.shownView !== 'ajustes') renderSettings();
+  if (view === 'ajustes' && state.shownView !== 'ajustes') {
+    renderSettings();
+    if (typeof renderPlansPanel === 'function') renderPlansPanel();
+  }
   state.shownView = view;
   if (state.openId) renderDrawer();
 }
@@ -637,6 +640,7 @@ function renderSettings() {
           <button class="btn btn-dark" type="submit">Actualizar contraseña</button>
         </form>
       </section>
+      <section class="panel span-2" id="plans-panel"></section>
       <section class="panel span-2">
         <div class="panel-head"><h2>Plantillas de mensajes</h2><span class="eyebrow">USA {NOMBRE} · {EMPRESA} · {SERVICIO}</span></div>
         <div class="tpl-grid">${Object.keys(DEFAULT_TEMPLATES).map(key => `

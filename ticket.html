@@ -33,6 +33,8 @@
     .label { display: block; margin-bottom: 3px; color: var(--muted); font: 9px "DM Mono", monospace; letter-spacing: 1.1px; text-transform: uppercase; }
     .meta b { font-weight: 600; word-break: break-word; }
     .plan { margin: 0 0 6px; font: 600 20px Sora, sans-serif; letter-spacing: -.02em; }
+    .plan-price { margin: 0 0 8px; color: var(--muted); }
+    .plan-price b { color: var(--ink); font-weight: 600; }
     table { width: 100%; border-collapse: collapse; margin: 12px 0 4px; }
     th { padding: 8px 0; text-align: left; color: var(--muted); font: 9px "DM Mono", monospace; letter-spacing: 1px; text-transform: uppercase; font-weight: 400; border-bottom: 1px solid var(--line); }
     td { padding: 11px 0; border-bottom: 1px solid #f0eee8; vertical-align: top; }
@@ -91,9 +93,9 @@
     // Ticket de ejemplo para revisar el diseño: ticket.html?demo=1
     const DEMO = {
       folio: 7, created_at: new Date().toISOString(), client_name: 'Café Raíz', client_contact: '+52 55 1234 5678',
-      plan: 'Sitio web + menú digital', total: 12500, notes: 'Incluye dominio y hosting por 1 año.\nEntrega estimada: 3 semanas.',
-      items: [{ concept: 'Diseño y desarrollo de sitio web', qty: 1, price: 9500 }, { concept: 'Menú digital con código QR', qty: 1, price: 3000 }],
-      payments: [{ date: new Date().toISOString().slice(0, 10), amount: 6250, method: 'Transferencia' }]
+      plan: 'Recomendado', monthly_price: 2000, months: 3, total: 6350, notes: 'Pago mensual los primeros 5 días de cada mes.',
+      items: [{ concept: 'Plan Recomendado · mensualidad', qty: 3, price: 2000 }, { concept: 'Dominio .com (1 año)', qty: 1, price: 350 }],
+      payments: [{ date: new Date().toISOString().slice(0, 10), amount: 2350, method: 'Transferencia' }]
     };
 
     function render(t) {
@@ -118,6 +120,7 @@
             </div>
             <span class="label">Plan contratado</span>
             <p class="plan">${esc(t.plan)}</p>
+            ${t.monthly_price != null ? `<p class="plan-price"><b>${mxn(t.monthly_price)}</b> /mes${t.months ? ` · ${t.months} ${t.months === 1 ? 'mes' : 'meses'}` : ''}</p>` : ''}
             <table>
               <thead><tr><th>Concepto</th><th class="num">Cant.</th><th class="num">Importe</th></tr></thead>
               <tbody>${(t.items || []).map(i => `<tr><td>${esc(i.concept)}</td><td class="num">${Number(i.qty || 1)}</td><td class="num">${mxn(Number(i.qty || 1) * Number(i.price || 0))}</td></tr>`).join('')}</tbody>
