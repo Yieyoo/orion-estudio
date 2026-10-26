@@ -36,3 +36,52 @@ body{font-size:14px;background:var(--bg)}
 @media(max-width:1000px){.header{padding-inline:5%}.hero{padding-inline:5%}.section{padding-block:110px}.contact{padding-inline:6%}}
 @media(max-width:680px){.header{height:72px}.nav{font-size:13px}.hero{min-height:unset;padding:20px 5% 22px}.hero-copy{padding-top:50px}.hero h1{font-size:clamp(64px,14vw,92px)}.hero-description{font-size:13px}.hero-art{height:370px;margin-top:28px}.hero-topline,.hero-bottomline{font-size:7px}.hero-image-footer{font-size:6px}.section{padding-block:88px}.intro-content h2{font-size:clamp(38px,9.5vw,56px)}.intro-bottom p,.section-heading>p,.statement-content>p:not(.eyebrow),.contact-copy>p{font-size:13px}.section-heading{margin-bottom:42px}.project-meta h3{font-size:14px}.project-meta p{font-size:11px}.project-feature .project-image{min-height:400px}.project-disclaimer{font-size:9px;line-height:1.7}.statement{padding-block:90px;min-height:unset}.statement h2{font-size:clamp(48px,11vw,72px)}.service-name h3{font-size:18px}.service-name p{font-size:11px}.process-item h3{font-size:15px}.process-item p{font-size:11px}.contact{padding:65px 5% 22px}.contact-main{padding:55px 0}.contact-copy h2{font-size:clamp(48px,11.5vw,68px)}.footer-links{font-size:10px}}
 @media(prefers-reduced-motion:reduce){.hero-image,.project-image img{transition:none}}
+
+/* Shorter portfolio layout: let the work lead */
+.intro{padding-top:85px;padding-bottom:85px;grid-template-columns:140px 1fr}
+.intro-content h2{font-size:clamp(38px,4.5vw,58px)}
+.intro-bottom{margin-top:20px}.intro-bottom p{max-width:560px}
+.intro-mark{display:none}
+.statement,.process{display:none}
+.projects{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:20px;row-gap:0}
+.projects>.section-heading,.projects>.project-disclaimer{grid-column:1/-1}
+.projects>.section-heading{margin-bottom:38px}
+.projects>.project-feature,.projects>.project-pair{display:contents}
+.project-image,.project-feature .project-image{min-height:360px}
+.project-pair .project-image{min-height:360px}
+.project-image-top{font-size:8px}
+.project-image-title{left:7%;top:auto;bottom:12%}
+.project-image-title h3{font-size:clamp(32px,3.2vw,48px)}
+.project-pair .project-image-title h3{font-size:clamp(32px,3vw,44px)}
+.project-image-title>b{font-size:8px}
+.project-meta{display:block;min-height:98px;padding-top:16px}
+.project-category{display:block;text-align:left;margin-top:10px;font-size:8px}
+.project-disclaimer{margin-top:20px;font-size:10px}
+.services{padding-top:90px;padding-bottom:95px}
+.services .section-heading{margin-bottom:35px}
+.service-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:28px;border-top:1px solid var(--line)}
+.service-row{grid-template-columns:32px 1fr 18px;gap:12px;padding:21px 0}
+.service-name h3{font-size:19px}.service-name p{font-size:12px;line-height:1.65}
+.service-label{display:none}
+.contact{padding-top:65px}.contact-main{padding-block:55px 65px}
+.contact-visual{height:270px}
+.hero-topline,.hero-art-caption,.hero-image-footer,.hero-bottomline{font-size:9px}
+@media(max-width:900px){
+  .projects{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:16px}
+  .projects>.project-feature .project-image{min-height:350px}
+  .project-image,.project-feature .project-image,.project-pair .project-image{min-height:320px}
+}
+@media(max-width:680px){
+  .intro{padding-block:65px;display:block}.intro-label{margin-bottom:20px}.vertical-line{display:none}.intro-content h2{font-size:clamp(35px,8.7vw,48px)}
+  .projects{display:block;padding-top:72px;padding-bottom:72px}.projects>.section-heading{margin-bottom:30px}
+  .projects>.project-feature,.projects>.project-pair{display:block}.project-pair{margin-top:0}
+  .project-image,.project-feature .project-image,.project-pair .project-image{min-height:340px}
+  .project-meta{min-height:unset;padding:13px 0 26px}.project-meta h3{font-size:16px}.project-meta p{font-size:12px}.project-category{font-size:9px}
+  .service-list{grid-template-columns:1fr}.service-row{padding:18px 0}.service-name h3{font-size:18px}.service-name p{font-size:12px}
+  .services{padding-block:72px}.contact-visual{height:220px}.contact-main{padding-block:45px}
+  .hero-topline,.hero-bottomline{font-size:7px}
+}
+/* Remove decorative microcopy so titles and examples stay in focus */
+.brand-copy small,.availability,.hero-topline,.hero-bottomline,.hero-art-caption,.hero-image-footer,.project-image-top,.project-category,.footer>.mono{display:none}
+.project-disclaimer{font:11px/1.6 var(--sans);color:#a5adb8}
+@media(max-width:680px){.project-disclaimer{font-size:11px}.hero-topline,.hero-bottomline{display:none}}

@@ -15,24 +15,23 @@
     const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 10);
     camera.position.set(0, 0, 4.4);
 
-    const geometry = new THREE.IcosahedronGeometry(1, 2);
+    const geometry = new THREE.SphereGeometry(1, 96, 96);
     const material = new THREE.MeshPhysicalMaterial({
-      color: 0x7c4dff,
-      metalness: 0.45,
-      roughness: 0.22,
-      clearcoat: 0.85,
-      clearcoatRoughness: 0.18,
-      flatShading: true,
-      reflectivity: 0.6
+      color: 0x9bcaff,
+      metalness: 0.28,
+      roughness: 0.13,
+      clearcoat: 1,
+      clearcoatRoughness: 0.08,
+      reflectivity: 0.9
     });
     const gem = new THREE.Mesh(geometry, material);
     scene.add(gem);
 
-    const key = new THREE.DirectionalLight(0xffffff, 1.3);
-    key.position.set(2.2, 2.6, 2.4);
+    const key = new THREE.DirectionalLight(0xffffff, 2.2);
+    key.position.set(2.2, 2.6, 3.4);
     scene.add(key);
 
-    const rim = new THREE.PointLight(0xb79bff, 1.7, 14);
+    const rim = new THREE.PointLight(0x7bc5ff, 2.1, 14);
     rim.position.set(-2.6, -1.4, 1.8);
     scene.add(rim);
 
@@ -40,7 +39,7 @@
     fillLight.position.set(0, 2.2, -2.4);
     scene.add(fillLight);
 
-    const ambient = new THREE.AmbientLight(0x3a2d5e, 0.55);
+    const ambient = new THREE.AmbientLight(0x54708f, 0.8);
     scene.add(ambient);
 
     let target = { x: 0, y: 0 };
