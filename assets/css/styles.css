@@ -287,3 +287,53 @@ h1,h2,h3,p { margin-top: 0; }
   .work-caption{min-height:0}
   .work-caption p{max-width:52%;font-size:11px}
 }
+
+/* Compact, navigable 3D concept carousel */
+.icon-arrow,.icon-down{display:inline-block;width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle}
+.nav-contact .icon-arrow{margin-left:18px;color:#a9bcff}.header.is-scrolled .nav-contact .icon-arrow{color:var(--blue)}
+.button-dark .icon-down{width:19px;height:19px;color:#365cf5}
+.text-link .icon-arrow{width:14px;height:14px;margin-left:8px;color:#a9bcff}
+.work-carousel{position:relative;width:min(100%,1100px);margin:0 auto;padding:0 52px 44px}
+.work-stage{height:440px;position:relative;display:grid;place-items:center;perspective:1200px;overflow:hidden;touch-action:pan-y;cursor:grab}
+.work-stage:active{cursor:grabbing}
+.work-track{position:relative;width:100%;height:100%;transform-style:preserve-3d;transform:rotateY(var(--carousel-rotation,0deg));transition:transform .85s cubic-bezier(.2,.72,.18,1)}
+.work-card{position:absolute;left:50%;top:50%;width:min(430px,58vw);height:355px;margin:0;background:#f5f3ee;box-shadow:0 22px 55px #11131b24;transform:translate(-50%,-50%) rotateY(var(--angle)) translateZ(var(--radius,270px));transform-style:preserve-3d;backface-visibility:hidden}
+.work-card:nth-child(1){--angle:0deg}.work-card:nth-child(2){--angle:90deg}.work-card:nth-child(3){--angle:180deg}.work-card:nth-child(4){--angle:270deg}
+.work-card .work-image,.work-card-wide .work-image,.work-card:not(.work-card-wide) .work-image{height:272px;min-height:0;width:100%}
+.work-card .work-title{left:6%;bottom:8%}
+.work-card .work-title h3,.work-card:not(.work-card-wide) .work-title h3{font-size:clamp(31px,3.1vw,43px)}
+.work-card .work-caption{display:block;min-height:82px;padding:12px 15px 10px;background:#f5f3ee}
+.work-card .work-caption h3{font-size:15px;margin:0 0 4px}
+.work-card .work-caption p{max-width:none;margin:0;text-align:left;font-size:11px;line-height:1.4}
+.work-arrow{display:grid;place-items:center;width:30px;height:30px}
+.work-arrow .icon-arrow{width:22px;height:22px}
+.carousel-control{position:absolute;z-index:5;top:46%;width:42px;height:42px;display:grid;place-items:center;border:1px solid #17191d45;border-radius:50%;background:#f5f3eef0;color:var(--ink);cursor:pointer;transition:background .2s,color .2s,transform .2s}
+.carousel-control:hover{background:var(--ink);color:#fff;transform:scale(1.06)}
+.carousel-control svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.carousel-prev{left:0}.carousel-next{right:0}
+.carousel-count{position:absolute;bottom:11px;left:50%;transform:translateX(-50%);color:var(--ink);font:10px var(--mono);letter-spacing:1px}
+.carousel-count i{color:#a3a5aa;font-style:normal;margin:0 5px}
+.contact-actions .icon-arrow{color:var(--blue)}.contact-email .icon-arrow{width:14px;height:14px;margin-left:5px;color:#9fb1ff}
+.preview-browser>b .icon-arrow,.preview-copy>b .icon-arrow{width:11px;height:11px;color:var(--blue)}
+@media(max-width:700px){
+  .work{padding-bottom:35px}
+  .work-carousel{width:100%;padding:0 0 48px}
+  .work-stage{height:315px;perspective:900px}
+  .work-card{width:min(260px,76vw);height:278px;--radius:205px}
+  .work-card .work-image,.work-card-wide .work-image,.work-card:not(.work-card-wide) .work-image{height:205px}
+  .work-card .work-title h3,.work-card:not(.work-card-wide) .work-title h3{font-size:clamp(30px,8vw,39px)}
+  .work-card .work-title>span{font-size:7px;letter-spacing:.7px}
+  .work-card .work-index{left:12px;top:13px;font-size:6px}
+  .work-card .work-arrow{right:10px;top:8px;width:26px;height:26px}
+  .work-card .work-arrow .icon-arrow{width:18px;height:18px}
+  .work-card .work-caption{min-height:73px;padding:10px 12px 8px}
+  .work-card .work-caption h3{font-size:13px}
+  .work-card .work-caption p{font-size:10px}
+  .carousel-control{top:auto;bottom:0;width:36px;height:36px}
+  .carousel-control svg{width:17px;height:17px}
+  .carousel-prev{left:calc(50% - 72px)}.carousel-next{right:auto;left:calc(50% + 36px)}
+  .carousel-count{bottom:11px;font-size:9px}
+  .work-disclaimer{margin-top:14px}
+  .services{padding-top:28px}
+}
+@media(prefers-reduced-motion:reduce){.work-track{transition:none}.carousel-control{transition:none}}

@@ -31,6 +31,54 @@
     });
   }
 
+  const carousel = document.querySelector(".work-carousel");
+  if (carousel) {
+    const track = carousel.querySelector(".work-track");
+    const stage = carousel.querySelector(".work-stage");
+    const cards = [...carousel.querySelectorAll(".work-card")];
+    const count = carousel.querySelector(".carousel-count");
+    let active = 0;
+    let pointerStart = null;
+    let suppressClick = false;
+
+    const showCard = (index) => {
+      active = (index + cards.length) % cards.length;
+      track.style.setProperty("--carousel-rotation", `${active * -90}deg`);
+      count.innerHTML = `${String(active + 1).padStart(2, "0")} <i>/</i> ${String(cards.length).padStart(2, "0")}`;
+      cards.forEach((card, i) => {
+        card.setAttribute("aria-hidden", String(i !== active));
+        card.inert = i !== active;
+      });
+    };
+
+    carousel.querySelector(".carousel-prev").addEventListener("click", () => showCard(active - 1));
+    carousel.querySelector(".carousel-next").addEventListener("click", () => showCard(active + 1));
+    stage.addEventListener("keydown", event => {
+      if (event.key === "ArrowLeft") { event.preventDefault(); showCard(active - 1); }
+      if (event.key === "ArrowRight") { event.preventDefault(); showCard(active + 1); }
+    });
+
+    stage.addEventListener("pointerdown", event => {
+      pointerStart = { x: event.clientX, y: event.clientY };
+    }, { passive: true });
+    stage.addEventListener("pointerup", event => {
+      if (!pointerStart) return;
+      const dx = event.clientX - pointerStart.x;
+      const dy = event.clientY - pointerStart.y;
+      pointerStart = null;
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) {
+        suppressClick = true;
+        showCard(active + (dx < 0 ? 1 : -1));
+        window.setTimeout(() => { suppressClick = false; }, 0);
+      }
+    }, { passive: true });
+    stage.addEventListener("pointercancel", () => { pointerStart = null; }, { passive: true });
+    track.addEventListener("click", event => {
+      if (suppressClick) { event.preventDefault(); event.stopPropagation(); }
+    }, true);
+    showCard(0);
+  }
+
   const year = document.getElementById("year");
   if (year) year.textContent = new Date().getFullYear();
 
