@@ -329,10 +329,10 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round
 .ps-list { display: flex; flex-direction: column; gap: 10px; }
 .ps-map-wrap { position: sticky; top: 112px; }
 .ps-map { height: calc(100svh - 140px); min-height: 420px; border: 1px solid var(--line); background: var(--paper-deep); }
-.map-placeholder { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 24px; text-align: center; color: var(--muted); background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 40px 40px; }
-.map-placeholder svg { width: 34px; height: 34px; color: var(--blue); }
-.map-placeholder strong { color: var(--ink); font: 600 16px var(--display); }
-.map-placeholder p { margin: 0; font-size: 13px; }
+.info-banner { margin: 14px 0 0; padding: 11px 16px; border-left: 2px solid var(--blue); background: #365cf50d; color: #3a4466; font-size: 12px; line-height: 1.5; }
+.ps-map { position: relative; z-index: 0; }
+.map-pin-wrap { background: none; border: 0; }
+.ps-map .leaflet-control-attribution { font: 10px var(--sans); }
 .map-pin { display: grid; place-items: center; width: 28px; height: 28px; border: 2px solid #fff; border-radius: 50%; background: var(--ink); color: #fff; font: 600 11px var(--display); box-shadow: 0 2px 8px #0b101b55; transition: transform .2s; }
 .map-pin.is-opportunity { background: var(--blue); }
 .map-pin.is-active { transform: scale(1.3); }

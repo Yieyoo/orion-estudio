@@ -1,33 +1,22 @@
-// Orion CRM — buscador de prospectos con Google Maps (Places API New).
+// Orion CRM — buscador de prospectos.
+// Sin clave de Google usa OpenStreetMap (gratis: búsqueda con Nominatim y mapa con Leaflet).
+// Con clave en google-config.js usa Google Places API (New), que tiene datos más completos.
 // Depende de admin.js (clients, db, render, toast, esc, norm, fromRow, toISODate…).
 
 const gcfg = window.ORION_GOOGLE || {};
-const prospects = { list: [], filter: 'all', what: '', loading: false, searched: false, map: null, markers: [], active: null };
+const useGoogle = Boolean(gcfg.mapsKey);
+const prospects = { list: [], filter: 'all', what: '', where: '', loading: false, searched: false, map: null, markers: [], active: null };
 
-const PLACE_FIELDS = ['id', 'displayName', 'formattedAddress', 'nationalPhoneNumber', 'internationalPhoneNumber',
-  'websiteURI', 'rating', 'userRatingCount', 'location', 'googleMapsURI', 'businessStatus'];
-
-// Resultados ficticios para el modo demo
-const DEMO_PLACES = [
-  { id: 'demo-1', name: 'Café Tlacuache', address: 'Colima 152, Roma Nte., Cuauhtémoc, CDMX', phone: '55 1111 2201', intlPhone: '+52 55 1111 2201', website: '', rating: 4.7, reviews: 312, lat: 19.4185, lng: -99.1610 },
-  { id: 'demo-2', name: 'Molienda Roma', address: 'Córdoba 88, Roma Nte., Cuauhtémoc, CDMX', phone: '55 1111 2202', intlPhone: '+52 55 1111 2202', website: 'https://example.com', rating: 4.5, reviews: 128, lat: 19.4202, lng: -99.1575 },
-  { id: 'demo-3', name: 'La Esquina del Grano', address: 'Orizaba 40, Roma Nte., Cuauhtémoc, CDMX', phone: '55 1111 2203', intlPhone: '+52 55 1111 2203', website: '', rating: 4.4, reviews: 76, lat: 19.4170, lng: -99.1588 },
-  { id: 'demo-4', name: 'Tostador Álvaro', address: 'Álvaro Obregón 120, Roma Nte., CDMX', phone: '', intlPhone: '', website: '', rating: 4.8, reviews: 54, lat: 19.4158, lng: -99.1630 },
-  { id: 'demo-5', name: 'Casa Cenzontle Café', address: 'Durango 210, Roma Nte., Cuauhtémoc, CDMX', phone: '55 1111 2205', intlPhone: '+52 55 1111 2205', website: 'https://example.org', rating: 4.3, reviews: 410, lat: 19.4220, lng: -99.1650 },
-  { id: 'demo-6', name: 'Barra Copal', address: 'Tabasco 75, Roma Nte., Cuauhtémoc, CDMX', phone: '55 1111 2206', intlPhone: '+52 55 1111 2206', website: '', rating: 4.6, reviews: 189, lat: 19.4195, lng: -99.1622 },
-  { id: 'demo-7', name: 'Pan y Grano Roma', address: 'Mérida 31, Roma Nte., Cuauhtémoc, CDMX', phone: '55 1111 2207', intlPhone: '+52 55 1111 2207', website: 'https://example.net', rating: 4.2, reviews: 95, lat: 19.4210, lng: -99.1560 }
-];
-
-const normPlace = p => ({
-  id: p.id, name: p.displayName || 'Sin nombre', address: p.formattedAddress || '',
-  phone: p.nationalPhoneNumber || '', intlPhone: p.internationalPhoneNumber || '', website: p.websiteURI || '',
-  rating: p.rating ?? null, reviews: p.userRatingCount || 0, mapsUrl: p.googleMapsURI || '',
-  lat: p.location ? p.location.lat() : null, lng: p.location ? p.location.lng() : null,
-  closed: Boolean(p.businessStatus && p.businessStatus !== 'OPERATIONAL')
-});
-const mapsUrlOf = p => p.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.name + ' ' + p.address)}`;
+const mapsSearchUrl = q => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
 const shortUrl = url => url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/.*$/, '');
 const inCrm = p => clients.some(c => (c.placeId && c.placeId === p.id) || norm(c.name) === norm(p.name));
+// Teléfono en formato +52XXXXXXXXXX para WhatsApp; vacío si no parece número mexicano
+function toIntlMx(raw) {
+  const d = (raw || '').replace(/\D/g, '');
+  if (d.length === 10) return '+52' + d;
+  if (d.startsWith('52') && d.length >= 12) return '+' + d;
+  return '';
+}
 
 const PROSPECT_FILTERS = [
   { id: 'all', label: 'Todos', test: () => true },
@@ -37,89 +26,228 @@ const PROSPECT_FILTERS = [
 ];
 const filteredProspects = () => prospects.list.filter(PROSPECT_FILTERS.find(f => f.id === prospects.filter).test);
 
-// ---------- Google Maps ----------
-function loadMaps() {
-  if (!loadMaps.promise) {
-    loadMaps.promise = new Promise((resolve, reject) => {
-      window.__orionMapsReady = resolve;
-      window.gm_authFailure = () => toast('Google rechazó la clave de Maps: revisa la clave y sus restricciones.');
-      const s = document.createElement('script');
-      s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(gcfg.mapsKey)}&v=weekly&language=es&region=MX&loading=async&callback=__orionMapsReady`;
-      s.async = true;
-      s.onerror = () => { loadMaps.promise = null; reject(new Error('No se pudo cargar Google Maps')); };
-      document.head.appendChild(s);
-    });
+// ---------- Google Places ----------
+const PLACE_FIELDS = ['id', 'displayName', 'formattedAddress', 'nationalPhoneNumber', 'internationalPhoneNumber',
+  'websiteURI', 'rating', 'userRatingCount', 'location', 'googleMapsURI', 'businessStatus'];
+
+function loadGoogle() {
+  loadGoogle.promise ||= new Promise((resolve, reject) => {
+    window.__orionMapsReady = resolve;
+    window.gm_authFailure = () => toast('Google rechazó la clave de Maps: revisa la clave y sus restricciones.');
+    const s = document.createElement('script');
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(gcfg.mapsKey)}&v=weekly&language=es&region=MX&loading=async&callback=__orionMapsReady`;
+    s.async = true;
+    s.onerror = () => { loadGoogle.promise = null; reject(new Error('No se pudo cargar Google Maps')); };
+    document.head.appendChild(s);
+  });
+  return loadGoogle.promise;
+}
+
+async function searchGoogle(what, where) {
+  await loadGoogle();
+  const { Place } = await google.maps.importLibrary('places');
+  const { places } = await Place.searchByText({
+    textQuery: `${what} en ${where}`, fields: PLACE_FIELDS, language: 'es', region: 'mx', maxResultCount: 20
+  });
+  return places.filter(p => !p.businessStatus || p.businessStatus === 'OPERATIONAL').map(p => ({
+    id: p.id, name: p.displayName || 'Sin nombre', address: p.formattedAddress || '',
+    phone: p.nationalPhoneNumber || '', intlPhone: p.internationalPhoneNumber || '', website: p.websiteURI || '',
+    rating: p.rating ?? null, reviews: p.userRatingCount || 0,
+    mapsUrl: p.googleMapsURI || mapsSearchUrl(`${p.displayName} ${p.formattedAddress}`),
+    lat: p.location ? p.location.lat() : null, lng: p.location ? p.location.lng() : null
+  }));
+}
+
+// ---------- OpenStreetMap ----------
+const tag = (k, v) => `[${k}=${v}]`;
+// Palabra que escribe el usuario (sin acentos) → etiquetas de OpenStreetMap
+const OSM_CATEGORIES = [
+  [['cafe'], [tag('amenity', 'cafe')]],
+  [['restaurant', 'comida', 'fonda', 'cocina'], [tag('amenity', 'restaurant')]],
+  [['taco', 'taqueria', 'hamburguesa', 'pizza', 'torta', 'comida rapida'], [tag('amenity', 'fast_food'), tag('amenity', 'restaurant')]],
+  [['bar', 'cantina', 'cerveceria', 'mezcaleria'], [tag('amenity', 'bar'), tag('amenity', 'pub')]],
+  [['dentist', 'dental', 'odontolog'], [tag('amenity', 'dentist'), tag('healthcare', 'dentist')]],
+  [['doctor', 'medic', 'consultorio', 'clinica'], [tag('amenity', 'doctors'), tag('amenity', 'clinic')]],
+  [['gimnasio', 'gym', 'crossfit', 'yoga', 'pilates', 'fitness'], [tag('leisure', 'fitness_centre'), tag('leisure', 'sports_centre')]],
+  [['hotel', 'hostal', 'posada'], [tag('tourism', 'hotel'), tag('tourism', 'guest_house'), tag('tourism', 'hostel')]],
+  [['panaderia', 'pasteleria', 'reposteria', 'pan '], [tag('shop', 'bakery'), tag('shop', 'pastry')]],
+  [['estetica', 'belleza', 'salon', 'unas', 'manicure'], [tag('shop', 'beauty'), tag('shop', 'hairdresser')]],
+  [['barberia', 'peluqueria'], [tag('shop', 'hairdresser')]],
+  [['veterinari'], [tag('amenity', 'veterinary')]],
+  [['farmacia'], [tag('amenity', 'pharmacy')]],
+  [['abogad', 'despacho', 'notaria'], [tag('office', 'lawyer'), tag('office', 'notary')]],
+  [['contador', 'contable'], [tag('office', 'accountant')]],
+  [['inmobiliaria', 'bienes raices'], [tag('office', 'estate_agent')]],
+  [['taller', 'mecanic', 'autos'], [tag('shop', 'car_repair')]],
+  [['floreria', 'flores'], [tag('shop', 'florist')]],
+  [['ropa', 'boutique'], [tag('shop', 'clothes'), tag('shop', 'boutique')]],
+  [['zapat'], [tag('shop', 'shoes')]],
+  [['optica'], [tag('shop', 'optician')]],
+  [['joyeria'], [tag('shop', 'jewelry')]],
+  [['escuela', 'colegio', 'academia'], [tag('amenity', 'school'), tag('amenity', 'college')]],
+  [['guarderia', 'kinder'], [tag('amenity', 'kindergarten')]],
+  [['spa', 'masaje'], [tag('shop', 'massage'), tag('leisure', 'spa')]],
+  [['helad', 'nieve'], [tag('amenity', 'ice_cream')]],
+  [['ferreteria'], [tag('shop', 'hardware')]],
+  [['papeleria'], [tag('shop', 'stationery')]],
+  [['lavanderia', 'tintoreria'], [tag('shop', 'laundry'), tag('shop', 'dry_cleaning')]],
+  [['mascota'], [tag('shop', 'pet')]],
+  [['mueble'], [tag('shop', 'furniture')]],
+  [['tatuaje', 'tattoo'], [tag('shop', 'tattoo')]]
+];
+
+const NOMINATIM = 'https://nominatim.openstreetmap.org/search';
+const pause = ms => new Promise(r => setTimeout(r, ms));
+async function nominatim(params) {
+  const res = await fetch(`${NOMINATIM}?${new URLSearchParams({ format: 'jsonv2', 'accept-language': 'es', ...params })}`);
+  if (!res.ok) throw new Error('OpenStreetMap no respondió, intenta en un minuto');
+  return res.json();
+}
+
+function fromOsm(x, where) {
+  const t = x.extratags || {}, a = x.address || {};
+  const street = [a.road, a.house_number].filter(Boolean).join(' ');
+  const address = [street, a.neighbourhood || a.suburb || a.quarter, a.city || a.town || a.borough].filter(Boolean).join(', ');
+  const phone = (t.phone || t['contact:phone'] || t['contact:mobile'] || '').split(';')[0].trim();
+  const whatsapp = (t['contact:whatsapp'] || '').split(';')[0].trim();
+  let website = (t.website || t['contact:website'] || t.url || '').split(';')[0].trim();
+  if (website && !/^https?:\/\//.test(website)) website = 'https://' + website;
+  return {
+    id: `osm-${x.osm_type}-${x.osm_id}`, name: x.name, address, phone, intlPhone: toIntlMx(whatsapp || phone), website,
+    rating: null, reviews: 0, mapsUrl: mapsSearchUrl(`${x.name} ${address || where}`),
+    lat: Number(x.lat), lng: Number(x.lon)
+  };
+}
+
+// Nominatim pide máximo 1 consulta por segundo: las búsquedas van una tras otra
+async function searchOsm(what, where) {
+  const geo = await nominatim({ q: where, countrycodes: 'mx', limit: 1 });
+  if (!geo.length) throw new Error(`no encontramos la zona "${where}"`);
+  let [s, n, w, e] = geo[0].boundingbox.map(Number);
+  // Una ciudad entera es demasiado grande (se recorta a ~6 km) y una colonia muy chica (se amplía a ~2 km)
+  const MAX = 0.06, MIN = 0.02;
+  const lat = Number(geo[0].lat), lon = Number(geo[0].lon);
+  if (n - s > MAX || e - w > MAX) [s, n, w, e] = [lat - MAX / 2, lat + MAX / 2, lon - MAX / 2, lon + MAX / 2];
+  else if (n - s < MIN && e - w < MIN) [s, n, w, e] = [lat - MIN / 2, lat + MIN / 2, lon - MIN / 2, lon + MIN / 2];
+  const term = norm(what);
+  const categories = [...new Set(OSM_CATEGORIES.filter(([keys]) => keys.some(k => term.includes(k))).flatMap(([, f]) => f))].slice(0, 3);
+  const byName = term.replace(/[^a-z0-9 ]/g, '').trim().replace(/(es|s)$/, '');
+  const found = [];
+  for (const q of [...categories, byName].filter(Boolean)) {
+    await pause(1100);
+    found.push(...await nominatim({ q, viewbox: [w, n, e, s].join(','), bounded: 1, limit: 40, extratags: 1, addressdetails: 1 }));
   }
-  return loadMaps.promise;
+  const seen = new Set();
+  return found
+    .filter(x => x.name)
+    .map(x => fromOsm(x, where))
+    .filter(p => !seen.has(norm(p.name)) && seen.add(norm(p.name)))
+    .sort((a, b) => Boolean(b.phone) - Boolean(a.phone) || Boolean(b.website) - Boolean(a.website))
+    .slice(0, 40);
+}
+
+// ---------- Mapa (Google o Leaflet) ----------
+const LEAFLET = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/';
+function loadLeaflet() {
+  loadLeaflet.promise ||= new Promise((resolve, reject) => {
+    const css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = LEAFLET + 'leaflet.min.css';
+    document.head.appendChild(css);
+    const s = document.createElement('script');
+    s.src = LEAFLET + 'leaflet.min.js';
+    s.onload = resolve;
+    s.onerror = () => { loadLeaflet.promise = null; reject(new Error('No se pudo cargar el mapa')); };
+    document.head.appendChild(s);
+  });
+  return loadLeaflet.promise;
 }
 
 function ensureMap() {
-  if (!gcfg.mapsKey) return Promise.resolve();
   ensureMap.promise ||= (async () => {
-    await loadMaps();
-    const { Map } = await google.maps.importLibrary('maps');
-    await google.maps.importLibrary('marker');
-    prospects.map = new Map($('#prospect-map'), {
-      center: { lat: 19.4326, lng: -99.1332 }, zoom: 11, mapId: gcfg.mapId || 'DEMO_MAP_ID',
-      disableDefaultUI: true, zoomControl: true, gestureHandling: 'cooperative'
-    });
+    const el = $('#prospect-map');
+    if (useGoogle) {
+      await loadGoogle();
+      const { Map } = await google.maps.importLibrary('maps');
+      await google.maps.importLibrary('marker');
+      prospects.map = new Map(el, {
+        center: { lat: 19.4326, lng: -99.1332 }, zoom: 11, mapId: gcfg.mapId || 'DEMO_MAP_ID',
+        disableDefaultUI: true, zoomControl: true, gestureHandling: 'cooperative'
+      });
+    } else {
+      await loadLeaflet();
+      prospects.map = L.map(el, { scrollWheelZoom: false }).setView([19.4326, -99.1332], 11);
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      }).addTo(prospects.map);
+    }
   })().catch(e => { ensureMap.promise = null; throw e; });
   return ensureMap.promise;
 }
 
+function addPin(p, number) {
+  const pin = document.createElement('div');
+  pin.className = 'map-pin' + (p.website ? '' : ' is-opportunity');
+  pin.textContent = number;
+  const onClick = () => focusProspect(p.id, true);
+  if (useGoogle) {
+    const marker = new google.maps.marker.AdvancedMarkerElement({ map: prospects.map, position: { lat: p.lat, lng: p.lng }, content: pin, title: p.name });
+    marker.addListener('click', onClick);
+    return { id: p.id, pin, remove: () => { marker.map = null; } };
+  }
+  const marker = L.marker([p.lat, p.lng], { title: p.name, icon: L.divIcon({ className: 'map-pin-wrap', html: pin, iconSize: [28, 28] }) })
+    .addTo(prospects.map).on('click', onClick);
+  return { id: p.id, pin, remove: () => marker.remove() };
+}
+
 function drawMarkers() {
   if (!prospects.map) return;
-  prospects.markers.forEach(m => { m.marker.map = null; });
+  prospects.markers.forEach(m => m.remove());
   prospects.markers = [];
-  const list = filteredProspects().filter(p => p.lat !== null);
-  if (!list.length) return;
-  const bounds = new google.maps.LatLngBounds();
+  const points = [];
   filteredProspects().forEach((p, i) => {
     if (p.lat === null) return;
-    const pin = document.createElement('div');
-    pin.className = 'map-pin' + (p.website ? '' : ' is-opportunity');
-    pin.textContent = i + 1;
-    const marker = new google.maps.marker.AdvancedMarkerElement({ map: prospects.map, position: { lat: p.lat, lng: p.lng }, content: pin, title: p.name });
-    marker.addListener('click', () => focusProspect(p.id, true));
-    prospects.markers.push({ id: p.id, marker, pin });
-    bounds.extend({ lat: p.lat, lng: p.lng });
+    prospects.markers.push(addPin(p, i + 1));
+    points.push([p.lat, p.lng]);
   });
-  if (list.length === 1) { prospects.map.setCenter(bounds.getCenter()); prospects.map.setZoom(16); }
-  else prospects.map.fitBounds(bounds, 50);
+  if (!points.length) return;
+  if (points.length === 1) return panTo(points[0], 16);
+  if (useGoogle) {
+    const bounds = new google.maps.LatLngBounds();
+    points.forEach(([lat, lng]) => bounds.extend({ lat, lng }));
+    prospects.map.fitBounds(bounds, 50);
+  } else {
+    prospects.map.fitBounds(points, { padding: [40, 40] });
+  }
+}
+
+function panTo([lat, lng], zoom) {
+  if (useGoogle) {
+    prospects.map.panTo({ lat, lng });
+    if (zoom) prospects.map.setZoom(zoom);
+  } else {
+    zoom ? prospects.map.setView([lat, lng], zoom) : prospects.map.panTo([lat, lng]);
+  }
 }
 
 function focusProspect(id, fromMap) {
   prospects.active = id;
   document.querySelectorAll('.pl-card').forEach(el => el.classList.toggle('is-active', el.dataset.place === id));
-  prospects.markers.forEach(m => {
-    m.pin.classList.toggle('is-active', m.id === id);
-    m.marker.zIndex = m.id === id ? 10 : null;
-  });
+  prospects.markers.forEach(m => m.pin.classList.toggle('is-active', m.id === id));
+  const p = prospects.list.find(x => x.id === id);
   if (fromMap) document.querySelector(`.pl-card[data-place="${CSS.escape(id)}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  else {
-    const m = prospects.markers.find(x => x.id === id);
-    if (m) prospects.map.panTo(m.marker.position);
-  }
+  else if (prospects.map && p.lat !== null) panTo([p.lat, p.lng]);
 }
 
 // ---------- Búsqueda ----------
 async function searchPlaces(what, where) {
   prospects.loading = true;
   prospects.what = what;
+  prospects.where = where;
   prospects.active = null;
   renderProspects();
   try {
-    if (!gcfg.mapsKey) {
-      await new Promise(r => setTimeout(r, 450));
-      prospects.list = DEMO_PLACES;
-    } else {
-      await loadMaps();
-      const { Place } = await google.maps.importLibrary('places');
-      const { places } = await Place.searchByText({
-        textQuery: `${what} en ${where}`, fields: PLACE_FIELDS, language: 'es', region: 'mx', maxResultCount: 20
-      });
-      prospects.list = places.map(normPlace).filter(p => !p.closed);
-    }
+    prospects.list = useGoogle ? await searchGoogle(what, where) : await searchOsm(what, where);
   } catch (e) {
     prospects.list = [];
     toast('Error al buscar: ' + e.message);
@@ -135,8 +263,8 @@ async function addProspect(p, button) {
     name: p.name, phone: p.intlPhone || p.phone || null, status: 'nuevo',
     channel: p.phone ? 'whatsapp' : 'email', service: p.website ? 'Rediseño web' : 'Sitio web',
     next_step: toISODate(0), next_label: 'Primer contacto',
-    tags: [prospects.what.trim().toLowerCase(), p.website ? '' : 'sin web'].filter(Boolean),
-    website: p.website || null, address: p.address || null, place_id: p.id, maps_url: mapsUrlOf(p)
+    tags: [prospects.what.trim().toLowerCase(), p.website ? '' : useGoogle ? 'sin web' : 'web por verificar'].filter(Boolean),
+    website: p.website || null, address: p.address || null, place_id: p.id, maps_url: p.mapsUrl
   };
   button.disabled = true;
   let client;
@@ -160,7 +288,7 @@ async function addProspect(p, button) {
 // ---------- Vista ----------
 function prospectCard(p, i) {
   const wa = p.intlPhone ? 'https://wa.me/' + p.intlPhone.replace(/\D/g, '') : '';
-  const added = inCrm(p);
+  const verify = `https://www.google.com/search?q=${encodeURIComponent(`${p.name} ${p.address || prospects.where}`)}`;
   return `<article class="pl-card${prospects.active === p.id ? ' is-active' : ''}" data-place="${esc(p.id)}">
     <span class="pl-num${p.website ? '' : ' is-opportunity'}">${i + 1}</span>
     <div class="pl-body">
@@ -168,27 +296,28 @@ function prospectCard(p, i) {
         <strong>${esc(p.name)}</strong>
         ${p.rating ? `<span class="pl-rating">★ ${p.rating.toFixed(1)} <em>(${p.reviews})</em></span>` : ''}
       </div>
-      <p class="pl-address">${esc(p.address)}</p>
+      <p class="pl-address">${esc(p.address) || 'Dirección no registrada'}</p>
       <div class="pl-facts">
-        ${p.phone ? `<span class="pl-fact"><svg viewBox="0 0 24 24">${CHANNELS.llamada.icon}</svg>${esc(p.phone)}</span>` : '<span class="pl-fact muted">Sin teléfono</span>'}
+        ${p.phone ? `<span class="pl-fact"><svg viewBox="0 0 24 24">${CHANNELS.llamada.icon}</svg>${esc(p.phone)}</span>` : '<span class="pl-fact muted">Sin teléfono registrado</span>'}
         ${p.website
           ? `<a class="pl-fact pl-web" href="${esc(p.website)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>${esc(shortUrl(p.website))}</a>`
-          : '<span class="badge-opportunity">Sin sitio web · oportunidad</span>'}
+          : `<span class="badge-opportunity">${useGoogle ? 'Sin sitio web · oportunidad' : 'Sin web registrada'}</span>`}
       </div>
       <div class="pl-actions">
         ${wa ? `<a class="mini-btn" href="${wa}" target="_blank" rel="noopener" title="WhatsApp (si el número lo tiene)" aria-label="WhatsApp"><svg viewBox="0 0 24 24">${CHANNELS.whatsapp.icon}</svg></a>` : ''}
         ${p.phone ? `<a class="mini-btn" href="tel:${esc(p.intlPhone || p.phone)}" title="Llamar" aria-label="Llamar"><svg viewBox="0 0 24 24">${CHANNELS.llamada.icon}</svg></a>` : ''}
-        <a class="mini-btn mini-text" href="${esc(mapsUrlOf(p))}" target="_blank" rel="noopener">Ver en Maps</a>
-        ${added
+        <a class="mini-btn mini-text" href="${esc(p.mapsUrl)}" target="_blank" rel="noopener">Ver en Maps</a>
+        ${!useGoogle && (!p.website || !p.phone) ? `<a class="mini-btn mini-text" href="${esc(verify)}" target="_blank" rel="noopener" title="Buscar teléfono y web en Google">Verificar en Google</a>` : ''}
+        ${inCrm(p)
           ? '<span class="pl-added">✓ En tus clientes</span>'
-          : `<button class="btn btn-dark btn-sm pl-add" data-pact="add">+ Agregar al CRM</button>`}
+          : '<button class="btn btn-dark btn-sm pl-add" data-pact="add">+ Agregar al CRM</button>'}
       </div>
     </div>
   </article>`;
 }
 
 function renderProspects() {
-  $('#maps-banner').hidden = Boolean(gcfg.mapsKey);
+  $('#maps-banner').hidden = useGoogle;
   const list = filteredProspects();
   $('#prospect-toolbar').hidden = !prospects.list.length;
   $('#prospect-chips').innerHTML = PROSPECT_FILTERS.map(f =>
@@ -206,16 +335,13 @@ function renderProspects() {
         .map(([w, z]) => `<button class="chip" data-suggest="${w}|${z}">${w} · ${z.split(',')[0]}</button>`).join('')}</div>
     </div>`;
   } else if (!list.length) {
-    $('#prospect-list').innerHTML = '<div class="ps-empty"><strong>Sin resultados</strong><p>Prueba otra zona, otro giro o cambia el filtro.</p></div>';
+    $('#prospect-list').innerHTML = `<div class="ps-empty"><strong>Sin resultados</strong>
+      <p>Prueba otra zona, otro giro o cambia el filtro.</p>
+      <a class="btn btn-ghost btn-sm" href="${esc(mapsSearchUrl(`${prospects.what} en ${prospects.where}`))}" target="_blank" rel="noopener">Ver esta búsqueda en Google Maps</a></div>`;
   } else {
     $('#prospect-list').innerHTML = list.map(prospectCard).join('');
   }
-
-  if (gcfg.mapsKey) ensureMap().catch(e => toast(e.message));
-  else if (!$('#prospect-map').childElementCount) {
-    $('#prospect-map').innerHTML = `<div class="map-placeholder"><svg viewBox="0 0 24 24"><path d="M12 21s-7-6.1-7-11.5a7 7 0 0 1 14 0C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
-      <strong>Aquí aparecerá el mapa</strong><p>Se activa al agregar tu clave de Google Maps.</p></div>`;
-  }
+  ensureMap().catch(e => toast(e.message));
 }
 
 $('#prospect-form').addEventListener('submit', e => {

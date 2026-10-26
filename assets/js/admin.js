@@ -190,7 +190,7 @@ function renderKanban(list) {
 }
 
 const VIEWS = {
-  prospectar: { title: 'Buscar prospectos', eyebrow: 'CRM · NEGOCIOS EN GOOGLE MAPS' },
+  prospectar: { title: 'Buscar prospectos', eyebrow: 'CRM · NEGOCIOS EN TU ZONA' },
   clientes: { title: 'Clientes', eyebrow: 'CRM · CLIENTES Y PROSPECTOS' },
   propuestas: { title: 'Propuestas', eyebrow: 'CRM · COTIZACIONES ENVIADAS' },
   seguimientos: { title: 'Seguimientos', eyebrow: 'CRM · AGENDA DE CONTACTO' },
