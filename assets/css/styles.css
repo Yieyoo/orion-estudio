@@ -302,6 +302,14 @@ h1,h2,h3,p { margin-top: 0; }
 .work-stage{height:440px;position:relative;display:grid;place-items:center;perspective:1200px;overflow:hidden;touch-action:pan-y;cursor:grab}
 .work-stage:before{content:"";position:absolute;z-index:0;left:50%;top:52%;width:min(780px,82%);height:270px;border:1px solid #365cf52b;border-radius:50%;transform:translate(-50%,-50%) rotateX(68deg);box-shadow:0 0 0 28px #365cf508;pointer-events:none}
 .work-stage:active{cursor:grabbing}
+/* las tarjetas laterales se pueden tocar para girar el carrusel; las imágenes no se arrastran */
+.work-track{pointer-events:none}
+.work-card[data-position="1"],.work-card[data-position="-1"]{pointer-events:auto;cursor:pointer}
+.work-card[data-position="1"]:hover,.work-card[data-position="-1"]:hover{opacity:1;filter:saturate(.95)}
+.work-stage{user-select:none;-webkit-user-select:none}
+.work-stage img{-webkit-user-drag:none}
+/* el recorte lateral va en la sección completa para que la sombra de las tarjetas no se corte */
+@supports (overflow:clip){.work-stage{overflow:visible}.work{overflow-x:clip}}
 .work-track{position:relative;width:100%;height:100%;transform-style:preserve-3d}
 .work-card{position:absolute;left:50%;top:50%;width:min(430px,58vw);height:355px;margin:0;background:#f5f3ee;box-shadow:0 22px 55px #11131b24;transform:translate(-50%,-50%) translateZ(-220px) scale(.62);transform-style:preserve-3d;backface-visibility:hidden;opacity:0;pointer-events:none;transition:transform .8s cubic-bezier(.2,.72,.18,1),opacity .65s,filter .65s}
 .work-card[data-position="0"]{z-index:4;transform:translate(-50%,-50%) translateZ(55px) rotateY(0) scale(1);opacity:1;pointer-events:auto;filter:none}
@@ -385,3 +393,13 @@ h1,h2,h3,p { margin-top: 0; }
   .work-card .work-caption h3{margin:0;font-size:12px}
   .carousel-count{font-size:8px}
 }
+
+/* Carrusel sin parpadeo: cada tarjeta se dibuja en 3D por separado (sin cruzarse entre sí)
+   y el tono apagado de las laterales es una capa encima, no un filtro */
+.work-track{transform-style:flat;perspective:inherit}
+.work-card{transform-style:flat;will-change:transform,opacity;transition:transform .8s cubic-bezier(.2,.72,.18,1),opacity .65s}
+.work-card,.work-card[data-position="0"],.work-card[data-position="1"],.work-card[data-position="-1"],.work-card[data-position="1"]:hover,.work-card[data-position="-1"]:hover{filter:none}
+.work-card:after{content:"";position:absolute;inset:0;z-index:6;background:#ebe9e2;opacity:0;pointer-events:none;transition:opacity .65s}
+.work-card[data-position="1"]:after,.work-card[data-position="-1"]:after{opacity:.22}
+.work-card[data-position="1"]:hover:after,.work-card[data-position="-1"]:hover:after{opacity:.05}
+@media(prefers-reduced-motion:reduce){.work-card,.work-card:after{transition:none}}

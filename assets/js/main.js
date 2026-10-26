@@ -74,6 +74,8 @@
       }
     }, { passive: true });
     stage.addEventListener("pointercancel", () => { pointerStart = null; }, { passive: true });
+    // Evita que el navegador arrastre la imagen y cancele el gesto con el mouse
+    stage.addEventListener("dragstart", event => event.preventDefault());
     track.addEventListener("click", event => {
       if (suppressClick) { event.preventDefault(); event.stopPropagation(); }
       const card = event.target.closest(".work-card");
