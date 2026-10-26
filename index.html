@@ -27,7 +27,9 @@
   </header>
 
   <main>
-    <section class="hero" id="inicio">
+    <section class="hero hero-immersive" id="inicio">
+      <canvas id="hero-canvas" class="hero-canvas" aria-hidden="true"></canvas>
+      <div class="hero-atmosphere" aria-hidden="true"></div>
       <div class="hero-copy">
         <p class="eyebrow"><span class="status-dot"></span> ESTUDIO DIGITAL INDEPENDIENTE · CDMX</p>
         <h1>Ideas con<br>una gran <em>presencia.</em></h1>
@@ -38,14 +40,9 @@
         </div>
         <div class="hero-note"><span>ESTRATEGIA</span><i></i><span>DISEÑO</span><i></i><span>DESARROLLO</span></div>
       </div>
-      <div class="hero-visual" aria-label="Composición arquitectónica de Orion Studio">
-        <img src="https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1600&q=90" alt="Arquitectura contemporánea de líneas escultóricas">
-        <div class="hero-image-wash"></div>
-        <div class="hero-stamp"><span>ORION</span><b>O.</b><span>BUILT WITH INTENTION</span></div>
-        <div class="hero-image-index"><span>DISEÑO QUE SE SIENTE.</span><span>01 — 03</span></div>
-        <div class="hero-orbit" aria-hidden="true"><i></i><i></i><i></i></div>
-      </div>
+      <div class="hero-signature" aria-hidden="true"><span>ORION</span><b>O.</b><span>DISEÑO EN MOVIMIENTO</span></div>
       <div class="hero-scroll" aria-hidden="true"><span></span> DESLIZA PARA EXPLORAR</div>
+      <div class="hero-coordinate" aria-hidden="true">19°25' N&nbsp;&nbsp; 99°08' W</div>
     </section>
 
     <section class="work section" id="proyectos">
@@ -112,5 +109,7 @@
     <span class="footer-copy">© <span id="year"></span> ORION STUDIO</span>
   </footer>
   <script src="assets/js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="assets/js/hero-scene.js"></script>
 </body>
 </html>

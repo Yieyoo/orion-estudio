@@ -6,7 +6,7 @@ Sitio de presentación para Orion Studio, con una selección de proyectos concep
 
 Abre `index.html` en un navegador o ejecútalo con Live Server desde VS Code.
 
-El sitio carga las tipografías de Google Fonts y las fotografías de Unsplash, así que necesita conexión a internet para mostrarse completo.
+El sitio carga las tipografías de Google Fonts, las fotografías de Unsplash y Three.js para la escena 3D de portada, así que necesita conexión a internet para mostrarse completo.
 
 ## Contacto
 
