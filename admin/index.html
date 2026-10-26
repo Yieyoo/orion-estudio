@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Clientes · Orion CRM</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body class="crm">
+  <aside class="sidebar" id="sidebar">
+    <a class="brand brand-light" href="index.html">
+      <span class="brand-mark">O<span>·</span></span>
+      <span class="brand-name">orion<span>CRM · ADMIN</span></span>
+    </a>
+
+    <nav class="side-nav" aria-label="Panel">
+      <p class="side-label">GESTIÓN</p>
+      <a href="#" class="is-active">
+        <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2 .6 3 2.8 3 6"/></svg>
+        Clientes <b id="nav-count-all">0</b>
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg>
+        Propuestas <b id="nav-count-prop">0</b>
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="1.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+        Seguimientos <b class="b-alert" id="nav-count-due">0</b>
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+        Reportes
+      </a>
+      <p class="side-label">CUENTA</p>
+      <a href="#">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+        Ajustes
+      </a>
+      <a href="../index.html">
+        <svg viewBox="0 0 24 24"><path d="M14 4h6v16h-6M10 8l-4 4 4 4M6 12h10"/></svg>
+        Ver sitio
+      </a>
+    </nav>
+
+    <div class="side-user">
+      <span class="avatar avatar-blue">OS</span>
+      <div><strong>Administrador</strong><small>Orion Studio</small></div>
+      <a href="login.html" class="icon-btn" title="Cerrar sesión" aria-label="Cerrar sesión">
+        <svg viewBox="0 0 24 24"><path d="M10 4H4v16h6M14 8l4 4-4 4M18 12H8"/></svg>
+      </a>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" id="menu-btn" aria-label="Abrir menú">
+        <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <div class="topbar-title">
+        <p class="eyebrow">CRM · CLIENTES Y PROSPECTOS</p>
+        <h1>Clientes</h1>
+      </div>
+      <label class="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        <input type="search" id="search" placeholder="Buscar por nombre, empresa, correo o etiqueta…">
+        <kbd>/</kbd>
+      </label>
+      <button class="btn btn-dark" type="button"><span class="plus">+</span> Nuevo cliente</button>
+    </header>
+
+    <section class="kpis" aria-label="Resumen">
+      <article class="kpi">
+        <p>Total en cartera</p>
+        <strong id="kpi-total">0</strong>
+        <small>prospectos y clientes</small>
+      </article>
+      <article class="kpi">
+        <p>Contactados</p>
+        <strong id="kpi-contacted">0</strong>
+        <small><span class="up">+4</span> esta semana</small>
+      </article>
+      <article class="kpi">
+        <p>Tasa de respuesta</p>
+        <strong id="kpi-rate">0%</strong>
+        <div class="meter"><i id="kpi-rate-bar"></i></div>
+      </article>
+      <article class="kpi">
+        <p>Sin respuesta</p>
+        <strong id="kpi-silent">0</strong>
+        <small>requieren seguimiento</small>
+      </article>
+      <article class="kpi kpi-dark">
+        <p>Propuestas abiertas</p>
+        <strong id="kpi-pipeline">$0</strong>
+        <small id="kpi-pipeline-count">0 propuestas</small>
+      </article>
+    </section>
+
+    <section class="pipeline" aria-label="Embudo">
+      <div class="pipeline-head">
+        <h2>Embudo de contacto</h2>
+        <span class="eyebrow">DISTRIBUCIÓN POR ESTADO</span>
+      </div>
+      <div class="pipeline-bar" id="pipeline-bar"></div>
+      <div class="pipeline-legend" id="pipeline-legend"></div>
+    </section>
+
+    <section class="board">
+      <div class="board-toolbar">
+        <div class="chips" id="chips" role="tablist" aria-label="Filtrar por estado"></div>
+        <div class="toolbar-right">
+          <select id="sort" aria-label="Ordenar">
+            <option value="recent">Último contacto</option>
+            <option value="next">Próximo seguimiento</option>
+            <option value="value">Valor de propuesta</option>
+            <option value="name">Nombre A–Z</option>
+          </select>
+          <div class="view-toggle" role="group" aria-label="Vista">
+            <button class="is-active" data-view="table" aria-label="Tabla"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+            <button data-view="kanban" aria-label="Tablero"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16"/><rect x="10" y="4" width="5" height="10"/><rect x="17" y="4" width="4" height="13"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap" id="table-view">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Estado</th>
+              <th>Último contacto</th>
+              <th>Canal</th>
+              <th>Propuesta</th>
+              <th>Próximo paso</th>
+              <th aria-label="Acciones"></th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+        <div class="empty" id="empty" hidden>
+          <strong>Sin resultados</strong>
+          <p>Prueba con otro nombre o cambia el filtro.</p>
+        </div>
+      </div>
+
+      <div class="kanban" id="kanban-view" hidden></div>
+    </section>
+  </div>
+
+  <div class="drawer-backdrop" id="backdrop" hidden></div>
+  <aside class="drawer" id="drawer" aria-hidden="true" aria-label="Detalle de cliente"></aside>
+
+  <script src="../assets/js/admin.js"></script>
+</body>
+</html>

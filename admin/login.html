@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Acceso · Orion Studio</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body class="login-page">
+  <aside class="login-visual">
+    <a class="brand brand-light" href="../index.html" aria-label="Volver al sitio">
+      <span class="brand-mark">O<span>·</span></span>
+      <span class="brand-name">orion<span>STUDIO DIGITAL</span></span>
+    </a>
+    <div class="login-orbit" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="login-visual-copy">
+      <p class="eyebrow">PANEL PRIVADO · CRM</p>
+      <h1>Cada cliente,<br>en su <em>órbita.</em></h1>
+      <p>Contactos, respuestas y propuestas en un solo lugar.</p>
+    </div>
+  </aside>
+
+  <main class="login-main">
+    <form class="login-form" id="login-form" autocomplete="on">
+      <p class="eyebrow"><span class="status-dot"></span>ACCESO ADMINISTRADOR</p>
+      <h2>Bienvenido de vuelta</h2>
+      <p class="login-sub">Ingresa para gestionar tus clientes y propuestas.</p>
+
+      <label class="field">
+        <span>Correo</span>
+        <input type="email" name="email" placeholder="tu@orionstudio.mx" required>
+      </label>
+      <label class="field">
+        <span>Contraseña</span>
+        <input type="password" name="password" placeholder="••••••••" required>
+      </label>
+
+      <div class="login-row">
+        <label class="check"><input type="checkbox" name="remember"> Recordarme</label>
+        <a href="#" class="link-muted">¿Olvidaste tu contraseña?</a>
+      </div>
+
+      <button class="btn btn-dark btn-block" type="submit">Ingresar <span>→</span></button>
+      <a class="link-muted login-back" href="../index.html">← Volver al sitio</a>
+    </form>
+  </main>
+
+  <script>
+    // Solo diseño: la autenticación real se conecta después.
+    document.getElementById('login-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>

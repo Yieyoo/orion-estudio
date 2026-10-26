@@ -133,6 +133,10 @@ h1,h2,h3,p { margin-top: 0; }
 .footer .brand-mark { font-size: 28px; }.footer .brand-name { font-size: 14px; }.footer .brand-name span { font-size: 7px; }
 .footer-note,.footer-copy { color: var(--muted); font-size: 11px; }
 .footer-copy { font: 9px var(--mono); }
+.footer-end { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.footer-admin { display: inline-flex; align-items: center; gap: 7px; padding: 6px 9px; border: 1px solid var(--line); color: var(--muted); font: 8px var(--mono); letter-spacing: 1.2px; transition: color .2s, border-color .2s; }
+.footer-admin svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+.footer-admin:hover { color: var(--blue); border-color: var(--blue); }
 .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1); }
 .reveal.visible { opacity: 1; transform: translateY(0); }
 
@@ -341,3 +345,42 @@ h1,h2,h3,p { margin-top: 0; }
   .services{padding-top:28px}
 }
 @media(prefers-reduced-motion:reduce){.work-card{transition:none}.carousel-control{transition:none}}
+
+/* Refined, compact carousel presentation */
+.work.section{padding-top:88px;padding-bottom:72px}
+.work .section-head{align-items:end;margin-bottom:26px}
+.work .section-head .eyebrow{margin-bottom:14px}
+.work .section-head h2{font-size:clamp(40px,4.3vw,60px)}
+.work .section-intro{max-width:280px;font-size:14px;line-height:1.6}
+.work-carousel{padding:0 0 28px}
+.work-stage{height:390px;perspective:1350px}
+.work-stage:before{width:min(700px,76%);height:230px;opacity:.62}
+.work-card{width:min(410px,54vw);height:326px;box-shadow:0 24px 60px #11131b20}
+.work-card[data-position="1"],.work-card[data-position="-1"]{opacity:.78}
+.work-card .work-image,.work-card-wide .work-image,.work-card:not(.work-card-wide) .work-image{height:250px}
+.work-card .work-index{font-size:8px;letter-spacing:1.2px}
+.work-card .work-title{bottom:7%}
+.work-card .work-title>span{font-size:8px;letter-spacing:1px}
+.work-card .work-title h3,.work-card:not(.work-card-wide) .work-title h3{font-size:clamp(30px,3vw,40px)}
+.work-card .work-caption{min-height:76px;padding:15px 17px}
+.work-card .work-caption h3{font-size:14px;font-weight:600}
+.carousel-count{bottom:0;font-size:9px;letter-spacing:1.5px}
+@media(max-width:700px){
+  .work.section{padding:56px 5% 40px}
+  .work .section-head{margin-bottom:14px}
+  .work .section-head .eyebrow{margin-bottom:10px}
+  .work .section-head h2{font-size:clamp(39px,10vw,52px);line-height:.99}
+  .work .section-intro{margin-top:11px;max-width:300px;font-size:13px;line-height:1.5}
+  .work-carousel{padding:0 0 25px}
+  .work-stage{height:278px;perspective:1000px}
+  .work-stage:before{width:98%;height:155px;top:52%}
+  .work-card{width:min(218px,68vw);height:260px;--side-offset:clamp(125px,39vw,150px)}
+  .work-card .work-image,.work-card-wide .work-image,.work-card:not(.work-card-wide) .work-image{height:202px}
+  .work-card .work-index{left:12px;top:12px;font-size:6px;letter-spacing:.8px}
+  .work-card .work-title{left:6%;bottom:7%}
+  .work-card .work-title>span{font-size:6px;letter-spacing:.7px}
+  .work-card .work-title h3,.work-card:not(.work-card-wide) .work-title h3{font-size:clamp(27px,7.5vw,34px)}
+  .work-card .work-caption{min-height:58px;padding:11px 12px}
+  .work-card .work-caption h3{margin:0;font-size:12px}
+  .carousel-count{font-size:8px}
+}

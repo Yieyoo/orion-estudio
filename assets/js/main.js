@@ -54,8 +54,6 @@
       });
     };
 
-    carousel.querySelector(".carousel-prev").addEventListener("click", () => showCard(active - 1));
-    carousel.querySelector(".carousel-next").addEventListener("click", () => showCard(active + 1));
     stage.addEventListener("keydown", event => {
       if (event.key === "ArrowLeft") { event.preventDefault(); showCard(active - 1); }
       if (event.key === "ArrowRight") { event.preventDefault(); showCard(active + 1); }
@@ -78,6 +76,11 @@
     stage.addEventListener("pointercancel", () => { pointerStart = null; }, { passive: true });
     track.addEventListener("click", event => {
       if (suppressClick) { event.preventDefault(); event.stopPropagation(); }
+      const card = event.target.closest(".work-card");
+      if (card && card.dataset.position !== "0") {
+        event.preventDefault();
+        showCard(active + (Number(card.dataset.position) < 0 ? -1 : 1));
+      }
     }, true);
     showCard(0);
   }
