@@ -288,9 +288,7 @@ function renderNewForm() {
     </div>
     <form class="drawer-body" id="new-form">
       <div class="form-grid">
-        <label class="field span-2"><span>Nombre *</span><input name="name" required></label>
-        <label class="field"><span>Empresa</span><input name="company"></label>
-        <label class="field"><span>Puesto</span><input name="role"></label>
+        <label class="field span-2"><span>Negocio *</span><input name="name" required placeholder="Café Raíz, Clínica Sonríe…"></label>
         <label class="field"><span>Correo</span><input name="email" type="email"></label>
         <label class="field"><span>Teléfono</span><input name="phone" type="tel"></label>
         <label class="field"><span>Estado</span><select name="status">${STATUSES.map(s => `<option value="${s.id}">${s.label}</option>`).join('')}</select></label>
@@ -366,7 +364,7 @@ async function saveNotes(c, notes) {
 async function createClient(form) {
   const f = Object.fromEntries(new FormData(form));
   const row = {
-    name: f.name.trim(), company: f.company.trim() || null, role: f.role.trim() || null,
+    name: f.name.trim(),
     email: f.email.trim() || null, phone: f.phone.trim() || null,
     status: f.status, channel: f.channel, service: f.service.trim() || null,
     value: Number(f.value) || 0, next_step: f.next_step || null, next_label: f.next_label.trim() || null,
