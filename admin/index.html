@@ -20,6 +20,10 @@
 
     <nav class="side-nav" aria-label="Panel">
       <p class="side-label">GESTIÓN</p>
+      <a href="#prospectar" data-nav="prospectar">
+        <svg viewBox="0 0 24 24"><path d="M12 21s-7-6.1-7-11.5a7 7 0 0 1 14 0C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        Buscar prospectos
+      </a>
       <a href="#clientes" data-nav="clientes" class="is-active">
         <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2 .6 3 2.8 3 6"/></svg>
         Clientes <b id="nav-count-all">0</b>
@@ -156,6 +160,22 @@
     </section>
     </div>
 
+    <div class="view" data-view="prospectar" hidden>
+      <form class="ps-form" id="prospect-form">
+        <label class="ps-field"><span>¿Qué negocio buscas?</span><input name="what" placeholder="Cafeterías, dentistas, gimnasios…" required></label>
+        <label class="ps-field"><span>¿Dónde?</span><input name="where" placeholder="Roma Norte, CDMX" required></label>
+        <button class="btn btn-dark" type="submit">Buscar en Maps <span>→</span></button>
+      </form>
+      <p class="demo-banner" id="maps-banner" hidden><b>Modo demo</b> · Resultados de ejemplo. Agrega tu clave de Google en <code>assets/js/google-config.js</code> para buscar negocios reales.</p>
+      <div class="ps-toolbar" id="prospect-toolbar" hidden>
+        <div class="chips" id="prospect-chips"></div>
+        <span class="eyebrow" id="prospect-count"></span>
+      </div>
+      <div class="ps-layout">
+        <div class="ps-list" id="prospect-list"></div>
+        <div class="ps-map-wrap"><div class="ps-map" id="prospect-map"></div></div>
+      </div>
+    </div>
     <div class="view" data-view="propuestas" id="view-propuestas" hidden></div>
     <div class="view" data-view="seguimientos" id="view-seguimientos" hidden></div>
     <div class="view" data-view="reportes" id="view-reportes" hidden></div>
@@ -170,6 +190,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.0/dist/umd/supabase.min.js"></script>
   <script src="../assets/js/supabase-config.js"></script>
+  <script src="../assets/js/google-config.js"></script>
   <script src="../assets/js/admin.js"></script>
+  <script src="../assets/js/prospects.js"></script>
 </body>
 </html>

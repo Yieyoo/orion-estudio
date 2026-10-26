@@ -83,6 +83,7 @@ function fromRow(r) {
     status: r.status, channel: r.channel, service: r.service || '', value: Number(r.value) || 0,
     lastContact: toOffset(r.last_contact), nextStep: toOffset(r.next_step), nextLabel: r.next_label || '—',
     tags: r.tags || [], notes: r.notes || '',
+    website: r.website || '', address: r.address || '', placeId: r.place_id || '', mapsUrl: r.maps_url || '',
     history: (r.interactions || [])
       .sort((a, b) => b.created_at.localeCompare(a.created_at))
       .map(i => ({ d: toOffset(i.created_at), s: i.status, t: i.title, n: i.note || '' }))
@@ -189,6 +190,7 @@ function renderKanban(list) {
 }
 
 const VIEWS = {
+  prospectar: { title: 'Buscar prospectos', eyebrow: 'CRM · NEGOCIOS EN GOOGLE MAPS' },
   clientes: { title: 'Clientes', eyebrow: 'CRM · CLIENTES Y PROSPECTOS' },
   propuestas: { title: 'Propuestas', eyebrow: 'CRM · COTIZACIONES ENVIADAS' },
   seguimientos: { title: 'Seguimientos', eyebrow: 'CRM · AGENDA DE CONTACTO' },
@@ -215,6 +217,7 @@ function render() {
   if (view === 'propuestas') renderProposals();
   if (view === 'seguimientos') renderFollowups();
   if (view === 'reportes') renderReports();
+  if (view === 'prospectar' && typeof renderProspects === 'function') renderProspects();
   // Ajustes solo se pinta al entrar, para no borrar lo que se está escribiendo
   if (view === 'ajustes' && state.shownView !== 'ajustes') renderSettings();
   state.shownView = view;
@@ -255,6 +258,8 @@ function renderDrawer() {
           <div><span>Propuesta</span><b>${money(c.value)}</b></div>
           <div><span>Canal</span><b>${CHANNELS[c.channel].label}</b></div>
           <div><span>Próximo paso</span><b>${esc(c.nextLabel)}</b></div>
+          ${c.website ? `<div class="span-2"><span>Sitio web</span><b><a class="inline-link" href="${esc(c.website)}" target="_blank" rel="noopener">${esc(c.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, ''))}</a></b></div>` : ''}
+          ${c.address ? `<div class="span-2"><span>Dirección</span><b>${esc(c.address)}${c.mapsUrl ? ` · <a class="inline-link" href="${esc(c.mapsUrl)}" target="_blank" rel="noopener">Ver en Maps</a>` : ''}</b></div>` : ''}
         </div>
       </section>
       ${c.tags.length ? `<section class="drawer-section">
@@ -661,10 +666,10 @@ async function changePassword(form) {
 }
 
 function exportCsv() {
-  const cols = ['Nombre', 'Empresa', 'Puesto', 'Correo', 'Teléfono', 'Estado', 'Canal', 'Servicio', 'Valor', 'Último contacto', 'Próximo seguimiento', 'Próximo paso', 'Etiquetas', 'Notas'];
+  const cols = ['Nombre', 'Empresa', 'Puesto', 'Correo', 'Teléfono', 'Estado', 'Canal', 'Servicio', 'Valor', 'Último contacto', 'Próximo seguimiento', 'Próximo paso', 'Etiquetas', 'Notas', 'Sitio web', 'Dirección'];
   const dateOf = d => d === null ? '' : toISODate(d);
   const rows = clients.map(c => [c.name, c.company, c.role, c.email, c.phone, statusById[c.status].label, CHANNELS[c.channel].label,
-    c.service, c.value, dateOf(c.lastContact), dateOf(c.nextStep), c.nextLabel === '—' ? '' : c.nextLabel, c.tags.join(', '), c.notes || '']);
+    c.service, c.value, dateOf(c.lastContact), dateOf(c.nextStep), c.nextLabel === '—' ? '' : c.nextLabel, c.tags.join(', '), c.notes || '', c.website || '', c.address || '']);
   const csv = [cols, ...rows].map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\r\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));

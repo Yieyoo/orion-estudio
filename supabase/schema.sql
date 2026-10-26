@@ -36,7 +36,12 @@ create table public.clients (
   next_step date,
   next_label text,
   tags text[] not null default '{}',
-  notes text
+  notes text,
+  -- datos de Google Maps (ver migrations/002_prospectos.sql)
+  website text,
+  address text,
+  place_id text unique,
+  maps_url text
 );
 
 -- Historial de cada cliente (contactos, respuestas, propuestas…)

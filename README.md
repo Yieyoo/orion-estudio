@@ -30,6 +30,16 @@ Para conectarlo a Supabase:
    `insert into public.admins (user_id) select id from auth.users where email = 'TU_CORREO';`
 6. En **Project Settings → API**, copia la **Project URL** y la **anon public key** a `assets/js/supabase-config.js`. Nunca uses la `service_role` key.
 
+### Buscador de prospectos (Google Maps)
+
+1. En Supabase, ejecuta `supabase/migrations/002_prospectos.sql` (agrega sitio web, dirección y datos de Maps a los clientes).
+2. En [Google Cloud Console](https://console.cloud.google.com), crea un proyecto y activa la facturación.
+3. En **APIs y servicios → Biblioteca**, habilita **Maps JavaScript API** y **Places API (New)**.
+4. En **APIs y servicios → Credenciales**, crea una **clave de API** y restríngela:
+   - Restricción de aplicación: **Sitios web** → `https://orionwebmx.com/*` (y `http://127.0.0.1:5500/*` para Live Server).
+   - Restricción de API: solo **Maps JavaScript API** y **Places API (New)**.
+5. Pega la clave en `assets/js/google-config.js`.
+
 ## Publicar en GitHub Pages
 
 1. Sube los archivos al repositorio.
