@@ -42,19 +42,50 @@
 
       <div class="login-row">
         <label class="check"><input type="checkbox" name="remember"> Recordarme</label>
-        <a href="#" class="link-muted">¿Olvidaste tu contraseña?</a>
+        <a href="#" id="forgot" class="link-muted">¿Olvidaste tu contraseña?</a>
       </div>
 
+      <p class="login-error" id="login-error" role="alert" hidden></p>
       <button class="btn btn-dark btn-block" type="submit">Ingresar <span>→</span></button>
       <a class="link-muted login-back" href="../index.html">← Volver al sitio</a>
     </form>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.0/dist/umd/supabase.min.js"></script>
+  <script src="../assets/js/supabase-config.js"></script>
   <script>
-    // Solo diseño: la autenticación real se conecta después.
-    document.getElementById('login-form').addEventListener('submit', function (e) {
+    const cfg = window.ORION_SUPABASE || {};
+    const db = cfg.url && cfg.anonKey && window.supabase ? window.supabase.createClient(cfg.url, cfg.anonKey) : null;
+    const form = document.getElementById('login-form');
+    const errorBox = document.getElementById('login-error');
+
+    // Si ya hay sesión abierta, entra directo al panel.
+    if (db) db.auth.getSession().then(({ data }) => { if (data.session) location.replace('index.html'); });
+
+    form.addEventListener('submit', async e => {
       e.preventDefault();
-      window.location.href = 'index.html';
+      if (!db) return location.href = 'index.html'; // modo demo
+      const button = form.querySelector('[type=submit]');
+      button.disabled = true;
+      errorBox.hidden = true;
+      const { error } = await db.auth.signInWithPassword({ email: form.email.value.trim(), password: form.password.value });
+      button.disabled = false;
+      if (error) {
+        errorBox.textContent = 'Correo o contraseña incorrectos.';
+        errorBox.hidden = false;
+        return;
+      }
+      location.replace('index.html');
+    });
+
+    document.getElementById('forgot').addEventListener('click', async e => {
+      e.preventDefault();
+      if (!db) return;
+      const email = form.email.value.trim();
+      if (!email) { errorBox.textContent = 'Escribe tu correo arriba y vuelve a dar clic.'; errorBox.hidden = false; return; }
+      await db.auth.resetPasswordForEmail(email, { redirectTo: location.href });
+      errorBox.textContent = 'Si el correo existe, te llegará un enlace para cambiar tu contraseña.';
+      errorBox.hidden = false;
     });
   </script>
 </body>

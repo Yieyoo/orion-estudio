@@ -49,8 +49,8 @@
 
     <div class="side-user">
       <span class="avatar avatar-blue">OS</span>
-      <div><strong>Administrador</strong><small>Orion Studio</small></div>
-      <a href="login.html" class="icon-btn" title="Cerrar sesión" aria-label="Cerrar sesión">
+      <div><strong>Administrador</strong><small id="user-email">Orion Studio</small></div>
+      <a href="login.html" id="logout" class="icon-btn" title="Cerrar sesión" aria-label="Cerrar sesión">
         <svg viewBox="0 0 24 24"><path d="M10 4H4v16h6M14 8l4 4-4 4M18 12H8"/></svg>
       </a>
     </div>
@@ -70,8 +70,10 @@
         <input type="search" id="search" placeholder="Buscar por nombre, empresa, correo o etiqueta…">
         <kbd>/</kbd>
       </label>
-      <button class="btn btn-dark" type="button"><span class="plus">+</span> Nuevo cliente</button>
+      <button class="btn btn-dark" type="button" id="new-client"><span class="plus">+</span> Nuevo cliente</button>
     </header>
+
+    <p class="demo-banner" id="demo-banner" hidden><b>Modo demo</b> · Estás viendo datos de ejemplo. Conecta Supabase en <code>assets/js/supabase-config.js</code> para usar tus clientes reales.</p>
 
     <section class="kpis" aria-label="Resumen">
       <article class="kpi">
@@ -82,7 +84,7 @@
       <article class="kpi">
         <p>Contactados</p>
         <strong id="kpi-contacted">0</strong>
-        <small><span class="up">+4</span> esta semana</small>
+        <small><span class="up" id="kpi-week">+0</span> esta semana</small>
       </article>
       <article class="kpi">
         <p>Tasa de respuesta</p>
@@ -155,6 +157,10 @@
   <div class="drawer-backdrop" id="backdrop" hidden></div>
   <aside class="drawer" id="drawer" aria-hidden="true" aria-label="Detalle de cliente"></aside>
 
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.0/dist/umd/supabase.min.js"></script>
+  <script src="../assets/js/supabase-config.js"></script>
   <script src="../assets/js/admin.js"></script>
 </body>
 </html>
