@@ -403,3 +403,10 @@ h1,h2,h3,p { margin-top: 0; }
 .work-card[data-position="1"]:after,.work-card[data-position="-1"]:after{opacity:.22}
 .work-card[data-position="1"]:hover:after,.work-card[data-position="-1"]:hover:after{opacity:.05}
 @media(prefers-reduced-motion:reduce){.work-card,.work-card:after{transition:none}}
+
+/* Celular: tarjetas laterales más chicas y cerca del centro para que se asomen completas */
+@media(max-width:700px){
+  .work-card{width:min(210px,62vw);--side-offset:clamp(92px,29vw,150px)}
+  .work-card[data-position="1"]{transform:translate(calc(-50% + var(--side-offset)),-50%) translateZ(-90px) rotateY(-32deg) scale(.66)}
+  .work-card[data-position="-1"]{transform:translate(calc(-50% - var(--side-offset)),-50%) translateZ(-90px) rotateY(32deg) scale(.66)}
+}
