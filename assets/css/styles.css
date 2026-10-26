@@ -397,7 +397,9 @@ h1,h2,h3,p { margin-top: 0; }
 /* Carrusel sin parpadeo: cada tarjeta se dibuja en 3D por separado (sin cruzarse entre sí)
    y el tono apagado de las laterales es una capa encima, no un filtro */
 .work-track{transform-style:flat;perspective:inherit}
-.work-card{transform-style:flat;will-change:transform,opacity;transition:transform .8s cubic-bezier(.2,.72,.18,1),opacity .65s}
+/* el orden (z-index) también se anima con la misma curva: la tarjeta que entra pasa al frente
+   a la mitad del giro, no de golpe al inicio */
+.work-card{z-index:1;transform-style:flat;will-change:transform,opacity;transition:transform .8s cubic-bezier(.2,.72,.18,1),opacity .65s,z-index .8s cubic-bezier(.2,.72,.18,1)}
 .work-card,.work-card[data-position="0"],.work-card[data-position="1"],.work-card[data-position="-1"],.work-card[data-position="1"]:hover,.work-card[data-position="-1"]:hover{filter:none}
 .work-card:after{content:"";position:absolute;inset:0;z-index:6;background:#ebe9e2;opacity:0;pointer-events:none;transition:opacity .65s}
 .work-card[data-position="1"]:after,.work-card[data-position="-1"]:after{opacity:.22}
