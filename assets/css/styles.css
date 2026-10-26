@@ -196,11 +196,9 @@ h1,h2,h3,p { margin-top: 0; }
 .hero-immersive .text-link{color:#f3f5fa;border-color:#ffffff65}.hero-immersive .text-link span{color:#a9bcff}
 .hero-immersive .hero-note{color:#aeb8c9;margin-top:58px}
 .hero-immersive .hero-note i{background:#a9bcff}
-.hero-signature{position:absolute;z-index:2;right:7%;top:22%;width:118px;height:118px;border:1px solid #ffffff55;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#f2f5fc;background:#111a2a55;backdrop-filter:blur(9px)}
-.hero-signature span{font:8px var(--mono);letter-spacing:1.2px}.hero-signature b{font:600 42px/.8 var(--display);letter-spacing:-6px}
 .hero-immersive .hero-scroll{left:7%;bottom:29px;z-index:2;color:#aeb8c9}.hero-immersive .hero-scroll span{background:#a9bcff}
 .hero-coordinate{position:absolute;z-index:2;right:7%;bottom:31px;color:#aeb8c9;font:9px var(--mono);letter-spacing:1px}
-@media(max-width:1000px){.header{padding-inline:5%}.hero-immersive{padding-inline:5%}.hero-immersive .hero-copy{width:min(600px,65vw)}.hero-immersive h1{font-size:clamp(62px,9vw,96px)}.hero-signature{right:6%;top:20%}}
+@media(max-width:1000px){.header{padding-inline:5%}.hero-immersive{padding-inline:5%}.hero-immersive .hero-copy{width:min(600px,65vw)}.hero-immersive h1{font-size:clamp(62px,9vw,96px)}}
 @media(max-width:700px){
   .header{height:72px;padding-inline:5%}.header .menu-toggle span{background:#f5f6fa}
   .header .nav{top:71px;left:0;right:0;padding:22px 5% 26px;background:#0b111e;color:#f4f6fb;border-color:#ffffff20}
@@ -211,8 +209,6 @@ h1,h2,h3,p { margin-top: 0; }
   .hero-immersive h1{font-size:clamp(54px,13.6vw,82px);line-height:.95}
   .hero-immersive .hero-description{max-width:390px;font-size:15px;margin:20px 0 24px}
   .hero-immersive .hero-note{margin-top:38px;font-size:7px}
-  .hero-signature{width:82px;height:82px;right:6%;top:auto;bottom:70px;gap:5px}
-  .hero-signature span{font-size:6px}.hero-signature b{font-size:30px}
   .hero-immersive .hero-scroll{left:5%;bottom:27px;font-size:7px}
   .hero-coordinate{right:5%;bottom:28px;font-size:7px}
   .hero-atmosphere{background:linear-gradient(90deg,#080d18e8,#080d18a0 65%,#080d1840),linear-gradient(0deg,#080d18c9,transparent 34%,#080d1866)}
