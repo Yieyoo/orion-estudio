@@ -87,6 +87,20 @@
     showCard(0);
   }
 
+  document.querySelectorAll(".service-card").forEach(card => {
+    const toggle = card.querySelector(".service-toggle");
+    const detail = card.querySelector(".service-detail");
+    if (!toggle || !detail) return;
+    detail.hidden = false;
+    toggle.addEventListener("click", () => {
+      const open = toggle.getAttribute("aria-expanded") !== "true";
+      toggle.setAttribute("aria-expanded", String(open));
+      card.classList.toggle("is-open", open);
+      toggle.firstChild.textContent = open ? "Ocultar detalle " : "Ver qué incluye ";
+      toggle.querySelector("span").textContent = open ? "−" : "＋";
+    });
+  });
+
   const year = document.getElementById("year");
   if (year) year.textContent = new Date().getFullYear();
 
