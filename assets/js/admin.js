@@ -55,6 +55,7 @@ const DEMO = [
 ];
 
 let clients = [];
+let contractDraft = {};
 const state = { filter: 'all', query: '', sort: 'recent', view: 'table', openId: null, creating: false, email: '', shownView: null };
 const $ = sel => document.querySelector(sel);
 const money = n => n ? '$' + n.toLocaleString('es-MX') : '—';
@@ -190,6 +191,7 @@ const VIEWS = {
   clientes: { title: 'Clientes', eyebrow: 'CRM · CLIENTES Y PROSPECTOS' },
   propuestas: { title: 'Propuestas', eyebrow: 'CRM · COTIZACIONES ENVIADAS' },
   seguimientos: { title: 'Seguimientos', eyebrow: 'CRM · AGENDA DE CONTACTO' },
+  contratos: { title: 'Contratos', eyebrow: 'CRM · DOCUMENTOS DE PROYECTO' },
   reportes: { title: 'Reportes', eyebrow: 'CRM · MÉTRICAS DEL EMBUDO' },
   ajustes: { title: 'Ajustes', eyebrow: 'CRM · CUENTA Y PREFERENCIAS' }
 };
@@ -198,7 +200,7 @@ const currentView = () => VIEWS[location.hash.slice(1)] ? location.hash.slice(1)
 // Permisos: el dueño ve todo; los demás usuarios solo las secciones que el dueño les dio. Ajustes es de todos.
 const SECTIONS = ['prospectar', 'clientes', 'tickets', 'propuestas', 'seguimientos', 'reportes'];
 const isOwner = () => Boolean(state.me?.is_owner);
-const canSee = view => view === 'ajustes' || isOwner() || Boolean(state.me?.permissions?.includes(view));
+const canSee = view => view === 'ajustes' || isOwner() || (view === 'contratos' ? Boolean(state.me?.permissions?.includes('clientes')) : Boolean(state.me?.permissions?.includes(view)));
 const canEditClients = () => ['clientes', 'prospectar'].some(canSee);
 
 function render() {
@@ -209,7 +211,7 @@ function render() {
     history.replaceState(null, '', '#' + view);
   }
   document.querySelectorAll('[data-nav]').forEach(a => { a.hidden = !canSee(a.dataset.nav); });
-  $('#new-client').hidden = !canEditClients();
+  $('#new-client').hidden = !canEditClients() || !['clientes', 'prospectar'].includes(view);
   renderStats();
   document.body.dataset.view = view;
   document.querySelectorAll('.view').forEach(v => { v.hidden = v.dataset.view !== view; });
@@ -225,6 +227,7 @@ function render() {
   }
   if (view === 'propuestas') renderProposals();
   if (view === 'seguimientos') renderFollowups();
+  if (view === 'contratos') renderContracts();
   if (view === 'reportes') renderReports();
   if (view === 'prospectar' && typeof renderProspects === 'function') renderProspects();
   if (view === 'tickets' && typeof renderTickets === 'function') renderTickets();
@@ -611,6 +614,153 @@ function renderReports() {
     </div>`;
 }
 
+// ---------- Generador de borradores de contrato ----------
+const contractValue = (form, name, fallback = 'Por definir') => form.elements[name]?.value.trim() || fallback;
+const contractLines = value => esc(value).replace(/\r?\n/g, '<br>');
+const CONTRACT_EXIT_TERMS = 'Si el cliente decide no renovar la mensualidad, Orion entregará los archivos finales, el código fuente y los materiales del proyecto, y facilitará los accesos necesarios para que pueda continuar administrando el sitio. Los dominios, hosting, licencias y servicios de terceros se transferirán a nombre del cliente cuando sus proveedores lo permitan; sus renovaciones y cuotas futuras correrán por cuenta del cliente. El alcance de los derechos de uso o transmisión de derechos de autor deberá especificarse por escrito entre las partes.';
+const CONTRACT_CHANGE_TERMS = 'El precio y plazo cubren únicamente el alcance descrito en este acuerdo. Las funciones, páginas o cambios adicionales se cotizarán por separado y solo comenzarán después de la aprobación escrita del cliente.';
+const CONTRACT_CLIENT_TERMS = 'El cliente entregará a tiempo textos, imágenes, logotipos, accesos y aprobaciones necesarios; confirma que puede autorizar el uso de los materiales que proporciona. Los retrasos en estos insumos pueden modificar el calendario acordado.';
+const CONTRACT_MONTHLY_TERMS = 'El mantenimiento mensual será opcional y aplicará solo si ambas partes lo contratan por escrito. Antes de iniciar, se definirán precio, fecha de cobro, periodo y renovación, tareas y horas incluidas, cancelación y condiciones de suspensión por falta de pago.';
+const CONTRACT_THIRD_PARTY_TERMS = 'Los costos de dominio, hosting, correo, licencias y otros servicios externos se especificarán en la cotización. Los que no aparezcan como incluidos serán pagados por el cliente al proveedor correspondiente.';
+const CONTRACT_PRIVACY_TERMS = 'El cliente definirá los fines y el aviso de privacidad de los datos que recabe el sitio. Si Orion accede a datos personales para prestar el servicio, las partes especificarán el alcance del acceso, las instrucciones aplicables y su devolución o eliminación al terminar el servicio.';
+const CONTRACT_RIGHTS_TERMS = 'Las partes especificarán por escrito si los entregables se licencian o se transmiten, qué materiales comprende el acuerdo y las condiciones de uso, duración y remuneración. Las tipografías, imágenes, software y demás recursos de terceros se sujetan a sus licencias.';
+const CONTRACT_CONTACT = { email: 'orionwebstd@gmail.com', phone: '+52 55 2257 4365', website: 'orionwebmx.com', location: 'Ciudad de México, México' };
+let contractProfile = (() => {
+  try { return { name: 'Orion Studio Digital', rfc: '', address: '', ...JSON.parse(localStorage.getItem('orion-contract-profile') || '{}') }; }
+  catch { return { name: 'Orion Studio Digital', rfc: '', address: '' }; }
+})();
+
+function saveContractProfile(form) {
+  contractProfile = {
+    name: form.elements.providerName.value.trim() || 'Orion Studio Digital',
+    rfc: form.elements.providerRfc.value.trim(),
+    address: form.elements.providerAddress.value.trim()
+  };
+  try { localStorage.setItem('orion-contract-profile', JSON.stringify(contractProfile)); }
+  catch { /* Si el navegador bloquea el almacenamiento, los datos siguen en el borrador actual. */ }
+}
+
+function renderContracts() {
+  const view = $('#view-contratos');
+  const selectedClient = findClient(contractDraft.clientId);
+  const options = clients.map(c => `<option value="${esc(c.id)}"${String(c.id) === String(contractDraft.clientId || '') ? ' selected' : ''}>${esc(c.company || c.name)}${c.company ? ' · ' + esc(c.name) : ''}</option>`).join('');
+  view.innerHTML = `
+    <div class="contract-layout" id="contract-layout">
+      <section class="panel contract-form-panel">
+        <div class="panel-head"><h2>Datos del acuerdo</h2><span class="eyebrow">BORRADOR EDITABLE</span></div>
+        <form id="contract-form">
+          <p class="contract-section-title">Las partes</p>
+          <div class="contract-fields">
+            <label class="field span-2"><span>Cliente del CRM</span><select name="clientId" id="contract-client"><option value="">Selecciona un cliente</option>${options}</select></label>
+            <div class="contract-provider span-2">
+              <div><strong>${esc(contractProfile.name)}</strong><small>${CONTRACT_CONTACT.email} · ${CONTRACT_CONTACT.phone} · ${CONTRACT_CONTACT.website} · ${CONTRACT_CONTACT.location}</small></div>
+              <details class="contract-profile"${contractProfile.rfc && contractProfile.address ? '' : ' open'}>
+                <summary>Mis datos fiscales · completar una vez</summary>
+                <div class="contract-fields">
+                  <label class="field"><span>Nombre fiscal</span><input name="providerName" value="${esc(contractProfile.name)}"></label>
+                  <label class="field"><span>RFC</span><input name="providerRfc" value="${esc(contractProfile.rfc)}" placeholder="Completar una vez"></label>
+                  <label class="field span-2"><span>Domicilio fiscal</span><input name="providerAddress" value="${esc(contractProfile.address)}" placeholder="Completar una vez"></label>
+                </div>
+                <small>Estos datos se guardan solo en este navegador para reutilizarlos en tus siguientes borradores.</small>
+              </details>
+            </div>
+            <label class="field"><span>Nombre o razón social del cliente</span><input name="clientName" value="${esc(contractDraft.clientName || selectedClient?.company || selectedClient?.name || '')}" required></label>
+            <label class="field"><span>Representante o contacto</span><input name="clientContact" value="${esc(contractDraft.clientContact || selectedClient?.name || '')}"></label>
+            <label class="field"><span>RFC del cliente</span><input name="clientRfc" value="${esc(contractDraft.clientRfc || '')}" placeholder="Por completar"></label>
+            <label class="field span-2"><span>Domicilio del cliente</span><input name="clientAddress" value="${esc(contractDraft.clientAddress || '')}" placeholder="Domicilio fiscal"></label>
+            <label class="field"><span>Correo del cliente</span><input name="clientEmail" type="email" value="${esc(contractDraft.clientEmail || selectedClient?.email || '')}"></label>
+            <label class="field"><span>Teléfono del cliente</span><input name="clientPhone" value="${esc(contractDraft.clientPhone || selectedClient?.phone || '')}"></label>
+          </div>
+
+          <p class="contract-section-title">Proyecto y pago</p>
+          <div class="contract-fields">
+            <label class="field span-2"><span>Servicio</span><input name="service" value="${esc(contractDraft.service || selectedClient?.service || '')}" placeholder="Diseño y desarrollo de sitio web" required></label>
+            <label class="field span-2"><span>Alcance y entregables</span><textarea name="scope" class="note-box" placeholder="Describe páginas, funciones y materiales incluidos.">${esc(contractDraft.scope || '')}</textarea></label>
+            <label class="field"><span>Precio del proyecto (MXN)</span><input name="price" type="number" min="0" step="0.01" value="${esc(contractDraft.price ?? (selectedClient?.value || ''))}" required></label>
+            <label class="field"><span>Impuestos</span><select name="tax"><option value="por definir">Por definir</option><option value="incluidos"${contractDraft.tax === 'incluidos' ? ' selected' : ''}>Incluidos</option><option value="mas impuestos"${contractDraft.tax === 'mas impuestos' ? ' selected' : ''}>Se agregan</option></select></label>
+            <label class="field span-2"><span>Forma de pago</span><input name="payment" value="${esc(contractDraft.payment || '50% al iniciar y 50% al entregar')}" required></label>
+            <label class="field"><span>Fecha o plazo de entrega</span><input name="delivery" value="${esc(contractDraft.delivery || '')}" placeholder="Fecha o días hábiles"></label>
+            <label class="field"><span>Revisiones incluidas</span><input name="revisions" value="${esc(contractDraft.revisions || '')}" placeholder="Cantidad y condiciones"></label>
+            <label class="field span-2"><span>Soporte o mantenimiento posterior</span><input name="support" value="${esc(contractDraft.support || '')}" placeholder="No incluido o especifica el plan"></label>
+            <details class="contract-extra span-2">
+              <summary>Cláusulas complementarias · incluidas en el documento</summary>
+              <div class="contract-fields">
+                <label class="field span-2"><span>Cambios fuera del alcance</span><textarea name="changeTerms" class="note-box">${esc(contractDraft.changeTerms || CONTRACT_CHANGE_TERMS)}</textarea></label>
+                <label class="field span-2"><span>Materiales y responsabilidades del cliente</span><textarea name="clientTerms" class="note-box">${esc(contractDraft.clientTerms || CONTRACT_CLIENT_TERMS)}</textarea></label>
+                <label class="field span-2"><span>Condiciones de la mensualidad</span><textarea name="monthlyTerms" class="note-box">${esc(contractDraft.monthlyTerms || CONTRACT_MONTHLY_TERMS)}</textarea></label>
+                <label class="field span-2"><span>Dominio, hosting y servicios de terceros</span><textarea name="thirdPartyTerms" class="note-box">${esc(contractDraft.thirdPartyTerms || CONTRACT_THIRD_PARTY_TERMS)}</textarea></label>
+                <label class="field span-2"><span>Datos personales y privacidad</span><textarea name="privacyTerms" class="note-box">${esc(contractDraft.privacyTerms || CONTRACT_PRIVACY_TERMS)}</textarea></label>
+                <label class="field span-2"><span>Derechos de uso y licencias</span><textarea name="rightsTerms" class="note-box">${esc(contractDraft.rightsTerms || CONTRACT_RIGHTS_TERMS)}</textarea></label>
+              </div>
+            </details>
+            <label class="field span-2"><span>Si el cliente no renueva la mensualidad</span><textarea name="exitTerms" class="note-box">${esc(contractDraft.exitTerms || CONTRACT_EXIT_TERMS)}</textarea></label>
+            <label class="field span-2"><span>Otros acuerdos que quieras incluir</span><textarea name="terms" class="note-box" placeholder="Escribe aquí las condiciones particulares acordadas.">${esc(contractDraft.terms || '')}</textarea></label>
+          </div>
+          <button class="btn btn-dark" type="submit">Preparar borrador <span>→</span></button>
+          <p class="contract-hint">Revisa los datos y las condiciones antes de compartirlo o firmarlo. El borrador no se guarda al salir de esta pantalla.</p>
+        </form>
+      </section>
+      <section class="contract-preview" id="contract-preview" hidden>
+        <div class="contract-preview-head"><div><p class="eyebrow">VISTA PREVIA</p><h2>Documento</h2></div><button class="btn btn-dark" type="button" id="print-contract">Imprimir / Guardar PDF</button></div>
+        <article class="contract-paper" id="contract-paper"></article>
+      </section>
+    </div>`;
+
+  const form = $('#contract-form');
+  form.addEventListener('input', () => {
+    contractDraft = Object.fromEntries(new FormData(form));
+    if (form.elements.providerName) saveContractProfile(form);
+    if (!$('#contract-preview').hidden) renderContractPreview();
+  });
+  form.addEventListener('change', e => {
+    if (e.target.id === 'contract-client') {
+      const c = findClient(e.target.value);
+      if (c) {
+        form.elements.clientName.value = c.company || c.name;
+        form.elements.clientContact.value = c.name || '';
+        form.elements.clientEmail.value = c.email || '';
+        form.elements.clientPhone.value = c.phone || '';
+        form.elements.service.value = c.service || '';
+        form.elements.price.value = c.value || '';
+      }
+    }
+    contractDraft = Object.fromEntries(new FormData(form));
+    if (form.elements.providerName) saveContractProfile(form);
+    if (!$('#contract-preview').hidden) renderContractPreview();
+  });
+}
+
+function renderContractPreview() {
+  const form = $('#contract-form');
+  if (!form) return;
+  contractDraft = Object.fromEntries(new FormData(form));
+  const v = name => contractValue(form, name);
+  const price = Number(form.elements.price.value);
+  const formattedPrice = Number.isFinite(price) && form.elements.price.value !== ''
+    ? '$' + price.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' MXN'
+    : 'Por definir';
+  const paper = $('#contract-paper');
+  paper.innerHTML = `
+    <header class="contract-doc-head"><span class="brand-mark">O<span>·</span></span><span class="eyebrow">ORION STUDIO DIGITAL</span></header>
+    <h1>Borrador de contrato</h1>
+    <p class="contract-doc-subtitle">Diseño y desarrollo digital</p>
+    <section><h2>Partes</h2><p><b>Prestador:</b> ${esc(contractProfile.name)}. RFC: ${esc(contractProfile.rfc || 'Por completar')}. Domicilio fiscal: ${esc(contractProfile.address || 'Por completar')}.</p><p><b>Contacto:</b> ${CONTRACT_CONTACT.email} · ${CONTRACT_CONTACT.phone} · ${CONTRACT_CONTACT.website} · ${CONTRACT_CONTACT.location}</p><p><b>Cliente:</b> ${esc(v('clientName'))}. Representante o contacto: ${esc(v('clientContact'))}. RFC: ${esc(v('clientRfc'))}. Domicilio: ${esc(v('clientAddress'))}.</p><p><b>Contacto del cliente:</b> ${esc(v('clientEmail'))} · ${esc(v('clientPhone'))}</p></section>
+    <section><h2>1. Servicio y alcance</h2><p><b>Servicio:</b> ${esc(v('service'))}</p><p>${contractLines(v('scope'))}</p></section>
+    <section><h2>2. Cambios fuera del alcance</h2><p>${contractLines(v('changeTerms'))}</p></section>
+    <section><h2>3. Responsabilidades del cliente</h2><p>${contractLines(v('clientTerms'))}</p></section>
+    <section><h2>4. Precio y pagos</h2><p><b>Precio:</b> ${formattedPrice}. Impuestos: ${esc(v('tax'))}.</p><p><b>Forma de pago:</b> ${esc(v('payment'))}</p></section>
+    <section><h2>5. Plazo, revisiones y soporte</h2><p><b>Entrega:</b> ${esc(v('delivery'))}. <b>Revisiones:</b> ${esc(v('revisions'))}.</p><p><b>Soporte posterior:</b> ${esc(v('support'))}</p><p><b>Mensualidad:</b> ${contractLines(v('monthlyTerms'))}</p></section>
+    <section><h2>6. Servicios de terceros</h2><p>${contractLines(v('thirdPartyTerms'))}</p></section>
+    <section><h2>7. Datos personales y privacidad</h2><p>${contractLines(v('privacyTerms'))}</p></section>
+    <section><h2>8. Derechos y licencias</h2><p>${contractLines(v('rightsTerms'))}</p></section>
+    <section><h2>9. No renovación y entrega</h2><p>${contractLines(v('exitTerms'))}</p></section>
+    <section><h2>10. Otros acuerdos</h2><p>${contractLines(v('terms'))}</p></section>
+    <p class="contract-doc-note">Borrador para revisión entre las partes. Completa la información pendiente y valida las condiciones antes de usarlo.</p>
+    <div class="contract-signatures"><div><span>${esc(contractProfile.name)}</span><small>Prestador del servicio · Firma y fecha</small></div><div><span>${esc(v('clientName'))}</span><small>Cliente · Firma y fecha</small></div></div>`;
+  $('#contract-preview').hidden = false;
+  $('#contract-layout').classList.add('is-ready');
+}
+
 // ---------- Ajustes ----------
 // Las plantillas se guardan en este navegador (localStorage) por ahora.
 const DEFAULT_TEMPLATES = {
@@ -705,6 +855,11 @@ document.querySelectorAll('.view-toggle button').forEach(b => b.addEventListener
   render();
 }));
 $('#views').addEventListener('click', e => {
+  if (e.target.closest('#print-contract')) {
+    document.body.classList.add('printing-contract');
+    window.print();
+    return;
+  }
   const act = e.target.closest('[data-act]');
   if (act) return handleAction(act.dataset.act, act);
   const item = e.target.closest('[data-id]');
@@ -716,6 +871,7 @@ $('#views').addEventListener('click', e => {
 $('#views').addEventListener('submit', e => {
   e.preventDefault();
   if (e.target.id === 'pw-form') changePassword(e.target);
+  if (e.target.id === 'contract-form') renderContractPreview();
 });
 $('#views').addEventListener('change', e => {
   if (e.target.dataset.template) saveTemplates();
@@ -763,6 +919,7 @@ document.addEventListener('keydown', e => {
     $('#search').focus();
   }
 });
+window.addEventListener('afterprint', () => document.body.classList.remove('printing-contract'));
 
 async function init() {
   if (!db) {
