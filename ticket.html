@@ -93,9 +93,9 @@
     // Ticket de ejemplo para revisar el diseño: ticket.html?demo=1
     const DEMO = {
       folio: 7, created_at: new Date().toISOString(), client_name: 'Café Raíz', client_contact: '+52 55 1234 5678',
-      plan: 'Recomendado', monthly_price: 2000, months: 3, total: 6350, notes: 'Pago mensual los primeros 5 días de cada mes.',
-      items: [{ concept: 'Plan Recomendado · mensualidad', qty: 3, price: 2000 }, { concept: 'Dominio .com (1 año)', qty: 1, price: 350 }],
-      payments: [{ date: new Date().toISOString().slice(0, 10), amount: 2350, method: 'Transferencia' }]
+      kind: 'web', plan: 'Recomendado', total: 12350, notes: 'El 50% restante se paga al entregar la página.',
+      items: [{ concept: 'Página web · Plan Recomendado', qty: 1, price: 12000 }, { concept: 'Dominio .com (1 año)', qty: 1, price: 350 }],
+      payments: [{ date: new Date().toLocaleDateString('en-CA'), amount: 6175, method: 'Transferencia', label: 'Anticipo' }]
     };
 
     function render(t) {
@@ -103,7 +103,11 @@
       const total = Number(t.total || 0);
       const due = Math.max(total - paid, 0);
       const pct = total ? Math.min(paid / total * 100, 100) : 0;
-      const [label, color] = paid >= total && total > 0 ? ['Pagado', 'var(--green)'] : paid > 0 ? ['Pago parcial', 'var(--amber)'] : ['Pendiente de pago', 'var(--muted)'];
+      const [label, color] = paid >= total && total > 0 ? ['Pagado', 'var(--green)'] : paid > 0 ? [t.kind === 'web' ? 'Anticipo pagado' : 'Pago parcial', 'var(--amber)'] : ['Pendiente de pago', 'var(--muted)'];
+      const periodo = p => p ? new Date(+p.slice(0, 4), +p.slice(5, 7) - 1, 1).toLocaleDateString('es-MX', { month: 'long', year: 'numeric' }).replace(' de ', ' ') : '';
+      const concepto = t.kind === 'web' ? 'Pago de página web' : t.kind === 'mensualidad' ? `Mensualidad ${periodo(t.period)}` : 'Plan contratado';
+      const detalle = t.kind === 'web' ? `Plan ${esc(t.plan)} · pago en dos partes: 50% de anticipo y 50% al entregar`
+        : t.monthly_price != null ? `Plan ${esc(t.plan)} · <b>${mxn(t.monthly_price)}</b> /mes${t.months > 1 ? ` · ${t.months} meses` : ''}` : '';
       document.title = `Comprobante #${String(t.folio).padStart(4, '0')} · Orion Studio`;
       box.innerHTML = `
         <article class="ticket">
@@ -118,9 +122,9 @@
               <div><span class="label">Fecha</span><b>${fecha(t.created_at)}</b></div>
               ${t.client_contact ? `<div style="grid-column:1/-1"><span class="label">Contacto</span><b>${esc(t.client_contact)}</b></div>` : ''}
             </div>
-            <span class="label">Plan contratado</span>
-            <p class="plan">${esc(t.plan)}</p>
-            ${t.monthly_price != null ? `<p class="plan-price"><b>${mxn(t.monthly_price)}</b> /mes${t.months ? ` · ${t.months} ${t.months === 1 ? 'mes' : 'meses'}` : ''}</p>` : ''}
+            <span class="label">Concepto</span>
+            <p class="plan">${t.kind ? concepto : esc(t.plan)}</p>
+            ${t.kind ? `<p class="plan-price">${detalle}</p>` : t.monthly_price != null ? `<p class="plan-price"><b>${mxn(t.monthly_price)}</b> /mes${t.months ? ` · ${t.months} ${t.months === 1 ? 'mes' : 'meses'}` : ''}</p>` : ''}
             <table>
               <thead><tr><th>Concepto</th><th class="num">Cant.</th><th class="num">Importe</th></tr></thead>
               <tbody>${(t.items || []).map(i => `<tr><td>${esc(i.concept)}</td><td class="num">${Number(i.qty || 1)}</td><td class="num">${mxn(Number(i.qty || 1) * Number(i.price || 0))}</td></tr>`).join('')}</tbody>
@@ -132,8 +136,8 @@
             </div>
             <div class="bar" aria-label="${Math.round(pct)}% pagado"><i style="width:${pct}%"></i></div>
             ${(t.payments || []).length ? `<h2>Pagos recibidos</h2>
-              <table><thead><tr><th>Fecha</th><th>Método</th><th class="num">Monto</th></tr></thead>
-              <tbody>${t.payments.map(p => `<tr><td>${fecha(p.date)}</td><td>${esc(p.method || '—')}</td><td class="num">${mxn(p.amount)}</td></tr>`).join('')}</tbody></table>` : ''}
+              <table><thead><tr><th>Fecha</th><th>Pago</th><th class="num">Monto</th></tr></thead>
+              <tbody>${t.payments.map(p => `<tr><td>${fecha(p.date)}</td><td>${p.label ? `<b>${esc(p.label)}</b> · ` : ''}${esc(p.method || '—')}</td><td class="num">${mxn(p.amount)}</td></tr>`).join('')}</tbody></table>` : ''}
             ${t.notes ? `<h2 style="margin-top:22px">Notas</h2><p class="notes">${esc(t.notes)}</p>` : ''}
           </div>
           <footer class="t-foot">
