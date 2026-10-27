@@ -470,3 +470,4 @@ $('#views').addEventListener('submit', e => {
 });
 
 if (currentView() === 'tickets') render();
+if (currentView() === 'ajustes') renderPlansPanel();

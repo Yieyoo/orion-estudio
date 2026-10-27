@@ -200,8 +200,21 @@ const VIEWS = {
 };
 const currentView = () => VIEWS[location.hash.slice(1)] ? location.hash.slice(1) : 'clientes';
 
+// Permisos: el dueño ve todo; los demás usuarios solo las secciones que el dueño les dio. Ajustes es de todos.
+const SECTIONS = ['prospectar', 'clientes', 'tickets', 'propuestas', 'seguimientos', 'reportes'];
+const isOwner = () => Boolean(state.me?.is_owner);
+const canSee = view => view === 'ajustes' || isOwner() || Boolean(state.me?.permissions?.includes(view));
+const canEditClients = () => ['clientes', 'prospectar'].some(canSee);
+
 function render() {
-  const view = currentView();
+  if (!state.me) return; // aún no sabemos quién es el usuario ni qué puede ver
+  let view = currentView();
+  if (!canSee(view)) {
+    view = SECTIONS.find(canSee) || 'ajustes';
+    history.replaceState(null, '', '#' + view);
+  }
+  document.querySelectorAll('[data-nav]').forEach(a => { a.hidden = !canSee(a.dataset.nav); });
+  $('#new-client').hidden = !canEditClients();
   renderStats();
   document.body.dataset.view = view;
   document.querySelectorAll('.view').forEach(v => { v.hidden = v.dataset.view !== view; });
@@ -224,6 +237,7 @@ function render() {
   if (view === 'ajustes' && state.shownView !== 'ajustes') {
     renderSettings();
     if (typeof renderPlansPanel === 'function') renderPlansPanel();
+    if (typeof renderUsersPanel === 'function') renderUsersPanel();
   }
   state.shownView = view;
   if (state.openId) renderDrawer();
@@ -628,7 +642,7 @@ function renderSettings() {
         <div class="panel-head"><h2>Cuenta</h2></div>
         <div class="info">
           <div><span>Correo</span><b>${esc(state.email) || 'Modo demo'}</b></div>
-          <div><span>Rol</span><b>Administrador</b></div>
+          <div><span>Rol</span><b>${isOwner() ? 'Dueño' : 'Colaborador'}</b></div>
         </div>
         <button class="btn btn-ghost panel-btn" data-act="logout">Cerrar sesión</button>
       </section>
@@ -640,7 +654,8 @@ function renderSettings() {
           <button class="btn btn-dark" type="submit">Actualizar contraseña</button>
         </form>
       </section>
-      <section class="panel span-2" id="plans-panel"></section>
+      ${isOwner() ? '<section class="panel span-2" id="users-panel"></section>' : ''}
+      ${isOwner() ? '<section class="panel span-2" id="plans-panel"></section>' : ''}
       <section class="panel span-2">
         <div class="panel-head"><h2>Plantillas de mensajes</h2><span class="eyebrow">USA {NOMBRE} · {EMPRESA} · {SERVICIO}</span></div>
         <div class="tpl-grid">${Object.keys(DEFAULT_TEMPLATES).map(key => `
@@ -649,7 +664,7 @@ function renderSettings() {
             <textarea class="note-box" id="tpl-${key}" data-template="${key}">${esc(tpl[key].text)}</textarea>
           </div>`).join('')}</div>
       </section>
-      <section class="panel span-2">
+      <section class="panel span-2"${canSee('clientes') ? '' : ' hidden'}>
         <div class="panel-head"><h2>Datos</h2></div>
         <p class="panel-text">Descarga todos tus clientes en un archivo que abre Excel o Google Sheets.</p>
         <div class="settings-actions">
@@ -757,6 +772,7 @@ document.addEventListener('keydown', e => {
 async function init() {
   if (!db) {
     clients = DEMO;
+    state.me = { is_owner: true, permissions: [], name: 'Administrador' };
     $('#demo-banner').hidden = false;
     return render();
   }
@@ -764,6 +780,16 @@ async function init() {
   if (!session) return location.replace('login.html');
   state.email = session.user.email;
   $('#user-email').textContent = session.user.email;
+  // ¿Quién soy y qué puedo ver? Sin registro en admins no hay acceso al panel
+  const { data: me } = await db.from('admins').select('*').eq('user_id', session.user.id).maybeSingle();
+  if (!me) {
+    document.body.innerHTML = `<div class="no-access"><strong>Tu usuario no tiene acceso al panel</strong>
+      <p>Pídele al administrador que te dé permisos.</p><a class="btn btn-dark" href="login.html" id="no-access-out">Cerrar sesión</a></div>`;
+    $('#no-access-out').addEventListener('click', async e => { e.preventDefault(); await db.auth.signOut(); location.replace('login.html'); });
+    return;
+  }
+  state.me = { ...me, permissions: me.permissions || [], is_owner: me.is_owner ?? true };
+  $('.side-user strong').textContent = me.name || (state.me.is_owner ? 'Administrador' : 'Colaborador');
   render();
   const { data, error } = await db.from('clients').select('*, interactions(*)').order('created_at');
   if (error) return toast('Error al cargar clientes: ' + error.message);
