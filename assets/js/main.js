@@ -37,6 +37,7 @@
     const stage = carousel.querySelector(".work-stage");
     const cards = [...carousel.querySelectorAll(".work-card")];
     const count = carousel.querySelector(".carousel-count");
+    const conceptModal = document.querySelector(".concept-modal");
     let active = 0;
     let pointerStart = null;
     let suppressClick = false;
@@ -76,14 +77,41 @@
     stage.addEventListener("pointercancel", () => { pointerStart = null; }, { passive: true });
     // Evita que el navegador arrastre la imagen y cancele el gesto con el mouse
     stage.addEventListener("dragstart", event => event.preventDefault());
+    const openConcept = card => {
+      if (!conceptModal?.showModal) return;
+      const pageTypes = ["store", "professional", "events", "food", "menu"];
+      const pageType = pageTypes.find(type => card.querySelector(`.image-${type}`)) || "store";
+      const template = document.getElementById(`concept-template-${pageType}`);
+      if (!template) return;
+      const conceptSite = document.getElementById("concept-site");
+      conceptSite.className = `concept-site mini-page-${pageType}`;
+      conceptSite.replaceChildren(template.content.cloneNode(true));
+      const category = card.querySelector(".work-caption h3")?.textContent || "Concepto";
+      document.getElementById("concept-category").textContent = `· ${category.toUpperCase()}`;
+      const brand = conceptSite.querySelector(".mini-brand")?.textContent.replace(/[^a-z0-9]/gi, "").toLowerCase() || "tumarca";
+      conceptModal.querySelector(".concept-toolbar span").textContent = `www.${brand}.mx`;
+      conceptSite.scrollTop = 0;
+      conceptModal.showModal();
+    };
+    document.getElementById("concept-site").addEventListener("click", event => {
+      const addButton = event.target.closest(".mini-add");
+      if (!addButton) return;
+      const bagCount = document.querySelector("#concept-site .mini-bag-count");
+      bagCount.textContent = String(Number(bagCount.textContent) + 1);
+      addButton.textContent = "AGREGADO A TU BOLSA ✓";
+    });
     track.addEventListener("click", event => {
-      if (suppressClick) { event.preventDefault(); event.stopPropagation(); }
+      if (suppressClick) { event.preventDefault(); event.stopPropagation(); return; }
       const card = event.target.closest(".work-card");
-      if (card && card.dataset.position !== "0") {
-        event.preventDefault();
-        showCard(active + (Number(card.dataset.position) < 0 ? -1 : 1));
-      }
+      if (!card) return;
+      event.preventDefault();
+      event.stopPropagation();
+      openConcept(card);
     }, true);
+    conceptModal?.querySelector(".concept-close")?.addEventListener("click", () => conceptModal.close());
+    conceptModal?.addEventListener("click", event => {
+      if (event.target === conceptModal || event.target.closest("[data-concept-contact]")) conceptModal.close();
+    });
     showCard(0);
   }
 

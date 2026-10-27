@@ -86,43 +86,21 @@
     <div id="views">
     <div class="view" data-view="clientes">
     <section class="kpis" aria-label="Resumen">
-      <article class="kpi">
-        <p>Total en cartera</p>
-        <strong id="kpi-total">0</strong>
-        <small>prospectos y clientes</small>
-      </article>
-      <article class="kpi">
-        <p>Contactados</p>
-        <strong id="kpi-contacted">0</strong>
-        <small><span class="up" id="kpi-week">+0</span> esta semana</small>
-      </article>
-      <article class="kpi">
-        <p>Tasa de respuesta</p>
-        <strong id="kpi-rate">0%</strong>
-        <div class="meter"><i id="kpi-rate-bar"></i></div>
-      </article>
-      <article class="kpi">
-        <p>Sin respuesta</p>
-        <strong id="kpi-silent">0</strong>
-        <small>requieren seguimiento</small>
-      </article>
-      <article class="kpi kpi-dark">
-        <p>Propuestas abiertas</p>
-        <strong id="kpi-pipeline">$0</strong>
-        <small id="kpi-pipeline-count">0 propuestas</small>
-      </article>
+      <article class="kpi"><p>Total en cartera</p><strong id="kpi-total">0</strong><small>prospectos y clientes</small></article>
+      <article class="kpi"><p>Sin respuesta</p><strong id="kpi-silent">0</strong><small>necesitan seguimiento</small></article>
+      <article class="kpi kpi-dark"><p>Propuestas abiertas</p><strong id="kpi-pipeline">$0</strong><small id="kpi-pipeline-count">0 propuestas</small></article>
+      <article class="kpi"><p>Tasa de respuesta</p><strong id="kpi-rate">0%</strong><div class="meter"><i id="kpi-rate-bar"></i></div></article>
     </section>
-
-    <section class="pipeline" aria-label="Embudo">
-      <div class="pipeline-head">
-        <h2>Embudo de contacto</h2>
-        <span class="eyebrow">DISTRIBUCIÓN POR ESTADO</span>
-      </div>
-      <div class="pipeline-bar" id="pipeline-bar"></div>
-      <div class="pipeline-legend" id="pipeline-legend"></div>
-    </section>
+    <details class="pipeline">
+      <summary class="pipeline-head"><h2>Ver embudo de contacto</h2><span class="eyebrow">ESTADOS DE CONTACTO</span></summary>
+      <div class="pipeline-content"><div class="pipeline-bar" id="pipeline-bar"></div><div class="pipeline-legend" id="pipeline-legend"></div></div>
+    </details>
 
     <section class="board">
+      <div class="board-heading">
+        <div><p class="eyebrow">CARTERA</p><h2>Contactos</h2></div>
+        <span>Abre un contacto para ver sus detalles</span>
+      </div>
       <div class="board-toolbar">
         <div class="chips" id="chips" role="tablist" aria-label="Filtrar por estado"></div>
         <div class="toolbar-right">
@@ -146,7 +124,6 @@
               <th>Cliente</th>
               <th>Estado</th>
               <th>Último contacto</th>
-              <th>Canal</th>
               <th>Propuesta</th>
               <th>Próximo paso</th>
               <th aria-label="Acciones"></th>

@@ -135,11 +135,7 @@ function renderStats() {
   const replied = clients.filter(c => ['respondio', 'propuesta', 'cliente', 'perdido'].includes(c.status)).length;
   const open = clients.filter(c => c.status === 'propuesta');
   const rate = contacted ? Math.round(replied / contacted * 100) : 0;
-  const thisWeek = clients.filter(c => c.lastContact !== null && c.lastContact >= -6 && c.status !== 'nuevo').length;
-
   $('#kpi-total').textContent = clients.length;
-  $('#kpi-contacted').textContent = contacted;
-  $('#kpi-week').textContent = '+' + thisWeek;
   $('#kpi-rate').textContent = rate + '%';
   $('#kpi-rate-bar').style.width = rate + '%';
   $('#kpi-silent').textContent = count('silencio');
@@ -164,10 +160,9 @@ function renderStats() {
 function renderTable(list) {
   $('#rows').innerHTML = list.map(c => `
     <tr data-id="${c.id}">
-      <td><div class="who"><span class="avatar">${esc(initials(c.name))}</span><div><strong>${esc(c.name)}</strong><small>${esc(c.company)}</small></div></div></td>
+      <td><div class="who"><span class="avatar">${esc(initials(c.name))}</span><div><strong>${esc(c.name)}</strong><small>${esc(c.company)}${c.company ? ' - ' : ''}${CHANNELS[c.channel]?.label || ''}</small></div></div></td>
       <td>${pill(c.status)}</td>
       <td>${relDay(c.lastContact)}</td>
-      <td>${channelHtml(c.channel)}</td>
       <td class="money">${money(c.value)}</td>
       <td>${nextHtml(c)}</td>
       <td class="row-actions"><button class="icon-btn" aria-label="Más opciones"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button></td>
