@@ -9,7 +9,7 @@
       header.classList.toggle("is-scrolled", window.scrollY > hero.offsetHeight - header.offsetHeight - 24);
       // El menú se oscurece cuando debajo de él hay una sección oscura
       const line = header.offsetHeight / 2;
-      header.classList.toggle("is-dark", [...document.querySelectorAll(".marquee, .ox-manifesto, .ox-show.is-dark, .ox-services, .ox-contact, .ox-footer")].some(section => {
+      header.classList.toggle("is-dark", [...document.querySelectorAll(".ox-ribbons, .ox-manifesto, .ox-show.is-dark, .ox-services, .ox-contact, .ox-footer")].some(section => {
         const r = section.getBoundingClientRect();
         return r.top <= line && r.bottom > line;
       }));
@@ -54,6 +54,7 @@
     const screen = show.querySelector(".ox-show-screen");
     const domainLabel = show.querySelector("[data-show-domain]");
     const description = show.querySelector("[data-show-desc]");
+    const counter = show.querySelector("[data-show-count]");
     const phone = window.matchMedia("(max-width: 760px)");
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let index = 0;
@@ -84,7 +85,7 @@
       preview = window.OrionConcepts.preview(tabs[index].dataset.concept, site);
     };
 
-    const select = next => {
+    const select = (next, dir = 1) => {
       index = (next + tabs.length) % tabs.length;
       const type = tabs[index].dataset.concept;
       const [bg, ink, accent, dark] = concepts[type].theme;
@@ -97,11 +98,13 @@
       show.style.setProperty("--show-accent", accent);
       show.classList.toggle("is-dark", dark);
       description.textContent = concepts[type].desc;
+      counter.textContent = `${String(index + 1).padStart(2, "0")} / ${String(tabs.length).padStart(2, "0")}`;
       domainLabel.textContent = window.OrionConcepts.domain(type);
       device.setAttribute("aria-label", `Probar la demo: ${concepts[type].name}`);
       // En celular, la pestaña activa se desliza a la vista
       tabs[index].parentElement.parentElement.scrollTo({ left: tabs[index].parentElement.offsetLeft - 20, behavior: "smooth" });
       elapsed = 0;
+      screen.dataset.dir = String(dir);
       screen.classList.add("is-switching");
       clearTimeout(switching);
       switching = setTimeout(() => {
@@ -135,8 +138,47 @@
       conceptModal.querySelector(".concept-toolbar span").textContent = `www.${domain}`;
     };
 
-    tabs.forEach((tab, i) => tab.addEventListener("click", () => select(i)));
-    show.querySelectorAll("[data-open-concept]").forEach(button => button.addEventListener("click", openConcept));
+    tabs.forEach((tab, i) => tab.addEventListener("click", () => select(i, i < index ? -1 : 1)));
+    show.querySelectorAll("[data-show-step]").forEach(button => button.addEventListener("click", () => {
+      const step = Number(button.dataset.showStep);
+      select(index + step, step);
+    }));
+
+    // Deslizar la vitrina (con el dedo o arrastrando) cambia de concepto; un toque la abre
+    let dragStart = null;
+    let dragged = false;
+    device.addEventListener("pointerdown", event => {
+      dragStart = { x: event.clientX, y: event.clientY };
+      dragged = false;
+    });
+    device.addEventListener("pointermove", event => {
+      if (!dragStart) return;
+      const dx = event.clientX - dragStart.x;
+      if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(event.clientY - dragStart.y)) {
+        dragged = true;
+        device.classList.add("is-dragging");
+        device.style.translate = `${dx * 0.35}px 0`;
+      }
+    });
+    const endDrag = event => {
+      if (!dragStart) return;
+      const dx = event.clientX - dragStart.x;
+      dragStart = null;
+      device.classList.remove("is-dragging");
+      device.style.translate = "";
+      if (dragged && Math.abs(dx) > 50) {
+        show.classList.add("has-swiped");
+        select(index + (dx < 0 ? 1 : -1), dx < 0 ? 1 : -1);
+      }
+    };
+    device.addEventListener("pointerup", endDrag);
+    device.addEventListener("pointercancel", endDrag);
+    device.addEventListener("dragstart", event => event.preventDefault());
+    device.style.touchAction = "pan-y";
+    show.querySelectorAll("[data-open-concept]").forEach(button => button.addEventListener("click", () => {
+      if (dragged) { dragged = false; return; }
+      openConcept();
+    }));
     device.addEventListener("keydown", event => {
       if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openConcept(); }
     });
@@ -168,7 +210,7 @@
       ".ox-plan",
       ".ox-faq details",
       ".ox-contact-copy > *",
-      ".ox-brief"
+      ".ox-chatbox"
     ];
     const revealObserver = new IntersectionObserver(entries => {
       entries.forEach(entry => {

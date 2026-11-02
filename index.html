@@ -11,15 +11,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://images.unsplash.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/styles.css?v=7">
-  <link rel="stylesheet" href="assets/css/concepts.css?v=7">
-  <link rel="stylesheet" href="assets/css/home.css?v=7">
+  <link rel="stylesheet" href="assets/css/styles.css?v=8">
+  <link rel="stylesheet" href="assets/css/concepts.css?v=8">
+  <link rel="stylesheet" href="assets/css/home.css?v=8">
 </head>
 <body>
   <header class="header">
     <a class="brand" href="#inicio" aria-label="Orion Studio, inicio">
       <span class="brand-mark">O<span>·</span></span>
-      <span class="brand-name">orion<span>STUDIO DIGITAL</span></span>
+      <span class="brand-name"><b class="brand-word">orion</b><span>STUDIO DIGITAL</span></span>
     </a>
     <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Abrir menú"><span></span><span></span></button>
     <nav class="nav" id="site-nav" aria-label="Navegación principal">
@@ -48,13 +48,9 @@
       <div class="hero-coordinate" aria-hidden="true">19°25' N&nbsp;&nbsp; 99°08' W</div>
     </section>
 
-    <div class="marquee" role="region" aria-label="Lo que incluye cada proyecto">
-      <ul class="marquee-track">
-        <li>100% a la medida</li><li>Optimizado para celular</li><li>Botón directo a WhatsApp</li><li>Listo para Google</li><li>Carga rápida</li><li>Soporte después del lanzamiento</li>
-      </ul>
-      <ul class="marquee-track" aria-hidden="true">
-        <li>100% a la medida</li><li>Optimizado para celular</li><li>Botón directo a WhatsApp</li><li>Listo para Google</li><li>Carga rápida</li><li>Soporte después del lanzamiento</li>
-      </ul>
+    <div class="ox-ribbons" role="region" aria-label="Lo que incluye cada proyecto">
+      <div class="ox-ribbon ox-ribbon-back" aria-hidden="true"><div class="ox-ribbon-track"><ul aria-hidden="true"><li>Diseño original</li><li>Sin plantillas</li><li>Hecho en CDMX</li><li>Pensado para vender</li><li>Experiencias que se recuerdan</li><li aria-hidden="true">Diseño original</li><li aria-hidden="true">Sin plantillas</li><li aria-hidden="true">Hecho en CDMX</li><li aria-hidden="true">Pensado para vender</li><li aria-hidden="true">Experiencias que se recuerdan</li></ul><ul aria-hidden="true"><li>Diseño original</li><li>Sin plantillas</li><li>Hecho en CDMX</li><li>Pensado para vender</li><li>Experiencias que se recuerdan</li><li aria-hidden="true">Diseño original</li><li aria-hidden="true">Sin plantillas</li><li aria-hidden="true">Hecho en CDMX</li><li aria-hidden="true">Pensado para vender</li><li aria-hidden="true">Experiencias que se recuerdan</li></ul></div></div>
+      <div class="ox-ribbon ox-ribbon-front"><div class="ox-ribbon-track"><ul><li>100% a la medida</li><li>Optimizado para celular</li><li>Botón directo a WhatsApp</li><li>Listo para Google</li><li>Carga rápida</li><li>Soporte después del lanzamiento</li><li aria-hidden="true">100% a la medida</li><li aria-hidden="true">Optimizado para celular</li><li aria-hidden="true">Botón directo a WhatsApp</li><li aria-hidden="true">Listo para Google</li><li aria-hidden="true">Carga rápida</li><li aria-hidden="true">Soporte después del lanzamiento</li></ul><ul aria-hidden="true"><li>100% a la medida</li><li>Optimizado para celular</li><li>Botón directo a WhatsApp</li><li>Listo para Google</li><li>Carga rápida</li><li>Soporte después del lanzamiento</li><li aria-hidden="true">100% a la medida</li><li aria-hidden="true">Optimizado para celular</li><li aria-hidden="true">Botón directo a WhatsApp</li><li aria-hidden="true">Listo para Google</li><li aria-hidden="true">Carga rápida</li><li aria-hidden="true">Soporte después del lanzamiento</li></ul></div></div>
     </div>
 
     <section class="ox-manifesto" id="manifiesto" aria-label="Por qué Orion">
@@ -83,14 +79,24 @@
         <li><button type="button" role="tab" data-concept="menu" aria-selected="false"><b>05</b><span><strong>Menú digital</strong><small>Pedidos desde el celular</small></span><i class="ox-show-bar"><i></i></i></button></li>
         </ol>
         <div class="ox-show-stage">
+          <div class="ox-show-deck">
           <div class="ox-show-device" role="button" tabindex="0" data-open-concept data-cursor="Probar" aria-label="Probar la demo">
             <span class="ox-show-toolbar" aria-hidden="true"><i></i><i></i><i></i><em data-show-domain>casalino.mx</em></span>
             <span class="ox-show-screen"></span>
             <span class="ox-show-hint" aria-hidden="true">Toca para probarla <svg class="icon-arrow" viewBox="0 0 24 24"><path d="M5 19 19 5M8 5h11v11"/></svg></span>
           </div>
+          </div>
+          <p class="ox-show-swipe" aria-hidden="true"><i></i>Desliza para ver otro concepto</p>
           <div class="ox-show-meta">
             <p data-show-desc></p>
-            <button class="ox-show-cta" type="button" data-open-concept>Probar esta demo <svg class="icon-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5M8 5h11v11"/></svg></button>
+            <div class="ox-show-actions">
+              <div class="ox-show-nav">
+                <button type="button" data-show-step="-1" aria-label="Concepto anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6"/></svg></button>
+                <span data-show-count>01 / 05</span>
+                <button type="button" data-show-step="1" aria-label="Siguiente concepto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
+              </div>
+              <button class="ox-show-cta" type="button" data-open-concept>Probar esta demo <svg class="icon-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5M8 5h11v11"/></svg></button>
+            </div>
           </div>
         </div>
       </div>
@@ -131,7 +137,22 @@
         <article class="ox-tile ox-tile-mobile" data-spot>
           <span class="ox-tag">02 · Celular primero</span>
           <h3>Impecable en cualquier pantalla.</h3>
-          <div class="ox-phone" aria-hidden="true"><div class="ox-phone-screen"><div class="ox-phone-feed"><i class="img"></i><i></i><i class="short"></i><i class="btn"></i><i class="img b"></i><i></i><i class="short"></i><i class="img c"></i><i></i><i class="short"></i><i class="img"></i><i></i></div></div></div>
+          <div class="ox-phone-wrap" aria-hidden="true">
+            <div class="ox-tablet"><i></i><i></i><i></i></div>
+            <div class="ox-phone"><div class="ox-phone-screen">
+              <div class="ox-phone-status"><b>9:41</b><i></i></div>
+              <div class="ox-phone-feed">
+                <div class="ox-pf-nav"><b>casa lino<em>.</em></b><span>2</span></div>
+                <div class="ox-pf-hero"><img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=400&q=70" alt="" loading="lazy"><div><small>COLECCIÓN OTOÑO</small><strong>Un poco más de <em>calma</em>.</strong><span>Explorar</span></div></div>
+                <div class="ox-pf-chips"><span class="on">Todo</span><span>Textiles</span><span>Cerámica</span><span>Hogar</span></div>
+                <div class="ox-pf-grid"><figure><img src="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=240&q=70" alt="" loading="lazy"><figcaption><b>Bolso Nara</b><span>$1,890</span></figcaption></figure><figure><img src="https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=240&q=70" alt="" loading="lazy"><figcaption><b>Jarrón Bruma</b><span>$680</span></figcaption></figure><figure><img src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=240&q=70" alt="" loading="lazy"><figcaption><b>Camisa Alba</b><span>$1,250</span></figcaption></figure><figure><img src="https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=240&q=70" alt="" loading="lazy"><figcaption><b>Set Arena</b><span>$540</span></figcaption></figure></div>
+                <div class="ox-pf-banner"><b>Envío gratis</b><span>desde $1,500</span></div>
+                <div class="ox-pf-grid"><figure><img src="https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=240&q=70" alt="" loading="lazy"><figcaption><b>Cojín Sol</b><span>$420</span></figcaption></figure><figure><img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=240&q=70" alt="" loading="lazy"><figcaption><b>Collar Perla</b><span>$2,350</span></figcaption></figure></div>
+              </div>
+              <div class="ox-pf-cart"><span>Ver bolsa · 2</span><b>$2,570</b></div>
+            </div></div>
+            <span class="ox-phone-badge">Se adapta solo</span>
+          </div>
         </article>
         <article class="ox-tile ox-tile-google" data-spot>
           <span class="ox-tag">03 · Visible en Google</span>
@@ -162,13 +183,15 @@
         </article>
         <article class="ox-tile ox-tile-brand" data-spot>
           <span class="ox-tag">06 · Identidad visual</span>
-          <h3>Colores y tipografía con personalidad.</h3>
-          <div class="ox-brandkit" aria-hidden="true"><b>Aa</b><div class="ox-swatches"><i></i><i></i><i></i><i></i></div></div>
-        </article>
-        <article class="ox-tile ox-tile-care" data-spot>
-          <span class="ox-tag">07 · Acompañamiento</span>
-          <h3>Tu web sigue al día, mes con mes.</h3>
-          <ul class="ox-care"><li><i class="ox-check"></i>Cambios y actualizaciones</li><li><i class="ox-check"></i>Tu sitio siempre en línea</li><li><i class="ox-check"></i>Soporte cuando lo necesites</li></ul>
+          <h3>Juega con colores y tipografía.</h3>
+          <div class="ox-brandkit" data-brandkit>
+            <p class="ox-brand-sample" data-brand-sample contenteditable="true" spellcheck="false" role="textbox" aria-label="Escribe el nombre de tu negocio">Tu marca</p>
+            <small class="ox-brand-hint">Toca el texto y escribe el nombre de tu negocio</small>
+            <div class="ox-brand-controls">
+              <div class="ox-brand-colors" role="group" aria-label="Color"><button type="button" style="--c:#9fb1ff" data-color="#9fb1ff" aria-label="Azul" aria-pressed="true"></button><button type="button" style="--c:#ff8a5c" data-color="#ff8a5c" aria-label="Coral" aria-pressed="false"></button><button type="button" style="--c:#7ee2a0" data-color="#7ee2a0" aria-label="Menta" aria-pressed="false"></button><button type="button" style="--c:#f7c948" data-color="#f7c948" aria-label="Mostaza" aria-pressed="false"></button><button type="button" style="--c:#e7a6ff" data-color="#e7a6ff" aria-label="Lila" aria-pressed="false"></button><button type="button" style="--c:#f4f6fb" data-color="#f4f6fb" aria-label="Blanco" aria-pressed="false"></button></div>
+              <div class="ox-brand-fonts" role="group" aria-label="Tipografía"><button type="button" data-font="Sora" style="font-family:'Sora'" aria-pressed="true">Moderna</button><button type="button" data-font="Fraunces" style="font-family:'Fraunces'" aria-pressed="false">Elegante</button><button type="button" data-font="Bricolage Grotesque" style="font-family:'Bricolage Grotesque'" aria-pressed="false">Divertida</button><button type="button" data-font="DM Mono" style="font-family:'DM Mono'" aria-pressed="false">Técnica</button></div>
+            </div>
+          </div>
         </article>
       </div>
     </section>
@@ -180,10 +203,10 @@
         <p>Un proceso claro, sin tecnicismos. Siempre sabes en qué paso vamos.</p>
       </div>
       <ol class="ox-steps" data-steps>
-        <li><b>01</b><h3>Platicamos</h3><p>Nos cuentas de tu negocio, tus clientes y lo que quieres lograr.</p></li>
-        <li><b>02</b><h3>Diseñamos</h3><p>Te mostramos una propuesta visual antes de programar una sola línea.</p></li>
-        <li><b>03</b><h3>Afinamos</h3><p>Revisamos juntos cada detalle hasta que se sienta tuyo.</p></li>
-        <li><b>04</b><h3>Lanzamos</h3><p>Publicamos tu sitio y te acompañamos después del lanzamiento.</p></li>
+        <li><span class="ox-step-dot">01</span><div class="ox-step-card"><svg class="ox-step-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 18.8L4 20z"/><path d="M9 11h.01M12 11h.01M15 11h.01"/></svg><h3>Platicamos</h3><p>Nos cuentas de tu negocio, tus clientes y lo que quieres lograr.</p></div></li>
+        <li><span class="ox-step-dot">02</span><div class="ox-step-card"><svg class="ox-step-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16l-1 4z"/><path d="m14 6 3 3"/></svg><h3>Diseñamos</h3><p>Te mostramos una propuesta visual antes de programar una sola línea.</p></div></li>
+        <li><span class="ox-step-dot">03</span><div class="ox-step-card"><svg class="ox-step-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg><h3>Afinamos</h3><p>Revisamos juntos cada detalle hasta que se sienta tuyo.</p></div></li>
+        <li><span class="ox-step-dot">04</span><div class="ox-step-card"><svg class="ox-step-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15 9 12c1.5-4 4.5-7 9-8-1 4.5-4 7.5-8 9z"/><path d="m9 12-4 1 2-4M12 15l-1 4 4-2"/><circle cx="15" cy="9" r="1.4"/></svg><h3>Lanzamos</h3><p>Publicamos tu sitio y te acompañamos después del lanzamiento.</p></div></li>
       </ol>
     </section>
 
@@ -206,47 +229,17 @@
       <div class="ox-contact-copy">
         <p class="ox-kicker"><span></span>¿TIENES ALGO EN MENTE?</p>
         <h2>Hagamos algo <em>que destaque.</em></h2>
-        <p>Arma tu idea en segundos y mándanosla por WhatsApp. Te respondemos personalmente.</p>
+        <p>Contesta cuatro preguntas rápidas y te dejamos tu idea lista para mandarla por WhatsApp. Te respondemos personalmente.</p>
         <div class="ox-contact-links">
           <a class="ox-link" id="whatsapp-link" href="https://wa.me/525522574365?text=Hola%20Orion%20Studio%2C%20quiero%20platicar%20sobre%20un%20proyecto." target="_blank" rel="noopener">Prefiero escribir directo por WhatsApp <svg class="icon-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5M8 5h11v11"/></svg></a>
           <a class="ox-link" href="mailto:orionwebstd@gmail.com">orionwebstd@gmail.com <svg class="icon-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5M8 5h11v11"/></svg></a>
         </div>
       </div>
-      <form class="ox-brief" data-brief>
-        <p class="ox-brief-title">Arma tu idea <small>TOMA 20 SEGUNDOS</small></p>
-        <fieldset>
-          <legend><b>1</b>¿Qué tipo de negocio tienes?</legend>
-          <div class="ox-chips" data-group="tipo" data-single>
-            <button type="button" aria-pressed="false" data-value="un restaurante">Restaurante</button>
-            <button type="button" aria-pressed="false" data-value="una tienda">Tienda</button>
-            <button type="button" aria-pressed="false" data-value="un negocio de servicios profesionales">Servicios</button>
-            <button type="button" aria-pressed="false" data-value="un consultorio o clínica">Salud</button>
-            <button type="button" aria-pressed="false" data-value="un espacio para eventos">Eventos</button>
-            <button type="button" aria-pressed="false" data-value="otro tipo de negocio">Otro</button>
-          </div>
-        </fieldset>
-        <fieldset>
-          <legend><b>2</b>¿Qué quieres lograr?</legend>
-          <div class="ox-chips" data-group="meta">
-            <button type="button" aria-pressed="false" data-value="conseguir más clientes">Más clientes</button>
-            <button type="button" aria-pressed="false" data-value="vender en línea">Vender en línea</button>
-            <button type="button" aria-pressed="false" data-value="recibir reservaciones">Reservaciones</button>
-            <button type="button" aria-pressed="false" data-value="verme más profesional">Verme profesional</button>
-            <button type="button" aria-pressed="false" data-value="tener un menú digital">Menú digital</button>
-          </div>
-        </fieldset>
-        <fieldset>
-          <legend><b>3</b>¿Para cuándo?</legend>
-          <div class="ox-chips" data-group="cuando" data-single>
-            <button type="button" aria-pressed="false" data-value="lo antes posible">Lo antes posible</button>
-            <button type="button" aria-pressed="false" data-value="este mes">Este mes</button>
-            <button type="button" aria-pressed="false" data-value="sin prisa, estoy explorando opciones">Sin prisa</button>
-          </div>
-        </fieldset>
-        <label class="ox-name"><span>Tu nombre (opcional)</span><input name="nombre" autocomplete="given-name" placeholder="¿Cómo te llamas?"></label>
-        <div class="ox-preview"><small>Así se enviará tu mensaje</small><p data-brief-preview></p></div>
-        <button class="ox-send" type="submit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 18.8L4 20z"/></svg>Enviar por WhatsApp</button>
-      </form>
+      <div class="ox-chatbox" data-chatbox>
+        <div class="ox-chatbox-head"><span class="ox-chatbox-avatar">O<i></i></span><div><b>Orion Studio</b><small data-chat-status>en línea</small></div><span class="ox-chatbox-tag">Arma tu idea</span></div>
+        <div class="ox-chatbox-body" data-chat-body aria-live="polite"></div>
+        <div class="ox-chatbox-input" data-chat-input></div>
+      </div>
     </section>
   </main>
 
@@ -270,10 +263,10 @@
       </a>
     </div>
   </footer>
-  <script src="assets/js/concepts.js?v=7"></script>
-  <script src="assets/js/main.js?v=7"></script>
-  <script src="assets/js/home.js?v=7"></script>
+  <script src="assets/js/concepts.js?v=8"></script>
+  <script src="assets/js/main.js?v=8"></script>
+  <script src="assets/js/home.js?v=8"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="assets/js/hero-scene.js?v=7"></script>
+  <script src="assets/js/hero-scene.js?v=8"></script>
 </body>
 </html>

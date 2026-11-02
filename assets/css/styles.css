@@ -206,14 +206,6 @@ h1,h2,h3,p { margin-top: 0; }
 .button-glow .icon-arrow{transition:transform .25s}.button-glow:hover .icon-arrow{transform:translate(2px,-2px)}
 .hero-immersive .text-link .icon-down{width:15px;height:15px;margin-left:8px;color:#a9bcff}
 
-/* Franja de beneficios en movimiento */
-.marquee{display:flex;overflow:hidden;background:var(--blue);color:#fff;border-block:1px solid #2a49c9;user-select:none}
-.marquee-track{display:flex;flex:none;min-width:100%;justify-content:space-around;margin:0;padding:0;list-style:none;animation:marquee 32s linear infinite}
-.marquee:hover .marquee-track{animation-play-state:paused}
-.marquee li{display:flex;align-items:center;gap:28px;padding:19px 0 19px 28px;white-space:nowrap;font:500 clamp(14px,1.4vw,18px) var(--display);letter-spacing:-.01em}
-.marquee li:after{content:"";flex:none;width:13px;height:13px;background:#c7d3ff;clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%)}
-@keyframes marquee{to{transform:translateX(-100%)}}
-@media(max-width:700px){.marquee li{padding-block:14px;gap:20px;padding-left:20px}}
 
 /* Botón flotante de WhatsApp */
 .whatsapp-float{position:fixed;right:22px;bottom:22px;z-index:30;display:flex;align-items:center;gap:10px;padding:13px 18px 13px 14px;border-radius:99px;background:#1fae58;color:#fff;font-size:14px;font-weight:600;box-shadow:0 12px 34px #0d3d2240;opacity:0;transform:translateY(16px) scale(.9);pointer-events:none;transition:opacity .35s,transform .35s cubic-bezier(.2,.72,.18,1),background .2s}
@@ -229,7 +221,6 @@ h1,h2,h3,p { margin-top: 0; }
 
 @media(prefers-reduced-motion:reduce){
   .hero-title .w,.hero-immersive .hero-description,.hero-immersive .hero-actions,.hero-immersive .hero-note{animation:none;opacity:1;transform:none;filter:none}
-  .marquee-track{animation:none}.marquee-track[aria-hidden]{display:none}.marquee{flex-wrap:wrap}.marquee-track{min-width:0;flex-wrap:wrap;justify-content:center}
   .whatsapp-float:before{animation:none;display:none}
 }
 
