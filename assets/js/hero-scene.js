@@ -10,20 +10,18 @@
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.7));
     renderer.setClearColor(0x080d18, 0);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
+    renderer.toneMappingExposure = 1.1;
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
     camera.position.set(0, 0, 10);
 
-    // En celular el orbe se ve grande, a la derecha y detrás del texto, como en escritorio
+    // En celular el planeta se ve grande, a la derecha y detrás del texto, como en escritorio
     let mobileY = 0;
     const world = new THREE.Group();
-    world.position.set(2.25, 0, 0);
-    world.rotation.z = -0.22;
+    world.rotation.z = -0.24;
     scene.add(world);
 
-    /* ------------------------------------------------------------ Planeta */
     // Ruido simplex 3D (Ashima Arts / Stefan Gustavson, licencia MIT)
     const noise = `
       vec3 mod289(vec3 x){return x-floor(x*(1./289.))*289.;}
@@ -51,16 +49,40 @@
       }
       float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<5;i++){s+=a*snoise(p);p*=2.03;a*=.5;}return s;}`;
 
-    const lightDir = new THREE.Vector3(-1, 0.65, 0.85).normalize();
+    // Densidad del anillo según el radio (0 = borde interior, 1 = exterior), con la división de Cassini
+    const ringDensity = `
+      float ringDensity(float r){
+        float d = .55 + .28 * snoise(vec3(r * 26., 1.7, 0.)) + .16 * snoise(vec3(r * 85., 3.1, 0.)) + .07 * sin(r * 431. + 4.1);
+        d *= smoothstep(0., .06, r) * (1. - smoothstep(.93, 1., r));
+        d *= 1. - (smoothstep(.57, .59, r) - smoothstep(.63, .65, r)) * .94;
+        d *= 1. - (smoothstep(.86, .865, r) - smoothstep(.875, .88, r)) * .7;
+        return clamp(d, 0., 1.);
+      }`;
+
+    const RING_INNER = 1.28;
+    const RING_OUTER = 2.38;
+    const lightDir = new THREE.Vector3(-1, 0.42, 0.55).normalize();
+    const shared = {
+      uLight: { value: lightDir },
+      uRingNormal: { value: new THREE.Vector3(0, 1, 0) },
+      uCenter: { value: new THREE.Vector3() },
+      uRingInner: { value: RING_INNER },
+      uRingOuter: { value: RING_OUTER },
+      uPlanetRadius: { value: 1 }
+    };
+
+    /* ------------------------------------------------------------ Planeta */
     const planetMaterial = new THREE.ShaderMaterial({
-      uniforms: { uTime: { value: 0 }, uLight: { value: lightDir } },
+      uniforms: { uTime: { value: 0 }, ...shared },
       vertexShader: `
         varying vec3 vPos;
         varying vec3 vNormalW;
         varying vec3 vViewDir;
+        varying vec3 vWorld;
         void main() {
           vPos = position;
           vec4 worldPos = modelMatrix * vec4(position, 1.0);
+          vWorld = worldPos.xyz;
           vNormalW = normalize(mat3(modelMatrix) * normal);
           vViewDir = normalize(cameraPosition - worldPos.xyz);
           gl_Position = projectionMatrix * viewMatrix * worldPos;
@@ -68,46 +90,66 @@
       fragmentShader: `
         uniform float uTime;
         uniform vec3 uLight;
+        uniform vec3 uRingNormal;
+        uniform vec3 uCenter;
+        uniform float uRingInner;
+        uniform float uRingOuter;
         varying vec3 vPos;
         varying vec3 vNormalW;
         varying vec3 vViewDir;
+        varying vec3 vWorld;
         ${noise}
+        ${ringDensity}
         void main() {
           vec3 p = normalize(vPos);
-          float t = uTime * .035;
-          // Bandas de gas que se arremolinan
-          float warp = fbm(p * 1.6 + vec3(t, 0., t * .5));
-          float streak = fbm(vec3(p.x * 2.2, p.y * 14., p.z * 2.2) + vec3(t * 2., 0., 0.) + warp * .8);
-          float bands = sin(p.y * 8. + warp * 2.6 + streak * 1.6);
-          float detail = streak;
-          vec3 deep = vec3(.025, .05, .19);
-          vec3 royal = vec3(.2, .34, .96);
-          vec3 ice = vec3(.68, .76, 1.);
-          vec3 violet = vec3(.42, .28, .92);
-          vec3 color = mix(deep, royal, smoothstep(-1., 1., bands));
-          color = mix(color, ice, smoothstep(.15, .8, streak) * .45);
-          color = mix(color, violet, smoothstep(.3, .9, warp) * .35);
-          float storm = smoothstep(.24, .0, length(p - normalize(vec3(.6, -.28, .75))) + detail * .05);
-          color = mix(color, ice * 1.15, storm * .7);
-          // Día y noche con un borde de luz en la frontera
-          float diffuse = dot(normalize(vNormalW), uLight);
-          float day = smoothstep(-.28, 1., diffuse);
-          vec3 lit = color * (.05 + 1.0 * day);
-          lit += vec3(.3, .42, 1.) * smoothstep(-.05, .25, diffuse) * smoothstep(.55, .05, diffuse) * .22;
-          // Atmósfera en el contorno
-          float fresnel = pow(1. - max(dot(normalize(vNormalW), vViewDir), 0.), 2.6);
-          lit += vec3(.3, .4, 1.) * fresnel * (.22 + .5 * day);
+          float t = uTime * .012;
+          // Bandas por latitud, deformadas por turbulencia como en un gigante gaseoso
+          float lat = p.y + .03 * fbm(p * 3.2 + vec3(t, 0., 0.)) + .008 * fbm(p * 14. - t);
+          float b1 = sin(lat * 18. + sin(lat * 5.) * 1.6);
+          float b2 = sin(lat * 47. + 1.7);
+          float streak = fbm(vec3(p.x * 2.5 + t * 3., lat * 70., p.z * 2.5));
+          vec3 navy = vec3(.03, .055, .14);
+          vec3 steel = vec3(.16, .26, .5);
+          vec3 ice = vec3(.58, .66, .82);
+          vec3 dusk = vec3(.29, .24, .48);
+          vec3 color = mix(navy, steel, .52 + .3 * b1);
+          color = mix(color, ice, smoothstep(.5, 1., b2 * .5 + .5) * .16 + smoothstep(.3, .9, streak) * .1);
+          color *= 1. + sin(lat * 140.) * .035;
+          color = mix(color, dusk, smoothstep(.3, .9, sin(lat * 9. + 2.) * .5 + .5) * .18);
+          color *= .72 + .28 * (1. - abs(p.y));
+          float storm = smoothstep(.16, .0, length(vec2(atan(p.z, p.x) * .5 - .9 - t * 2., (lat + .32) * 2.6)));
+          color = mix(color, vec3(.74, .79, .94), storm * .5);
+
+          vec3 n = normalize(vNormalW);
+          float ndl = dot(n, uLight);
+          float ndv = max(dot(n, vViewDir), 0.);
+          float day = smoothstep(-.1, .55, ndl);
+          vec3 lit = color * day * (.35 + .65 * pow(ndv, .35)) * 1.3;
+          lit += vec3(.45, .32, .55) * smoothstep(-.12, .06, ndl) * smoothstep(.28, .0, ndl) * .05;
+
+          // Sombra del anillo sobre el planeta
+          float denom = dot(uLight, uRingNormal);
+          if (abs(denom) > .001) {
+            float travel = dot(uCenter - vWorld, uRingNormal) / denom;
+            if (travel > 0.) {
+              float r = (length(vWorld + uLight * travel - uCenter) - uRingInner) / (uRingOuter - uRingInner);
+              if (r > 0. && r < 1.) lit *= 1. - ringDensity(r) * .72;
+            }
+          }
+
+          // Atmósfera delgada, solo en el borde iluminado
+          lit += vec3(.32, .48, 1.) * pow(1. - ndv, 4.) * smoothstep(-.2, .6, ndl) * .85;
+          lit += color * .01;
           gl_FragColor = vec4(lit, 1.);
         }`
     });
-    const planet = new THREE.Mesh(new THREE.SphereGeometry(1, isSmall ? 96 : 160, isSmall ? 96 : 160), planetMaterial);
-    planet.rotation.z = 0.12;
+    const planet = new THREE.Mesh(new THREE.SphereGeometry(1, isSmall ? 112 : 180, isSmall ? 112 : 180), planetMaterial);
     world.add(planet);
 
     const atmosphere = new THREE.Mesh(
-      new THREE.SphereGeometry(1.2, 64, 64),
+      new THREE.SphereGeometry(1.045, 64, 64),
       new THREE.ShaderMaterial({
-        uniforms: { uLight: { value: lightDir } },
+        uniforms: { uLight: shared.uLight },
         vertexShader: `
           varying vec3 vNormalV;
           varying vec3 vNormalW;
@@ -121,9 +163,9 @@
           varying vec3 vNormalV;
           varying vec3 vNormalW;
           void main() {
-            float intensity = pow(max(.68 - dot(vNormalV, vec3(0., 0., 1.)), 0.), 3.2);
-            float lit = .45 + .75 * smoothstep(-.6, .8, dot(vNormalW, uLight));
-            gl_FragColor = vec4(vec3(.3, .46, 1.) * intensity * lit * 1.15, 1.);
+            float rim = pow(max(.78 - dot(vNormalV, vec3(0., 0., 1.)), 0.), 4.);
+            float lit = smoothstep(-.35, .7, dot(vNormalW, uLight));
+            gl_FragColor = vec4(vec3(.28, .46, 1.) * rim * lit * 1.5, 1.);
           }`,
         side: THREE.BackSide,
         blending: THREE.AdditiveBlending,
@@ -133,142 +175,95 @@
     );
     world.add(atmosphere);
 
-    // Resplandor detrás del planeta
-    function makeGlow(stops, size = 256) {
-      const glowCanvas = document.createElement("canvas");
-      glowCanvas.width = glowCanvas.height = size;
-      const context = glowCanvas.getContext("2d");
-      const gradient = context.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-      stops.forEach(([offset, color]) => gradient.addColorStop(offset, color));
-      context.fillStyle = gradient;
-      context.fillRect(0, 0, size, size);
-      return new THREE.CanvasTexture(glowCanvas);
-    }
-    const backGlow = new THREE.Sprite(new THREE.SpriteMaterial({
-      map: makeGlow([[0, "rgba(90,120,255,.55)"], [0.35, "rgba(60,90,240,.18)"], [1, "rgba(40,60,200,0)"]]),
-      transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
-    }));
-    backGlow.scale.setScalar(7.5);
-    backGlow.position.z = -1.5;
-    world.add(backGlow);
-
-    /* ------------------------------------------------------------ Anillo de partículas */
-    const ringCount = isSmall ? 7000 : 14000;
-    const ringData = { radius: new Float32Array(ringCount), angle: new Float32Array(ringCount), height: new Float32Array(ringCount), size: new Float32Array(ringCount), tone: new Float32Array(ringCount) };
-    for (let i = 0; i < ringCount; i++) {
-      let r;
-      // Bandas de distinta densidad y una división vacía, como los anillos de Saturno
-      do { r = 1.5 + Math.pow(Math.random(), 1.2) * 1.3; } while ((r > 2.06 && r < 2.16) || Math.random() > 0.5 + 0.5 * Math.sin(r * 24));
-      ringData.radius[i] = r;
-      ringData.angle[i] = Math.random() * Math.PI * 2;
-      ringData.height[i] = (Math.random() - 0.5) * 0.02 * (1 + (r - 1.5));
-      ringData.size[i] = 0.5 + Math.pow(Math.random(), 4) * 2.4;
-      ringData.tone[i] = Math.random();
-    }
-    const ringGeometry = new THREE.BufferGeometry();
-    ringGeometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(ringCount * 3), 3));
-    ringGeometry.setAttribute("aRadius", new THREE.BufferAttribute(ringData.radius, 1));
-    ringGeometry.setAttribute("aAngle", new THREE.BufferAttribute(ringData.angle, 1));
-    ringGeometry.setAttribute("aHeight", new THREE.BufferAttribute(ringData.height, 1));
-    ringGeometry.setAttribute("aSize", new THREE.BufferAttribute(ringData.size, 1));
-    ringGeometry.setAttribute("aTone", new THREE.BufferAttribute(ringData.tone, 1));
+    /* ------------------------------------------------------------ Anillo continuo con sombra del planeta */
     const ringMaterial = new THREE.ShaderMaterial({
-      uniforms: { uTime: { value: 0 }, uPixelRatio: { value: renderer.getPixelRatio() } },
+      uniforms: { ...shared },
       vertexShader: `
-        attribute float aRadius;
-        attribute float aAngle;
-        attribute float aHeight;
-        attribute float aSize;
-        attribute float aTone;
-        uniform float uTime;
-        uniform float uPixelRatio;
-        varying float vTone;
-        varying float vAlpha;
+        varying float vR;
+        varying vec3 vWorld;
         void main() {
-          // Las partículas internas giran más rápido, como un anillo real
-          float a = aAngle + uTime * .22 / pow(aRadius, 1.5);
-          vec3 pos = vec3(cos(a) * aRadius, aHeight, sin(a) * aRadius);
-          vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-          gl_PointSize = aSize * uPixelRatio * (20. / -mvPosition.z);
-          gl_Position = projectionMatrix * mvPosition;
-          vTone = aTone;
-          vAlpha = (.55 + .45 * sin(uTime * 1.4 + aAngle * 9.)) * smoothstep(1.48, 1.62, aRadius) * (1. - smoothstep(2.6, 2.8, aRadius) * .7);
+          vR = length(position.xy);
+          vec4 worldPos = modelMatrix * vec4(position, 1.0);
+          vWorld = worldPos.xyz;
+          gl_Position = projectionMatrix * viewMatrix * worldPos;
         }`,
       fragmentShader: `
-        varying float vTone;
-        varying float vAlpha;
+        uniform vec3 uLight;
+        uniform vec3 uRingNormal;
+        uniform vec3 uCenter;
+        uniform float uRingInner;
+        uniform float uRingOuter;
+        uniform float uPlanetRadius;
+        varying float vR;
+        varying vec3 vWorld;
+        ${noise}
+        ${ringDensity}
         void main() {
-          float glow = smoothstep(.5, .0, length(gl_PointCoord - .5));
-          vec3 color = mix(vec3(.55, .66, 1.), vec3(.95, .97, 1.), vTone);
-          color = mix(color, vec3(.62, .45, 1.), step(.86, vTone) * .8);
-          gl_FragColor = vec4(color, glow * glow * vAlpha);
+          float r = (vR - ${RING_INNER.toFixed(3)}) / ${(RING_OUTER - RING_INNER).toFixed(3)};
+          float grain = fract(sin(floor(vR * 900.) * 12.9898) * 43758.5453);
+          float d = ringDensity(r) * (.8 + .2 * grain);
+          vec3 color = mix(vec3(.7, .72, .8), vec3(.93, .93, .96), snoise(vec3(r * 14., 7., 0.)) * .5 + .5);
+          color = mix(color, vec3(.5, .58, .9), (1. - r) * .28) * mix(.9, 1.08, grain);
+          // Sombra del planeta sobre el anillo
+          vec3 oc = vWorld - uCenter;
+          float b = dot(oc, uLight);
+          float h = b * b - (dot(oc, oc) - uPlanetRadius * uPlanetRadius);
+          float shadow = smoothstep(0., .04, h) * step(b, 0.);
+          float light = .55 + .9 * abs(dot(uRingNormal, uLight));
+          gl_FragColor = vec4(color * light * (1. - shadow * .88), d * .88);
+        }`,
+      side: THREE.DoubleSide,
+      transparent: true,
+      depthWrite: false
+    });
+    const ring = new THREE.Mesh(new THREE.RingGeometry(RING_INNER, RING_OUTER, 256, 1), ringMaterial);
+    ring.rotation.set(-Math.PI / 2 + 0.36, 0, 0);
+    world.add(ring);
+
+    /* ------------------------------------------------------------ Luna lejana */
+    const moonPivot = new THREE.Group();
+    moonPivot.rotation.set(0.32, 0, 0.18);
+    const moon = new THREE.Mesh(
+      new THREE.SphereGeometry(0.075, 32, 32),
+      new THREE.MeshStandardMaterial({ color: 0xaab3c6, roughness: 1, metalness: 0 })
+    );
+    moonPivot.add(moon);
+    world.add(moonPivot);
+
+    const sun = new THREE.DirectionalLight(0xffffff, 2.4);
+    sun.position.copy(lightDir).multiplyScalar(10);
+    scene.add(sun, new THREE.AmbientLight(0x6f7fa8, 0.08));
+
+    /* ------------------------------------------------------------ Nebulosa y Vía Láctea de fondo */
+    const nebulaMaterial = new THREE.ShaderMaterial({
+      uniforms: { uTime: { value: 0 } },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }`,
+      fragmentShader: `
+        uniform float uTime;
+        varying vec2 vUv;
+        ${noise}
+        void main() {
+          vec3 p = vec3(vUv * vec2(3.2, 1.9), uTime * .006);
+          float n = fbm(p + fbm(p * 1.6 + 4.) * .9);
+          float band = exp(-pow((vUv.y - (vUv.x * .62 + .12)) * 3.4, 2.));
+          vec3 color = mix(vec3(.04, .06, .2), vec3(.24, .1, .4), smoothstep(-.2, .6, n));
+          color = mix(color, vec3(.06, .28, .46), smoothstep(.2, .85, fbm(p * 2.2 + 9.)) * .5);
+          float dust = smoothstep(.1, .7, fbm(p * 5. + 2.)) * band;
+          float alpha = smoothstep(-.15, .8, n) * (.22 + .78 * band) * .72 - dust * .3;
+          gl_FragColor = vec4(color * max(alpha, 0.) + vec3(.55, .6, .8) * band * .035, 1.);
         }`,
       transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending
     });
-    const ring = new THREE.Points(ringGeometry, ringMaterial);
-    ring.frustumCulled = false;
-    ring.rotation.set(0.42, 0, 0.05);
-    world.add(ring);
-
-    // Dos órbitas finas que mantienen el sello de Orion
-    const orbitLineA = new THREE.Mesh(new THREE.TorusGeometry(2.55, 0.006, 8, 240), new THREE.MeshBasicMaterial({ color: 0x819fff, transparent: true, opacity: 0.32 }));
-    orbitLineA.rotation.set(0.54, -0.48, 0.7);
-    world.add(orbitLineA);
-    const orbitLineB = new THREE.Mesh(new THREE.TorusGeometry(2.82, 0.008, 8, 240), new THREE.MeshBasicMaterial({ color: 0x9db6ff, transparent: true, opacity: 0.42 }));
-    orbitLineB.rotation.set(-0.62, 0.28, 0.42);
-    world.add(orbitLineB);
-
-    /* ------------------------------------------------------------ Lunas con estela */
-    const TRAIL = 70;
-    const moons = [
-      { radius: 2.05, speed: 0.42, size: 0.085, tilt: [1.05, 0, -0.5], color: 0xe5edff, phase: 0.6 },
-      { radius: 2.6, speed: -0.28, size: 0.06, tilt: [-0.75, 0.3, 0.6], color: 0xc7b8ff, phase: 2.8 }
-    ].map(config => {
-      const pivot = new THREE.Group();
-      pivot.rotation.set(...config.tilt);
-      const body = new THREE.Mesh(
-        new THREE.SphereGeometry(config.size, 32, 32),
-        new THREE.MeshStandardMaterial({ color: config.color, roughness: 0.35, metalness: 0.2, emissive: 0x4a64ff, emissiveIntensity: 0.4 })
-      );
-      const trailGeometry = new THREE.BufferGeometry();
-      trailGeometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(TRAIL * 3), 3));
-      const colors = new Float32Array(TRAIL * 3);
-      for (let i = 0; i < TRAIL; i++) {
-        const fade = Math.pow(1 - i / TRAIL, 2);
-        colors.set([0.62 * fade, 0.72 * fade, 1 * fade], i * 3);
-      }
-      trailGeometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-      const trail = new THREE.Line(trailGeometry, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
-      trail.frustumCulled = false;
-      pivot.add(body, trail);
-      world.add(pivot);
-      return { ...config, body, trail };
-    });
-    function updateMoons(time) {
-      moons.forEach(moon => {
-        const angle = moon.phase + time * moon.speed;
-        moon.body.position.set(Math.cos(angle) * moon.radius, 0, Math.sin(angle) * moon.radius);
-        const points = moon.trail.geometry.attributes.position;
-        const step = 0.012 * Math.sign(moon.speed);
-        for (let i = 0; i < TRAIL; i++) {
-          const a = angle - i * step;
-          points.setXYZ(i, Math.cos(a) * moon.radius, 0, Math.sin(a) * moon.radius);
-        }
-        points.needsUpdate = true;
-      });
-    }
-
-    const lights = [
-      [new THREE.AmbientLight(0x8797c3, 0.7), 0, 0, 0],
-      [new THREE.PointLight(0xffffff, 2.4, 18), -2.4, 2.6, 4],
-      [new THREE.PointLight(0x437bff, 3.2, 17), 3.6, 0.4, 1]
-    ];
-    lights.forEach(([light, x, y, z]) => {
-      light.position.set(x, y, z);
-      scene.add(light);
-    });
+    const nebula = new THREE.Mesh(new THREE.PlaneGeometry(46, 26), nebulaMaterial);
+    nebula.position.z = -14;
+    scene.add(nebula);
 
     // Fondo de espacio: estrellas que titilan, estrellas fugaces y pequeñas explosiones
     const starCount = 1600;
@@ -393,19 +388,19 @@
       const tint = novaTints[Math.floor(Math.random() * novaTints.length)];
       nova.userData.flash.material.color.setHex(tint);
       nova.userData.ring.material.color.setHex(tint);
-      nova.userData.size = random(0.7, 1.4);
+      nova.userData.size = random(0.35, 0.7);
       nova.userData.life = 0;
       nova.userData.duration = random(1.5, 2.3);
       nova.visible = true;
     }
 
     let nextShootingStar = random(1.2, 3);
-    let nextNova = random(0.8, 2);
+    let nextNova = random(4, 8);
     function updateSpace(delta) {
       nextShootingStar -= delta;
       nextNova -= delta;
       if (nextShootingStar <= 0) { launchShootingStar(); nextShootingStar = random(2.5, 6); }
-      if (nextNova <= 0) { launchNova(); nextNova = random(1.8, 4.2); }
+      if (nextNova <= 0) { launchNova(); nextNova = random(5, 11); }
 
       shootingStars.forEach(star => {
         if (!star.visible) return;
@@ -429,7 +424,7 @@
         data.flash.material.opacity = flashIn * flashOut;
         const ringProgress = 1 - Math.pow(1 - t, 3);
         data.ring.scale.setScalar(data.size * 2.4 * ringProgress);
-        data.ring.material.opacity = Math.pow(1 - t, 1.6) * 0.9;
+        data.ring.material.opacity = Math.pow(1 - t, 1.6) * 0.45;
       });
     }
 
@@ -447,15 +442,28 @@
       camera.aspect = bounds.width / bounds.height;
       const mobile = bounds.width < 700;
       camera.position.z = mobile ? 13.2 : 10.3;
-      // Convierte píxeles de pantalla a unidades de la escena para colocar el orbe en celular
+      // Convierte píxeles de pantalla a unidades de la escena para colocar el planeta en celular
       const unitsPerPx = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.position.z / bounds.height;
-      const orbRadiusPx = bounds.width * 0.95;
-      mobileY = bounds.height * 0.04 * unitsPerPx;
-      world.scale.setScalar(mobile ? orbRadiusPx * unitsPerPx / 2.82 : 1.08);
-      world.position.x = mobile ? bounds.width * 0.45 * unitsPerPx : 2.15;
+      const orbRadiusPx = bounds.width * 0.9;
+      mobileY = bounds.height * 0.05 * unitsPerPx;
+      world.scale.setScalar(mobile ? orbRadiusPx * unitsPerPx / RING_OUTER : 1.22);
+      world.position.x = mobile ? bounds.width * 0.42 * unitsPerPx : 2.2;
       world.position.y = mobile ? mobileY : 0;
       camera.updateProjectionMatrix();
       renderer.render(scene, camera);
+    }
+
+    const ringNormal = new THREE.Vector3();
+    function syncShadows() {
+      // El anillo y el planeta se proyectan sombra entre sí, así que comparten posición y orientación reales
+      world.updateMatrixWorld(true);
+      world.getWorldPosition(shared.uCenter.value);
+      ringNormal.set(0, 0, 1).transformDirection(ring.matrixWorld);
+      shared.uRingNormal.value.copy(ringNormal);
+      const scale = world.scale.x;
+      shared.uRingInner.value = RING_INNER * scale;
+      shared.uRingOuter.value = RING_OUTER * scale;
+      shared.uPlanetRadius.value = scale;
     }
 
     let raf = 0;
@@ -470,22 +478,25 @@
         elapsed += reducedMotion ? 0 : delta;
         starMaterial.uniforms.uTime.value = elapsed;
         planetMaterial.uniforms.uTime.value = elapsed;
-        ringMaterial.uniforms.uTime.value = elapsed;
+        nebulaMaterial.uniforms.uTime.value = elapsed;
         if (!reducedMotion) updateSpace(delta);
-        updateMoons(elapsed);
-        pointer.x += (target.x - pointer.x) * 0.04;
-        pointer.y += (target.y - pointer.y) * 0.04;
-        planet.rotation.y = elapsed * 0.06;
+        pointer.x += (target.x - pointer.x) * 0.035;
+        pointer.y += (target.y - pointer.y) * 0.035;
+        planet.rotation.y = elapsed * 0.035;
+        const moonAngle = -0.7 + elapsed * 0.025;
+        moon.position.set(Math.cos(moonAngle) * 3.4, 0, Math.sin(moonAngle) * 3.4);
         // Al bajar, el planeta gira, se eleva y se aleja un poco
-        world.rotation.x = pointer.y * 0.08 + scroll * 0.35 + Math.sin(elapsed * 0.25) * 0.03;
-        world.rotation.y = pointer.x * 0.12 + scroll * 0.6;
-        world.position.y = (window.innerWidth < 700 ? mobileY : 0) + Math.sin(elapsed * 0.4) * 0.05 + scroll * 1.6;
-        camera.position.x = pointer.x * 0.18;
-        camera.position.y = -pointer.y * 0.12;
+        world.rotation.x = 0.06 + pointer.y * 0.05 + scroll * 0.3;
+        world.rotation.y = pointer.x * 0.08 + scroll * 0.45;
+        world.position.y = (window.innerWidth < 700 ? mobileY : 0) + Math.sin(elapsed * 0.3) * 0.03 + scroll * 1.5;
+        camera.position.x = pointer.x * 0.15;
+        camera.position.y = -pointer.y * 0.1;
         camera.lookAt(0, 0, 0);
-        stars.rotation.y = elapsed * 0.012;
-        stars.rotation.z = elapsed * 0.004;
+        stars.rotation.y = elapsed * 0.008;
+        stars.rotation.z = elapsed * 0.003;
         stars.position.y = scroll * 0.8;
+        nebula.position.y = scroll * 0.5;
+        syncShadows();
         renderer.render(scene, camera);
       }
       if (!reducedMotion) raf = requestAnimationFrame(animate);

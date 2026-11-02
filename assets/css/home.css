@@ -282,14 +282,14 @@ html{-webkit-tap-highlight-color:transparent}
 @media(hover:none),(pointer:coarse){.ox-cursor-ring{display:none}}
 
 
-/* ------------------------------------------------------------ Logo del menú: se enciende y se apaga despacio */
-.header .brand-mark,.header .brand-word{--logo-stroke:#f6f8ff;background:linear-gradient(90deg,#365cf5,#7e9bff 55%,#c7d3ff) 0 0/0% 100% no-repeat;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:1px var(--logo-stroke);animation:logo-breathe 8s ease-in-out infinite;transition:-webkit-text-stroke-color .3s}
-.header .brand-word{display:inline;font:inherit;animation-delay:.35s}
-.header .brand-mark span{-webkit-text-stroke:0;color:#7e9bff}
-.header.is-scrolled .brand-mark,.header.is-scrolled .brand-word{--logo-stroke:#17191d}
-.header.is-scrolled.is-dark .brand-mark,.header.is-scrolled.is-dark .brand-word{--logo-stroke:#f4f6fb}
-@keyframes logo-breathe{0%,6%{background-size:0% 100%;background-position:0 0}42%,54%{background-size:100% 100%;background-position:0 0}55%{background-position:100% 0}92%,100%{background-size:0% 100%;background-position:100% 0}}
-@media(prefers-reduced-motion:reduce){.header .brand-mark,.header .brand-word{animation:none;background-size:100% 100%}}
+/* ------------------------------------------------------------ Logo del menú: un destello de luz lo recorre despacio */
+.header .brand-mark,.header .brand-word{--logo-base:#f6f8ff;background:linear-gradient(100deg,var(--logo-base) 40%,#9fb1ff 50%,var(--logo-base) 60%) 100% 0/260% 100% no-repeat;-webkit-background-clip:text;background-clip:text;color:transparent;animation:logo-shine 7s ease-in-out infinite}
+.header .brand-word{display:inline;font:inherit;animation-delay:.18s}
+.header .brand-mark span{color:#7e9bff}
+.header.is-scrolled .brand-mark,.header.is-scrolled .brand-word{--logo-base:#17191d}
+.header.is-scrolled.is-dark .brand-mark,.header.is-scrolled.is-dark .brand-word{--logo-base:#f4f6fb}
+@keyframes logo-shine{0%,55%{background-position:100% 0}85%,100%{background-position:0 0}}
+@media(prefers-reduced-motion:reduce){.header .brand-mark,.header .brand-word{animation:none}}
 
 /* ------------------------------------------------------------ Cintas cruzadas */
 .ox-ribbons{position:relative;overflow:hidden;padding:58px 0 66px;background:#070b16;isolation:isolate}
