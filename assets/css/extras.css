@@ -571,8 +571,9 @@ html[lang="es"] .lang-toggle span:first-child,html[lang="en"] .lang-toggle span:
 }
 
 /* ------------------------------------------------------------ Antes y después */
-.ox-ba{padding:120px 6% 110px;background:var(--paper-deep)}
-.ox-ba-frame{--pos:60%;overflow:hidden;border:1px solid #ffffffb5;border-radius:22px;background:#fff;box-shadow:0 32px 72px -34px #17191d66,0 0 0 1px #17191d0d}
+.ox-ba{position:relative;padding:40px 6% 120px;background:#070b16;color:#f4f6fb;isolation:isolate}
+.ox-ba:before{content:"";position:absolute;inset:20% -10% auto 20%;z-index:-1;height:70%;background:radial-gradient(closest-side,#365cf52e,transparent)}
+.ox-ba-frame{--pos:60%;overflow:hidden;border:1px solid #ffffff2b;border-radius:22px;background:#fff;box-shadow:0 60px 120px -40px #000,0 0 80px -20px #365cf540}
 .ox-ba-bar{display:flex;align-items:center;gap:6px;height:38px;padding:0 14px;border-bottom:1px solid #e3e1dc;background:#f3f2ef}
 .ox-ba-bar i{width:10px;height:10px;border-radius:50%;background:#d4d2cc}
 .ox-ba-bar i:first-child{background:#fa8b80}.ox-ba-bar i:nth-child(2){background:#f1c46a}.ox-ba-bar i:nth-child(3){background:#82c99b}
@@ -588,8 +589,8 @@ html[lang="es"] .lang-toggle span:first-child,html[lang="en"] .lang-toggle span:
 .ox-ba-label.r{right:16px;background:var(--blue)}
 .ox-ba-screen input{position:absolute;inset:0;z-index:4;width:100%;height:100%;margin:0;opacity:0;cursor:ew-resize}
 .ox-ba-points{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:28px 0 0;padding:0;list-style:none}
-.ox-ba-points li{display:grid;gap:8px;padding:22px;border:1px solid #d7d4cb;border-radius:20px;background:#f5f3ee}
-.ox-ba-points s{color:#a2410f;font-size:14px;text-decoration-thickness:1.5px}
+.ox-ba-points li{display:grid;gap:8px;padding:22px;border:1px solid #ffffff17;border-radius:20px;background:#0f1628}
+.ox-ba-points s{color:#ff9b7a;font-size:14px;text-decoration-thickness:1.5px}
 .ox-ba-points b{display:flex;align-items:center;gap:8px;font:600 18px var(--display);letter-spacing:-.02em}
 .ox-ba-points b:before{content:"";width:20px;height:20px;flex:none;border-radius:50%;background:#2fbf71 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/12px no-repeat}
 /* El sitio "antes": todo lo que hace ver mal a un negocio */
@@ -655,7 +656,7 @@ html[lang="es"] .lang-toggle span:first-child,html[lang="en"] .lang-toggle span:
   .ox-ba-old .old-foot{flex-wrap:wrap;gap:5px 10px;font-size:9px}
 }
 @media(max-width:700px){
-  .ox-ba{padding:90px 5% 80px}
+  .ox-ba{padding:20px 5% 90px}
   .ox-ba-screen{aspect-ratio:390/720}
   .ox-ba-points{grid-template-columns:1fr}
 }

@@ -41,7 +41,7 @@ html{-webkit-tap-highlight-color:transparent}
 .ox-manifesto .ox-orbit{right:-200px;top:50%;transform:translateY(-50%)}
 .ox-manifesto-text{max-width:1120px;margin:0;font:500 clamp(30px,4.6vw,70px)/1.12 var(--display);letter-spacing:-.035em}
 .ox-manifesto-text em{font-style:normal}
-.ox-manifesto-text .mw{color:#ffffff21;transition:color .45s}
+.ox-manifesto-text .mw{color:#ffffff47;transition:color .45s}
 .ox-manifesto-text .mw.on{color:#f4f6fb}
 .ox-manifesto-text em .mw.on{color:#9fb1ff;text-shadow:0 0 34px #365cf580}
 .ox-manifesto-foot{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:84px;padding-top:28px;border-top:1px solid #ffffff1a}
@@ -118,7 +118,7 @@ html{-webkit-tap-highlight-color:transparent}
 .ox-process{padding:130px 9% 110px;background:var(--paper)}
 
 /* ------------------------------------------------------------ Preguntas */
-.ox-faq{display:grid;grid-template-columns:.85fr 1.15fr;gap:7%;padding:120px 9%;background:var(--paper-deep)}
+.ox-faq{display:grid;grid-template-columns:.85fr 1.15fr;gap:7%;padding:120px 9%;background:var(--paper);border-top:1px solid #17191d14}
 .ox-faq .ox-head{display:block;align-self:start;position:sticky;top:120px;margin:0}
 .ox-faq .ox-head .ox-kicker{margin-bottom:22px}
 .ox-faq .ox-head h2{font-size:clamp(36px,4vw,58px)}
@@ -153,9 +153,14 @@ html{-webkit-tap-highlight-color:transparent}
 .ox-footer nav{display:grid;grid-template-columns:repeat(2,auto);gap:14px 44px;font-size:15px}
 .ox-footer nav a{transition:color .2s}
 .ox-footer nav a:hover{color:#fff}
-.ox-wordmark{margin:70px 0 14px;background:linear-gradient(90deg,#365cf5,#9fb1ff,#365cf5) 0 0/0% 100% no-repeat;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:1px #ffffff2e;font:800 clamp(100px,25vw,400px)/.8 var(--brand);letter-spacing:-.075em;white-space:nowrap;user-select:none;transition:background-size 1.6s cubic-bezier(.65,0,.35,1)}
-.ox-wordmark.is-lit{background-size:100% 100%}
-.ox-wordmark span{color:#365cf5;-webkit-text-stroke:0}
+/* Marca gigante: letras sólidas que se funden con el fondo como un horizonte, y un destello que las cruza al aparecer */
+.ox-wordmark{position:relative;margin:70px 0 14px;background:linear-gradient(180deg,#f4f6fb 0%,#c3cfff 38%,#365cf5 72%,#365cf500 100%);-webkit-background-clip:text;background-clip:text;color:transparent;font:800 clamp(100px,25vw,400px)/.82 var(--brand);letter-spacing:-.075em;white-space:nowrap;user-select:none;opacity:0;transform:translateY(40px);transition:opacity 1.2s ease,transform 1.4s cubic-bezier(.2,.7,.2,1)}
+.ox-wordmark.is-lit{opacity:1;transform:none}
+.ox-wordmark:after{content:"orion.";position:absolute;inset:0;background:linear-gradient(100deg,transparent 40%,#ffffffcc 50%,transparent 60%) 200% 0/250% 100% no-repeat;-webkit-background-clip:text;background-clip:text;color:transparent;pointer-events:none}
+.ox-wordmark.is-lit:after{animation:ox-word-shine 2.6s 1s ease-in-out}
+.ox-wordmark span{background:inherit;-webkit-background-clip:text;background-clip:text;color:transparent}
+@keyframes ox-word-shine{to{background-position:-60% 0}}
+@media(prefers-reduced-motion:reduce){.ox-wordmark{opacity:1;transform:none}}
 .ox-footer-bottom{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;padding-top:22px;border-top:1px solid #ffffff14;font:11px var(--mono);letter-spacing:.06em}
 .ox-footer .footer-admin{border-color:#ffffff2b;color:#aeb8c9}
 .ox-footer .footer-admin:hover{border-color:#9fb1ff;color:#9fb1ff}

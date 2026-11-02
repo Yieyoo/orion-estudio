@@ -9,7 +9,7 @@
       header.classList.toggle("is-scrolled", window.scrollY > hero.offsetHeight - header.offsetHeight - 24);
       // El menú se oscurece cuando debajo de él hay una sección oscura
       const line = header.offsetHeight / 2;
-      header.classList.toggle("is-dark", [...document.querySelectorAll(".ox-manifesto, .ox-show.is-dark, .ox-services, .ox-sys, .ox-contact, .ox-footer")].some(section => {
+      header.classList.toggle("is-dark", [...document.querySelectorAll(".ox-manifesto, .ox-ba, .ox-show.is-dark, .ox-services, .ox-sys, .ox-contact, .ox-footer")].some(section => {
         const r = section.getBoundingClientRect();
         return r.top <= line && r.bottom > line;
       }));
