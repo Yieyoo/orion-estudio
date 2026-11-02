@@ -81,25 +81,15 @@
       if (!conceptModal?.showModal) return;
       const pageTypes = ["store", "professional", "events", "food", "menu"];
       const pageType = pageTypes.find(type => card.querySelector(`.image-${type}`)) || "store";
-      const template = document.getElementById(`concept-template-${pageType}`);
-      if (!template) return;
-      const conceptSite = document.getElementById("concept-site");
-      conceptSite.className = `concept-site mini-page-${pageType}`;
-      conceptSite.replaceChildren(template.content.cloneNode(true));
+      if (!window.OrionConcepts) return;
       const category = card.querySelector(".work-caption h3")?.textContent || "Concepto";
       document.getElementById("concept-category").textContent = `· ${category.toUpperCase()}`;
-      const brand = conceptSite.querySelector(".mini-brand")?.textContent.replace(/[^a-z0-9]/gi, "").toLowerCase() || "tumarca";
-      conceptModal.querySelector(".concept-toolbar span").textContent = `www.${brand}.mx`;
-      conceptSite.scrollTop = 0;
+      // El modal debe estar abierto antes de montar la demo para que midan bien sus elementos
       conceptModal.showModal();
+      const domain = window.OrionConcepts.open(pageType, document.getElementById("concept-site"));
+      conceptModal.querySelector(".concept-toolbar span").textContent = `www.${domain}`;
     };
-    document.getElementById("concept-site").addEventListener("click", event => {
-      const addButton = event.target.closest(".mini-add");
-      if (!addButton) return;
-      const bagCount = document.querySelector("#concept-site .mini-bag-count");
-      bagCount.textContent = String(Number(bagCount.textContent) + 1);
-      addButton.textContent = "AGREGADO A TU BOLSA ✓︎";
-    });
+    conceptModal?.addEventListener("close", () => window.OrionConcepts?.close());
     track.addEventListener("click", event => {
       if (suppressClick) { event.preventDefault(); event.stopPropagation(); return; }
       const card = event.target.closest(".work-card");
