@@ -46,13 +46,55 @@
     });
   });
 
+  // Servicios: una sola tarjeta se anima a la vez, como un reflector que pasa de una a otra
+  const bento = document.querySelector(".ox-bento");
+  const isOn = tile => !bento || !bento.classList.contains("is-calm") || tile?.classList.contains("is-on");
+  if (bento && !reduceMotion) {
+    const tiles = [...bento.querySelectorAll(".ox-tile")];
+    let current = -1;
+    let held = false;
+    let inView = false;
+    let timer = 0;
+    const turn = i => {
+      if (i === current) return;
+      current = i;
+      tiles.forEach((tile, k) => tile.classList.toggle("is-on", k === i));
+    };
+    const schedule = () => {
+      clearTimeout(timer);
+      if (held || !inView) return;
+      timer = setTimeout(() => { turn((current + 1) % tiles.length); schedule(); }, 6500);
+    };
+    bento.classList.add("is-calm");
+    tiles.forEach((tile, i) => {
+      const hold = () => { held = true; clearTimeout(timer); turn(i); };
+      tile.addEventListener("pointerenter", event => { if (event.pointerType === "mouse") hold(); });
+      tile.addEventListener("pointerleave", event => { if (event.pointerType === "mouse") { held = false; schedule(); } });
+      tile.addEventListener("pointerdown", () => { turn(i); schedule(); });
+      tile.addEventListener("focusin", hold);
+      tile.addEventListener("focusout", () => { held = false; schedule(); });
+    });
+    const check = () => {
+      const r = bento.getBoundingClientRect();
+      const visible = r.top < innerHeight * 0.75 && r.bottom > innerHeight * 0.25;
+      if (visible === inView) return;
+      inView = visible;
+      if (inView && current < 0) turn(0);
+      schedule();
+    };
+    addEventListener("scroll", check, { passive: true });
+    check();
+  }
+
   // Búsqueda de Google que se escribe sola
   const typed = document.querySelector("[data-type]");
   if (typed) {
     const phrases = () => typed.dataset.type.split("|");
     const result = document.querySelector(".ox-result");
+    const tile = typed.closest(".ox-tile");
     let index = 0;
     const typePhrase = () => {
+      if (!isOn(tile)) { setTimeout(typePhrase, 400); return; }
       const phrase = phrases()[index++ % phrases().length];
       let length = 0;
       result.style.opacity = ".2";
@@ -68,8 +110,8 @@
       };
       tick();
     };
-    if (reduceMotion) typed.textContent = phrases()[0];
-    else typePhrase();
+    typed.textContent = phrases()[0];
+    if (!reduceMotion) typePhrase();
   }
 
   // La línea del proceso se llena tramo por tramo conforme bajas
@@ -105,6 +147,7 @@
     };
     // Mientras nadie la toca, la tarjeta se muestra sola
     let demo = reduceMotion ? 0 : setInterval(() => {
+      if (!isOn(brandkit.closest(".ox-tile"))) return;
       setColor(colors[(colors.findIndex(b => b.getAttribute("aria-pressed") === "true") + 1) % colors.length]);
       setFont(fonts[(fonts.findIndex(b => b.getAttribute("aria-pressed") === "true") + 1) % fonts.length]);
     }, 2400);
