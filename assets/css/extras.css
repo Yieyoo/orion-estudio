@@ -443,6 +443,113 @@ html[lang="es"] .lang-toggle span:first-child,html[lang="en"] .lang-toggle span:
 @media(prefers-reduced-motion:reduce){
   .ox-make-site .mk-media img,.ox-make-site .mk-blob img,.ox-make-site .mk-copy>*,.ox-make-site .mk-cards article,.ox-make-site .mk-pcards article,.ox-make-site .mk-playful .mk-sticker{animation:none!important}
 }
+
+/* Secciones reales para que el armador se sienta como una web completa */
+.ox-make-site .mk a{color:inherit;text-decoration:none}
+.ox-make-site .mk-brand{display:flex;align-items:center;gap:4px}
+.ox-make-site .mk-brand>span{color:var(--accent);font-size:.7em}
+.ox-make-site .mk-links a{color:inherit;text-decoration:none;transition:color .2s}
+.ox-make-site .mk-links a:hover{color:var(--accent)}
+.ox-make-site .mk-nav-cta,.ox-make-site .mk-bnav-cta{white-space:nowrap}
+.ox-make-site .mk-btn{color:#fff;text-decoration:none}
+.ox-make-site .mk-btn span{display:inline-block;margin-left:8px;transition:transform .2s}
+.ox-make-site .mk-btn:hover span{transform:translate(3px,-3px)}
+.ox-make-site .mk-image-note{position:absolute;right:14px;bottom:14px;padding:8px 11px;border:1px solid #ffffff65;border-radius:99px;background:#10131b80;color:#fff;font:500 10px var(--font);letter-spacing:.08em;backdrop-filter:blur(10px)}
+.ox-make-site .mk-section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:16px}
+.ox-make-site .mk-section-head small{color:var(--accent);font:600 10px var(--font);letter-spacing:.15em;text-transform:uppercase}
+.ox-make-site .mk-section-head span{font-size:20px;font-weight:600;letter-spacing:-.04em}
+.ox-make-site .mk-cards{display:block;padding:18px 40px 24px}
+.ox-make-site .mk-service-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.ox-make-site .mk-service-grid article{overflow:hidden;padding:0;border:1px solid color-mix(in srgb,var(--ink) 9%,transparent);border-radius:18px;background:color-mix(in srgb,var(--bg) 74%,var(--soft));box-shadow:0 12px 30px -28px color-mix(in srgb,var(--ink) 45%,transparent);transition:transform .3s,box-shadow .3s}
+.ox-make-site .mk-service-grid article:hover{transform:translateY(-4px);box-shadow:0 18px 30px -24px color-mix(in srgb,var(--ink) 40%,transparent)}
+.ox-make-site .mk-service-photo{height:125px;overflow:hidden;background:var(--soft)}
+.ox-make-site .mk-service-photo img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
+.ox-make-site .mk-service-grid article:hover img{transform:scale(1.05)}
+.ox-make-site .mk-service-info{display:grid;grid-template-columns:1fr auto;gap:5px 8px;padding:12px}
+.ox-make-site .mk-service-info small{grid-column:1/-1;color:color-mix(in srgb,var(--ink) 56%,transparent);font:500 9px var(--font);letter-spacing:.08em;text-transform:uppercase}
+.ox-make-site .mk-service-info b{font-size:14px;line-height:1.2}
+.ox-make-site .mk-service-info>span{color:var(--accent);font-size:13px;font-weight:700;white-space:nowrap}
+.ox-make-site .mk-trust{display:flex;justify-content:center;align-items:center;gap:16px;padding:14px 40px;border-block:1px solid color-mix(in srgb,var(--ink) 10%,transparent);color:color-mix(in srgb,var(--ink) 65%,transparent);font-size:11px}
+.ox-make-site .mk-trust i{width:4px;height:4px;border-radius:50%;background:var(--accent)}
+.ox-make-site .mk-inline-note{margin-top:16px;color:color-mix(in srgb,var(--ink) 58%,transparent);font-size:12px}
+.ox-make-site .mk-story{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:5%;padding:28px 40px;background:var(--soft)}
+.ox-make-site .mk-story-photo{height:220px;overflow:hidden;border-radius:18px}
+.ox-make-site .mk-story-photo img{width:100%;height:100%;object-fit:cover}
+.ox-make-site .mk-story-copy small{color:var(--accent);font:600 10px var(--font);letter-spacing:.16em;text-transform:uppercase}
+.ox-make-site .mk-story-copy h2{margin:9px 0;font-size:26px;line-height:1.05;letter-spacing:-.05em;text-wrap:balance}
+.ox-make-site .mk-story-copy p{margin:0;color:color-mix(in srgb,var(--ink) 70%,transparent);font-size:13px;line-height:1.5}
+.ox-make-site .mk-story-copy>a{display:inline-flex;align-items:center;gap:8px;margin-top:12px;color:var(--accent);font-size:12px;font-weight:700}
+.ox-make-site .mk-review{display:grid;justify-items:center;gap:8px;padding:24px 40px;text-align:center}
+.ox-make-site .mk-review-stars{color:var(--accent);font-size:14px;letter-spacing:.18em}
+.ox-make-site .mk-review blockquote{max-width:650px;margin:0;font-size:clamp(18px,2.2cqi,27px);font-weight:500;line-height:1.25;letter-spacing:-.03em}
+.ox-make-site .mk-review small{color:color-mix(in srgb,var(--ink) 58%,transparent);font:500 9px var(--font);letter-spacing:.08em;text-transform:uppercase}
+.ox-make-site .mk-footer{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px 24px;padding:22px 40px 0;background:var(--ink);color:var(--bg)}
+.ox-make-site .mk-footer>div:first-child small{color:color-mix(in srgb,var(--bg) 60%,transparent);font:500 9px var(--font);letter-spacing:.12em;text-transform:uppercase}
+.ox-make-site .mk-footer h2{max-width:560px;margin:5px 0 0;font-size:22px;line-height:1.05;letter-spacing:-.04em}
+.ox-make-site .mk-footer .mk-btn{margin:0;background:var(--accent);color:#fff}
+.ox-make-site .mk-footer-base{grid-column:1/-1;display:flex;justify-content:space-between;gap:10px;margin-top:10px;padding:10px 0;border-top:1px solid color-mix(in srgb,var(--bg) 18%,transparent);color:color-mix(in srgb,var(--bg) 66%,transparent);font-size:9px}
+.ox-make-site .mk-footer-base b{color:var(--bg)}
+.ox-make-site .mk-media{position:relative}
+.ox-make-site .mk-bold .mk-media{position:absolute}
+.ox-make-site .mk-bold .mk-hero-index{position:absolute;right:24px;bottom:20px;color:#fff;font:500 10px var(--font);letter-spacing:.16em}
+.ox-make-site .mk-elegant-rule{display:flex;justify-content:center;align-items:center;gap:14px;padding:8px 20px;color:color-mix(in srgb,var(--ink) 60%,transparent);font:500 9px var(--font);letter-spacing:.12em;text-align:center;text-transform:uppercase}
+.ox-make-site .mk-elegant-rule:before,.ox-make-site .mk-elegant-rule:after{content:"";width:38px;height:1px;background:color-mix(in srgb,var(--accent) 55%,transparent)}
+.ox-make-site .mk-minimal .mk-footer{background:#111820;color:#fff}
+.ox-make-site .mk-bold .mk-footer{background:var(--accent);color:#fff}
+.ox-make-site .mk-bold .mk-footer .mk-btn{background:#fff;color:var(--ink)}
+.ox-make-site .mk-elegant .mk-footer{background:var(--soft);color:var(--ink)}
+.ox-make-site .mk-elegant .mk-footer .mk-btn{background:var(--ink);color:var(--bg)}
+.ox-make-site .mk-editorial .mk-footer{background:var(--soft);color:var(--ink)}
+.ox-make-site .mk-editorial .mk-footer .mk-btn{background:var(--accent);color:#fff}
+.ox-make-site .mk-playful .mk-footer{background:var(--accent);color:#fff}
+.ox-make-site .mk-playful .mk-footer .mk-btn{background:var(--bg);color:var(--ink)}
+.ox-make-site .mk-brutal .mk-footer{background:var(--accent);color:#fff}
+.ox-make-site .mk-brutal .mk-footer .mk-btn{background:var(--ink);color:var(--bg)}
+.ox-make-site .mk-gallery figure{animation:mk-card-in .7s both;animation-delay:calc(var(--i,0) * 90ms)}
+.ox-make-site .mk-gallery img{width:100%;object-fit:cover}
+.ox-make-site .mk-gallery figcaption{display:flex;justify-content:center;align-items:center;gap:6px}
+.ox-make-site .mk-gallery figcaption span{color:var(--accent);font:500 9px var(--font)}
+.ox-make-site .mk-pcards{grid-template-columns:repeat(3,minmax(0,1fr))}
+.ox-make-site .mk-pcards .mk-thumb{height:110px;overflow:hidden;padding:0;background:none}
+.ox-make-site .mk-pcards .mk-thumb img{width:100%;height:100%;border-radius:inherit;object-fit:cover}
+.ox-make-site .mk-bnav a:not(.mk-bnav-cta){display:flex;align-items:center;padding:18px 16px;border-right:3px solid var(--ink);font-size:12px;font-weight:700;text-transform:uppercase}
+.ox-make-site .mk-bnav .mk-bnav-cta{display:flex;align-items:center;padding:14px 18px;color:#fff}
+.ox-make-site .mk-brutal .mk-footer-base{border-top:3px solid #ffffff70}
+@container (max-width:600px){
+  .ox-make-site .mk-section-head{margin-bottom:10px}
+  .ox-make-site .mk-section-head span{font-size:16px}
+  .ox-make-site .mk-cards{padding:12px 12px 16px}
+  .ox-make-site .mk-service-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .ox-make-site .mk-service-grid article{border-radius:12px}
+  .ox-make-site .mk-service-photo{height:75px}
+  .ox-make-site .mk-service-info{gap:3px 5px;padding:7px}
+  .ox-make-site .mk-service-info small{font-size:7px}
+  .ox-make-site .mk-service-info b{font-size:10px}
+  .ox-make-site .mk-service-info>span{font-size:10px}
+  .ox-make-site .mk-trust{gap:8px;padding:9px 12px;font-size:8px}
+  .ox-make-site .mk-inline-note{margin-top:8px;font-size:10px}
+  .ox-make-site .mk-story{grid-template-columns:1fr;gap:10px;padding:14px 12px}
+  .ox-make-site .mk-story-photo{height:105px;border-radius:12px}
+  .ox-make-site .mk-story-copy h2{margin:5px 0;font-size:18px}
+  .ox-make-site .mk-story-copy p{font-size:10px}
+  .ox-make-site .mk-story-copy>a{margin-top:7px;font-size:10px}
+  .ox-make-site .mk-review{gap:5px;padding:14px 12px}
+  .ox-make-site .mk-review blockquote{font-size:15px}
+  .ox-make-site .mk-review small{font-size:7px}
+  .ox-make-site .mk-image-note{right:7px;bottom:7px;padding:5px 7px;font-size:7px}
+  .ox-make-site .mk-bold .mk-hero-index{right:12px;bottom:10px;font-size:7px}
+  .ox-make-site .mk-elegant-rule{gap:7px;padding:4px 12px;font-size:7px}
+  .ox-make-site .mk-elegant-rule:before,.ox-make-site .mk-elegant-rule:after{width:20px}
+  .ox-make-site .mk-footer{grid-template-columns:1fr auto;gap:9px;padding:14px 12px 0}
+  .ox-make-site .mk-footer h2{font-size:16px}
+  .ox-make-site .mk-footer .mk-btn{padding:9px 11px;font-size:10px}
+  .ox-make-site .mk-footer-base{font-size:7px}
+  .ox-make-site .mk-gallery figure:nth-child(2){transform:translateY(6px)}
+  .ox-make-site .mk-pcards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ox-make-site .mk-pcards .mk-thumb{height:62px}
+  .ox-make-site .mk-bnav a:not(.mk-bnav-cta){display:none}
+  .ox-make-site .mk-bnav .mk-bnav-cta{padding:8px 10px;font-size:9px}
+}
 @media(max-width:1000px){
   .ox-make-body{grid-template-columns:1fr;gap:30px}
   .ox-make-panel{position:static;order:2}

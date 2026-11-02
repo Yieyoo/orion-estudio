@@ -17,25 +17,25 @@
 
   /* ------------------------------------------------------------ Arma tu sitio en vivo */
   const giros = {
-    cafe: { img: "1509042239860-f550ce710b93", img2: "1501339847302-ac426a4a7cbb",
+    cafe: { img: "1509042239860-f550ce710b93", img2: "1501339847302-ac426a4a7cbb", img3: "1495474472287-4d71bcdd2085",
       es: { label: "Cafetería", name: "Café Aurora", tag: "Café de especialidad", headline: "Tu café favorito, a dos cuadras.", text: "Granos mexicanos tostados en casa, pan del día y un lugar para quedarte.", cta: "Ordenar para llevar", links: ["Menú", "Nosotros", "Ubicación"], items: [["Espresso", "$45"], ["Latte de temporada", "$68"], ["Pan de la casa", "$38"]], about: "Tostamos cada semana en pequeños lotes para que cada taza sepa a su origen.", quote: "El mejor latte de la colonia, y siempre te reciben con una sonrisa.", strip: "Pide desde tu celular y recoge sin hacer fila" },
       en: { label: "Coffee shop", name: "Aurora Coffee", tag: "Specialty coffee", headline: "Your favorite coffee, around the corner.", text: "Mexican beans roasted in house, fresh bread and a place to stay.", cta: "Order to go", links: ["Menu", "About", "Location"], items: [["Espresso", "$45"], ["Seasonal latte", "$68"], ["House bread", "$38"]], about: "We roast small batches every week so each cup tastes like its origin.", quote: "The best latte in the neighborhood, always served with a smile.", strip: "Order from your phone and skip the line" } },
-    barber: { img: "1585747860715-2ba37e788b70", img2: "1622286342621-4bd786c2447c",
+    barber: { img: "1585747860715-2ba37e788b70", img2: "1622286342621-4bd786c2447c", img3: "1621605815971-fbc98d665033",
       es: { label: "Barbería", name: "Barbería Norte", tag: "Cortes clásicos y modernos", headline: "Sal sintiéndote como nuevo.", text: "Corte, barba y toalla caliente con barberos que saben lo que hacen.", cta: "Agendar cita", links: ["Servicios", "Barberos", "Citas"], items: [["Corte clásico", "$250"], ["Barba completa", "$180"], ["Corte + barba", "$380"]], about: "Barberos con oficio, buena música y una cerveza fría mientras esperas.", quote: "Llevo años viniendo y nunca he salido inconforme.", strip: "Agenda en línea en menos de un minuto" },
       en: { label: "Barbershop", name: "North Barbers", tag: "Classic and modern cuts", headline: "Walk out feeling brand new.", text: "Cut, beard and hot towel with barbers who know their craft.", cta: "Book now", links: ["Services", "Barbers", "Booking"], items: [["Classic cut", "$250"], ["Full beard", "$180"], ["Cut + beard", "$380"]], about: "Skilled barbers, good music and a cold beer while you wait.", quote: "I've been coming for years and never left unhappy.", strip: "Book online in under a minute" } },
-    dental: { img: "1629909613654-28e377c37b09", img2: "1606811971618-4486d14f3f99",
+    dental: { img: "1629909613654-28e377c37b09", img2: "1606811971618-4486d14f3f99", img3: "1609840114035-3c981b782dfe",
       es: { label: "Dentista", name: "Sonríe Dental", tag: "Odontología integral", headline: "Una sonrisa sana, sin miedo al dentista.", text: "Tecnología moderna, trato cálido y citas puntuales para toda la familia.", cta: "Agendar valoración", links: ["Tratamientos", "Equipo", "Contacto"], items: [["Limpieza dental", "$700"], ["Blanqueamiento", "$3,500"], ["Valoración", "$300"]], about: "Tratamientos explicados con calma, sin sorpresas en el precio.", quote: "Por fin un dentista al que no me da miedo ir.", strip: "Confirmamos tu cita por WhatsApp" },
       en: { label: "Dentist", name: "Smile Dental", tag: "Complete dental care", headline: "A healthy smile, no fear of the dentist.", text: "Modern technology, warm care and on-time appointments for the whole family.", cta: "Book a checkup", links: ["Treatments", "Team", "Contact"], items: [["Cleaning", "$700"], ["Whitening", "$3,500"], ["Checkup", "$300"]], about: "Treatments explained calmly, with no surprises on the bill.", quote: "Finally a dentist I'm not afraid to visit.", strip: "We confirm your appointment on WhatsApp" } },
-    flowers: { img: "1487070183336-b863922373d4", img2: "1561181286-d3fee7d55364",
+    flowers: { img: "1487070183336-b863922373d4", img2: "1561181286-d3fee7d55364", img3: "1490750967868-88aa4486c946",
       es: { label: "Florería", name: "Florería Pétalo", tag: "Arreglos hechos a mano", headline: "Flores frescas para cada momento.", text: "Arreglos a domicilio el mismo día en toda la ciudad.", cta: "Enviar flores", links: ["Arreglos", "Ocasiones", "Envíos"], items: [["Ramo de tulipanes", "$650"], ["Caja de rosas", "$890"], ["Arreglo de temporada", "$540"]], about: "Flores de temporada elegidas cada mañana en el mercado.", quote: "El arreglo llegó a tiempo y más bonito que en la foto.", strip: "Envío el mismo día si pides antes de las 2 pm" },
       en: { label: "Florist", name: "Petal Flowers", tag: "Handmade arrangements", headline: "Fresh flowers for every moment.", text: "Same-day delivery across the city.", cta: "Send flowers", links: ["Bouquets", "Occasions", "Delivery"], items: [["Tulip bouquet", "$650"], ["Box of roses", "$890"], ["Seasonal arrangement", "$540"]], about: "Seasonal flowers picked every morning at the market.", quote: "The arrangement arrived on time and prettier than the photo.", strip: "Same-day delivery if you order before 2 pm" } },
-    gym: { img: "1534438327276-14e5300c3a48", img2: "1571019613454-1cb2f99b2d8b",
+    gym: { img: "1534438327276-14e5300c3a48", img2: "1571019613454-1cb2f99b2d8b", img3: "1517836357463-d25dfeac3438",
       es: { label: "Gimnasio", name: "Pulso Gym", tag: "Entrena a tu ritmo", headline: "Más fuerte cada semana.", text: "Clases grupales, pesas y coaches que te acompañan desde el primer día.", cta: "Prueba una clase", links: ["Clases", "Horarios", "Planes"], items: [["Clase de prueba", "$0"], ["Mensualidad", "$799"], ["Coach personal", "$1,200"]], about: "Coaches certificados y un ambiente donde todos se apoyan.", quote: "En tres meses cambió por completo mi energía.", strip: "Reserva tu lugar en la clase desde el celular" },
       en: { label: "Gym", name: "Pulse Gym", tag: "Train at your pace", headline: "Stronger every week.", text: "Group classes, weights and coaches with you from day one.", cta: "Try a class", links: ["Classes", "Schedule", "Plans"], items: [["Trial class", "$0"], ["Monthly", "$799"], ["Personal coach", "$1,200"]], about: "Certified coaches and a place where everyone has your back.", quote: "In three months my energy completely changed.", strip: "Save your spot in class from your phone" } },
-    party: { img: "1519167758481-83f550bb49b3", img2: "1464366400600-7168b8af9bc3",
+    party: { img: "1519167758481-83f550bb49b3", img2: "1464366400600-7168b8af9bc3", img3: "1511795409834-ef04bbd61622",
       es: { label: "Salón de fiestas", name: "Jardín Magnolia", tag: "Salón de fiestas y eventos", headline: "Tu fiesta, en un lugar inolvidable.", text: "Jardín, salón y atención completa para que tú solo disfrutes.", cta: "Consultar fechas", links: ["Espacios", "Paquetes", "Ubicación"], items: [["Jardín hasta 150", "$18,000"], ["Salón hasta 250", "$24,000"], ["Paquete boda", "$32,000"]], about: "Un espacio versátil con jardín, pista de baile y un equipo atento.", quote: "Todo salió perfecto; disfrutamos cada momento.", strip: "Aparta tu fecha y ven a conocer el espacio" },
       en: { label: "Party venue", name: "Magnolia Garden", tag: "Party and event venue", headline: "Celebrate somewhere unforgettable.", text: "A garden, a ballroom and a caring team, so you can simply enjoy.", cta: "Check dates", links: ["Spaces", "Packages", "Location"], items: [["Garden · 150 guests", "$18,000"], ["Ballroom · 250 guests", "$24,000"], ["Wedding package", "$32,000"]], about: "A flexible venue with a garden, dance floor and thoughtful service.", quote: "Everything was perfect; we enjoyed every moment.", strip: "Save your date and come see the venue" } },
-    beauty: { img: "1522335789203-aabd1fc54bc9", img2: "1490750967868-88aa4486c946",
+    beauty: { img: "1522335789203-aabd1fc54bc9", img2: "1490750967868-88aa4486c946", img3: "1487412720507-e7ab37603c6f",
       es: { label: "Belleza", name: "Estudio Bella", tag: "Salón de belleza", headline: "Tu mejor versión empieza aquí.", text: "Maquillaje, uñas y peinado con productos profesionales.", cta: "Reservar cita", links: ["Servicios", "Galería", "Citas"], items: [["Maquillaje social", "$900"], ["Manicure gel", "$350"], ["Peinado", "$600"]], about: "Productos profesionales y un equipo que escucha lo que quieres.", quote: "Salí lista para la boda y me sentí increíble.", strip: "Elige servicio, día y hora en un solo paso" },
       en: { label: "Beauty", name: "Bella Studio", tag: "Beauty salon", headline: "Your best version starts here.", text: "Makeup, nails and hair with professional products.", cta: "Book now", links: ["Services", "Gallery", "Booking"], items: [["Event makeup", "$900"], ["Gel manicure", "$350"], ["Hairstyle", "$600"]], about: "Professional products and a team that listens to what you want.", quote: "I left ready for the wedding and felt amazing.", strip: "Pick service, day and time in one step" } }
   };
@@ -90,42 +90,74 @@
         </div>`;
     };
 
-    // Cada plantilla tiene su propia estructura, no solo otra foto
+    const pageWords = {
+      es: { services: "Lo que hacemos", featured: "Favoritos de la casa", story: "Un lugar hecho para ti", about: "Una experiencia cuidada de principio a fin.", review: "Lo que dicen nuestros clientes", visit: "Ven a conocernos", detail: "Ver detalles", location: "Encuéntranos", ready: "¿Lo hacemos realidad?" },
+      en: { services: "What we do", featured: "House favorites", story: "A place made for you", about: "A thoughtful experience from beginning to end.", review: "Kind words from our customers", visit: "Come say hello", detail: "Explore", location: "Find us", ready: "Shall we make it happen?" }
+    };
+    const serviceCards = (c, className = "mk-cards") => `
+      <section class="${className}" id="mk-services">
+        <header class="mk-section-head"><small>${c.ui.services}</small><span>${c.ui.featured}</span></header>
+        <div class="mk-service-grid">${c.t.items.map(([item, price], i) => `<article style="--i:${i}"><div class="mk-service-photo"><img src="${c.images[i]}" alt="${item}"></div><div class="mk-service-info"><small>0${i + 1} · ${c.t.links[0]}</small><b>${item}</b><span>${price}</span></div></article>`).join("")}</div>
+      </section>`,
+      storySection = c => `
+        <section class="mk-story" id="mk-story"><div class="mk-story-photo"><img src="${c.images[2]}" alt="${c.name}"></div><div class="mk-story-copy"><small>${c.ui.story}</small><h2>${c.t.about}</h2><p>${c.t.text}</p><a href="#mk-contact">${c.ui.visit} <span>↗</span></a></div></section>`,
+      reviewSection = c => `
+        <section class="mk-review"><span class="mk-review-stars" aria-label="5 estrellas">★★★★★</span><blockquote>“${c.t.quote}”</blockquote><small>${c.name} · ${c.ui.review}</small></section>`,
+      closingSection = c => `
+        <footer class="mk-footer" id="mk-contact"><div><small>${c.ui.ready}</small><h2>${c.t.strip}</h2></div><a class="mk-btn" href="#mk-contact">${c.t.cta} <span>↗</span></a><div class="mk-footer-base"><b>${c.name}</b><span>${c.t.links[2]} · ${c.ui.location}</span><span>© 2026</span></div></footer>`,
+      photoCards = c => c.t.items.map(([item, price], i) => `<article style="--i:${i}"><div class="mk-thumb"><img src="${c.images[i]}" alt="${item}"></div><b>${item}</b><span>${price}</span></article>`).join("");
+
+    // Cada opción representa una página completa, con navegación, contenido y cierre propios.
     const templates = {
       minimal: c => `
         ${c.nav}
-        <section class="mk-hero"><div class="mk-media"><img src="${c.img1}" alt=""></div><div class="mk-copy"><small>${c.t.tag}</small><h1>${c.t.headline}</h1><p>${c.t.text}</p><span class="mk-btn">${c.t.cta}</span></div></section>
-        <section class="mk-cards">${c.t.items.map(([item, price], i) => `<article style="--i:${i}"><div class="mk-thumb" style="background-image:url('${i === 1 ? c.thumb2 : c.thumb1}')"></div><b>${item}</b><span>${price}</span></article>`).join("")}</section>
-        <div class="mk-strip">${c.t.strip}</div>`,
+        <section class="mk-hero" id="mk-top"><div class="mk-media"><img src="${c.img1}" alt="${c.t.tag}"><span class="mk-image-note">${c.t.tag}</span></div><div class="mk-copy"><small>${c.t.tag}</small><h1>${c.t.headline}</h1><p>${c.t.text}</p><a class="mk-btn" href="#mk-services">${c.t.cta} <span>↗</span></a><div class="mk-inline-note">${c.ui.about}</div></div></section>
+        <div class="mk-trust"><span>${c.t.links[0]}</span><i></i><span>${c.t.links[1]}</span><i></i><span>${c.ui.location}</span></div>
+        ${serviceCards(c)}
+        ${storySection(c)}
+        ${closingSection(c)}`,
       bold: c => `
         ${c.nav}
-        <section class="mk-hero"><div class="mk-media"><img src="${c.img1}" alt=""></div><div class="mk-copy"><small>${c.t.tag}</small><h1>${c.t.headline}</h1><p>${c.t.text}</p><span class="mk-btn">${c.t.cta}</span></div></section>
+        <section class="mk-hero" id="mk-top"><div class="mk-media"><img src="${c.img1}" alt="${c.t.tag}"></div><div class="mk-copy"><small>${c.t.tag}</small><h1>${c.t.headline}</h1><p>${c.t.text}</p><a class="mk-btn" href="#mk-services">${c.t.cta} <span>↗</span></a></div><span class="mk-hero-index">01 / 03</span></section>
         <div class="mk-ticker"><div>${[...c.t.links, c.t.tag, ...c.t.links, c.t.tag].map(word => `<span>${word}</span>`).join("")}</div></div>
-        <section class="mk-list">${c.t.items.map(([item, price], i) => `<div><b>0${i + 1}</b><strong>${item}</strong><span>${price}</span></div>`).join("")}</section>
-        <section class="mk-cta"><h2>${c.t.strip}</h2><span class="mk-btn">${c.t.cta}</span></section>`,
+        <section class="mk-list" id="mk-services"><header class="mk-section-head"><small>${c.ui.services}</small><span>${c.ui.featured}</span></header>${c.t.items.map(([item, price], i) => `<div><b>0${i + 1}</b><strong>${item}</strong><span>${price}</span></div>`).join("")}</section>
+        ${storySection(c)}
+        ${reviewSection(c)}
+        ${closingSection(c)}`,
       elegant: c => `
         ${c.nav}
-        <section class="mk-hero"><div class="mk-copy"><small>${c.t.tag}</small><h1>${c.t.headline}</h1><p>${c.t.text}</p><span class="mk-btn">${c.t.cta}</span></div><div class="mk-media"><img src="${c.img1}" alt=""></div></section>
-        <section class="mk-gallery">${[c.thumb1, c.thumb2, c.thumb1].map((src, i) => `<figure><img src="${src}" alt=""><figcaption>${c.t.items[i][0]}</figcaption></figure>`).join("")}</section>
-        <blockquote class="mk-quote">“${c.t.quote}”</blockquote>
-        <section class="mk-menu">${c.t.items.map(([item, price]) => `<div><span>${item}</span><i></i><b>${price}</b></div>`).join("")}</section>`,
+        <section class="mk-hero" id="mk-top"><div class="mk-copy"><small>${c.t.tag}</small><h1>${c.t.headline}</h1><p>${c.t.text}</p><a class="mk-btn" href="#mk-services">${c.t.cta} <span>↗</span></a></div><div class="mk-media"><img src="${c.img1}" alt="${c.t.tag}"><span class="mk-image-note">${c.name}</span></div></section>
+        <div class="mk-elegant-rule"><span>${c.ui.about}</span></div>
+        <section class="mk-gallery" id="mk-services">${c.images.map((src, i) => `<figure style="--i:${i}"><img src="${src}" alt="${c.t.items[i][0]}"><figcaption><span>0${i + 1}</span>${c.t.items[i][0]}</figcaption></figure>`).join("")}</section>
+        ${storySection(c)}
+        ${reviewSection(c)}
+        <section class="mk-menu">${c.t.items.map(([item, price]) => `<div><span>${item}</span><i></i><b>${price}</b></div>`).join("")}</section>
+        ${closingSection(c)}`,
       editorial: c => `
-        <header class="mk-mast"><span>${c.t.tag}</span><b>${c.name}</b><span>N.º 01 · 2026</span></header>
-        <nav class="mk-nav mk-nav-thin"><span class="mk-links">${c.t.links.map(link => `<i>${link}</i>`).join("")}</span><span class="mk-nav-cta">${c.t.cta}</span></nav>
-        <section class="mk-ed-grid"><div class="mk-media"><img src="${c.img1}" alt=""></div><div class="mk-ed-copy"><small>${c.t.links[0]}</small><h1>${c.t.headline}</h1><p class="mk-drop">${c.t.about} ${c.t.text}</p><span class="mk-btn">${c.t.cta}</span></div></section>
-        <section class="mk-ed-cols">${c.t.items.map(([item, price], i) => `<article><b>0${i + 1}</b><h3>${item}</h3><p>${price}</p></article>`).join("")}</section>
-        <blockquote class="mk-pull">“${c.t.quote}”</blockquote>`,
+        <header class="mk-mast" id="mk-top"><span>${c.t.tag}</span><b>${c.name}</b><span>N.º 01 · 2026</span></header>
+        <nav class="mk-nav mk-nav-thin"><span class="mk-links">${c.navLinks}</span><a class="mk-nav-cta" href="#mk-contact">${c.t.cta}</a></nav>
+        <section class="mk-ed-grid"><div class="mk-media"><img src="${c.img1}" alt="${c.t.tag}"><span class="mk-image-note">${c.t.links[0]} · 01</span></div><div class="mk-ed-copy"><small>${c.t.links[0]} / ${c.t.links[1]}</small><h1>${c.t.headline}</h1><p class="mk-drop">${c.t.about} ${c.t.text}</p><a class="mk-btn" href="#mk-services">${c.t.cta} <span>↗</span></a></div></section>
+        <section class="mk-ed-cols" id="mk-services">${c.t.items.map(([item, price], i) => `<article><b>0${i + 1}</b><h3>${item}</h3><p>${price}</p></article>`).join("")}</section>
+        ${storySection(c)}
+        ${reviewSection(c)}
+        <blockquote class="mk-pull">“${c.t.quote}”</blockquote>
+        ${closingSection(c)}`,
       playful: c => `
         ${c.nav}
-        <section class="mk-hero"><div class="mk-copy"><span class="mk-sticker">${c.l === "en" ? "New!" : "¡Nuevo!"}</span><small>${c.t.tag}</small><h1>${c.t.headline}</h1><p>${c.t.text}</p><span class="mk-btn">${c.t.cta}</span></div><div class="mk-blob"><img src="${c.img1}" alt=""><span class="mk-sticker s2">${c.t.items[0][0]}</span></div></section>
+        <section class="mk-hero" id="mk-top"><div class="mk-copy"><span class="mk-sticker">${c.l === "en" ? "Made with love" : "Hecho con cariño"}</span><small>${c.t.tag}</small><h1>${c.t.headline}</h1><p>${c.t.text}</p><a class="mk-btn" href="#mk-services">${c.t.cta} <span>↗</span></a></div><div class="mk-blob"><img src="${c.img1}" alt="${c.t.tag}"><span class="mk-sticker s2">${c.t.items[0][0]}</span></div></section>
         <svg class="mk-wave" viewBox="0 0 1100 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30 Q 70 0 140 30 T 280 30 T 420 30 T 560 30 T 700 30 T 840 30 T 980 30 T 1120 30 V60 H0z"/></svg>
-        <section class="mk-pcards">${c.t.items.map(([item, price], i) => `<article style="--r:${[-3, 2, -2][i]}deg;--i:${i}"><div style="background-image:url('${i === 1 ? c.thumb2 : c.thumb1}')"></div><b>${item}</b><span>${price}</span></article>`).join("")}</section>
-        <section class="mk-pquote"><p>“${c.t.quote}”</p><span class="mk-btn">${c.t.cta}</span></section>`,
+        <section class="mk-pcards" id="mk-services">${photoCards(c)}</section>
+        ${storySection(c)}
+        ${reviewSection(c)}
+        ${closingSection(c)}`,
       brutal: c => `
-        <nav class="mk-bnav"><b>${c.name}</b>${c.t.links.map(link => `<span>${link}</span>`).join("")}<span class="mk-bnav-cta">${c.t.cta}</span></nav>
-        <section class="mk-bhero"><div class="mk-bcopy"><small>[ ${c.t.tag} ]</small><h1>${c.t.headline}</h1></div><div class="mk-bmedia"><img src="${c.img1}" alt=""></div><p class="mk-btext">${c.t.text}</p><span class="mk-bbtn">${c.t.cta} →</span></section>
-        <div class="mk-btable">${c.t.items.map(([item, price], i) => `<div><span>0${i + 1}</span><b>${item}</b><em>${price}</em></div>`).join("")}</div>
-        <div class="mk-bstrip">${c.t.strip} ✱ ${c.t.strip}</div>`
+        <nav class="mk-bnav" id="mk-top"><b>${c.name}</b>${c.navLinks}<a class="mk-bnav-cta" href="#mk-contact">${c.t.cta} ↗</a></nav>
+        <section class="mk-bhero"><div class="mk-bcopy"><small>[ ${c.t.tag} ]</small><h1>${c.t.headline}</h1></div><div class="mk-bmedia"><img src="${c.img1}" alt="${c.t.tag}"></div><p class="mk-btext">${c.t.text}</p><a class="mk-bbtn" href="#mk-services">${c.t.cta} →</a></section>
+        <div class="mk-bstrip">${c.t.strip} ✳ ${c.t.strip}</div>
+        <div class="mk-btable" id="mk-services">${c.t.items.map(([item, price], i) => `<div><span>0${i + 1}</span><b>${item}</b><em>${price}</em></div>`).join("")}</div>
+        ${storySection(c)}
+        ${reviewSection(c)}
+        ${closingSection(c)}`
     };
     const siteHtml = () => {
       const l = lang();
@@ -133,10 +165,13 @@
       const t = g[l];
       const p = palettes[state.palette];
       const name = esc(state.name.trim() || t.name);
+      const navLinks = t.links.map((link, i) => `<a href="#${i === 0 ? "mk-services" : i === 1 ? "mk-story" : "mk-contact"}">${link}</a>`).join("");
+      const images = [g.img, g.img2, g.img3].map(id => img(id, 700));
       const c = {
         l, t, name,
-        img1: img(g.img, 1200), thumb1: img(g.img, 500), thumb2: img(g.img2, 500),
-        nav: `<nav class="mk-nav"><b class="mk-brand">${name}</b><span class="mk-links">${t.links.map(link => `<i>${link}</i>`).join("")}</span><span class="mk-nav-cta">${t.cta}</span></nav>`
+        ui: pageWords[l], images, navLinks,
+        img1: img(g.img, 1200),
+        nav: `<nav class="mk-nav"><a class="mk-brand" href="#mk-top">${name}<span>®</span></a><span class="mk-links">${navLinks}</span><a class="mk-nav-cta" href="#mk-contact">${t.cta} <span>↗</span></a></nav>`
       };
       return `<div class="mk mk-${state.layout}" style="--bg:${p.bg};--ink:${p.ink};--accent:${p.accent};--soft:${p.soft};--font:${fonts[state.font].css.replace(/"/g, "'")}">${templates[state.layout](c)}</div>`;
     };
