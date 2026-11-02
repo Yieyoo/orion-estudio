@@ -543,153 +543,210 @@
     world.add(boomFlash, boomWave);
 
     /* ------------------------------------------------------------ Núcleo neuronal dentro del planeta */
-    // Al estallar se descubre que el orbe era el caparazón de una red neuronal viva: una masa irregular
-    // de filamentos de luz enredados, con zarcillos hacia afuera, que palpita como un corazón
+    // Al estallar se descubre que el orbe era el caparazón de un cerebro digital: una sola red tipo telaraña,
+    // cada punto unido a sus vecinos, con membranas translúcidas entre ellos, que palpita como un corazón
     const brain = new THREE.Group();
+    brain.rotation.z = 0.24;
     brain.visible = false;
     world.add(brain);
-    // Radio irregular de la masa según la dirección, para que no sea una esfera
-    const coreRadius = d => 0.6 * (1 + 0.2 * Math.sin(3 * d.x + 1) * Math.sin(2.3 * d.y + 0.5) + 0.14 * Math.sin(4.1 * d.z + 2) + 0.08 * Math.sin(5.7 * d.x * d.y));
-    // Campo de "corrientes" que curva los filamentos alrededor de la masa
-    const flow = (p, k) => new THREE.Vector3(
-      Math.sin(p.y * 3.1 + k) + Math.sin(p.z * 5.3 - k * 0.7),
-      Math.sin(p.z * 2.7 + k * 1.3) + Math.sin(p.x * 4.4 + k),
-      Math.sin(p.x * 3.6 - k) + Math.sin(p.y * 4.9 + k * 0.5)
-    );
-    const randomDir = () => {
+    const folds = (x, y, z) => Math.sin(13 * x + 2.2 * Math.sin(9 * y)) * Math.sin(11 * y + 1.8 * Math.sin(8 * z)) * Math.sin(12 * z + 1.6 * Math.sin(10 * x));
+    // Un punto sobre la forma del cerebro (dos hemisferios con pliegues y el cerebelo atrás), sin detalles anatómicos de más
+    const brainPoint = () => {
       const u = Math.random() * Math.PI * 2;
       const v = Math.acos(Math.random() * 2 - 1);
-      return new THREE.Vector3(Math.sin(v) * Math.cos(u), Math.cos(v), Math.sin(v) * Math.sin(u));
-    };
-    const STRANDS = isSmall ? 480 : 950;
-    const strandPos = [];
-    const strandT = [];
-    const strandSeed = [];
-    const strandHot = [];
-    for (let i = 0; i < STRANDS; i++) {
-      const tendril = Math.random() < 0.1;
-      const dir = randomDir();
-      const shell = coreRadius(dir) * (tendril ? 0.95 : 0.45 + Math.random() * 0.6);
-      const p = dir.clone().multiplyScalar(shell);
-      const steps = 24 + Math.floor(Math.random() * 30);
-      const k = Math.random() * 10;
-      const seed = Math.random();
-      const hot = Math.random() < 0.16 ? 1 : 0;
-      let prev = p.clone();
-      for (let j = 1; j <= steps; j++) {
-        const n = p.clone().normalize();
-        const field = flow(p, k);
-        const step = field.clone().cross(n).multiplyScalar(0.9).add(field.multiplyScalar(0.25)).normalize().multiplyScalar(0.017);
-        p.add(step);
-        if (tendril) p.addScaledVector(n, 0.008);
-        else p.copy(n.multiplyScalar(THREE.MathUtils.lerp(p.length(), shell, 0.22)));
-        strandPos.push(prev.x, prev.y, prev.z, p.x, p.y, p.z);
-        strandT.push((j - 1) / steps, j / steps);
-        strandSeed.push(seed, seed);
-        strandHot.push(hot, hot);
-        prev = p.clone();
+      const dir = new THREE.Vector3(Math.sin(v) * Math.cos(u), Math.cos(v), Math.sin(v) * Math.sin(u));
+      const depth = Math.random() < 0.88 ? 1 : 0.3 + Math.random() * 0.6;
+      if (Math.random() < 0.88) {
+        const side = dir.z >= 0 ? 1 : -1;
+        const p = new THREE.Vector3(dir.x * (dir.x > 0 ? 0.74 : 0.68), dir.y * (dir.y > 0 ? 0.52 : 0.32), Math.abs(dir.z) * 0.36 * side);
+        if (dir.y < 0) p.y -= 0.14 * Math.exp(-Math.pow(dir.x - 0.2, 2) / 0.09) * -dir.y;
+        p.z += side * 0.03;
+        p.multiplyScalar((1 + folds(p.x, p.y, p.z) * 0.08) * depth);
+        p.y += 0.06;
+        return p;
       }
-    }
-    const strandGeometry = new THREE.BufferGeometry();
-    strandGeometry.setAttribute("position", new THREE.Float32BufferAttribute(strandPos, 3));
-    strandGeometry.setAttribute("aT", new THREE.Float32BufferAttribute(strandT, 1));
-    strandGeometry.setAttribute("aSeed", new THREE.Float32BufferAttribute(strandSeed, 1));
-    strandGeometry.setAttribute("aHot", new THREE.Float32BufferAttribute(strandHot, 1));
+      const p = new THREE.Vector3(dir.x * 0.26, dir.y * 0.16, dir.z * 0.32).multiplyScalar(depth);
+      return p.add(new THREE.Vector3(-0.46, -0.26, 0));
+    };
+    const NODES = isSmall ? 1500 : 2800;
+    const nodes = Array.from({ length: NODES }, () => brainPoint().multiplyScalar(1.1));
+    // Vecinos cercanos con una cuadrícula, para unir cada punto con los suyos sin revisar todos contra todos
+    const LINK = 0.12;
+    const grid = new Map();
+    const cellOf = p => [Math.floor(p.x / LINK), Math.floor(p.y / LINK), Math.floor(p.z / LINK)];
+    nodes.forEach((p, i) => {
+      const key = cellOf(p).join();
+      if (!grid.has(key)) grid.set(key, []);
+      grid.get(key).push(i);
+    });
+    const nearest = i => {
+      const [cx, cy, cz] = cellOf(nodes[i]);
+      const found = [];
+      for (let x = -1; x <= 1; x++) for (let y = -1; y <= 1; y++) for (let z = -1; z <= 1; z++) {
+        (grid.get([cx + x, cy + y, cz + z].join()) || []).forEach(j => {
+          if (j === i) return;
+          const d = nodes[i].distanceTo(nodes[j]);
+          if (d < LINK) found.push([d, j]);
+        });
+      }
+      return found.sort((p, q) => p[0] - q[0]).slice(0, 4).map(([, j]) => j);
+    };
+    const edges = new Set();
+    const tris = [];
+    const neighbors = nodes.map((_, i) => nearest(i));
+    neighbors.forEach((list, i) => {
+      list.forEach(j => edges.add(i < j ? i + "-" + j : j + "-" + i));
+      // Membrana: si dos vecinos también se tocan entre sí, se forma un triángulo
+      if (list.length >= 2 && neighbors[list[0]].includes(list[1]) && Math.random() < 0.7) tris.push(i, list[0], list[1]);
+    });
     const brainUniforms = { uTime: { value: 0 }, uReveal: { value: 0 }, uBeat: { value: 0 }, uWave: { value: 0 }, uPixelRatio: { value: renderer.getPixelRatio() } };
     // El latido: la red se infla un poco y respira con ondas que la deforman
     const breathe = `
-      vec3 breathe(vec3 p, float seed) {
-        float wobble = sin(uTime * 1.7 + p.y * 5. + seed * 6.) * .018 + sin(uTime * 1.1 + p.x * 4.) * .014;
-        return p * (1. + uBeat * .07 + wobble);
+      vec3 breathe(vec3 p) {
+        float wobble = sin(uTime * 1.7 + p.y * 6.) * .012 + sin(uTime * 1.2 + p.x * 5.) * .01;
+        return p * (1. + uBeat * .06 + wobble);
       }`;
-    const strandMaterial = new THREE.ShaderMaterial({
+    // Cada punto se enciende en su momento: la red se va tejiendo de un lado al otro
+    const seedOf = p => 0.5 + 0.35 * p.x + 0.15 * Math.sin(p.y * 9 + p.z * 7);
+    const glowCommon = `
+      uniform float uTime;
+      uniform float uReveal;
+      uniform float uBeat;
+      uniform float uWave;
+      vec3 webColor(vec3 p, float seed) {
+        // Mayormente cian, con zonas ámbar como en un holograma de dos temperaturas
+        float warm = smoothstep(.68, .95, sin(p.x * 3.2 + p.z * 2.4 + 1.3) * .5 + .5) * .85;
+        return mix(mix(vec3(.25, .62, 1.), vec3(.7, .95, 1.), seed), vec3(1., .62, .28), warm);
+      }
+      float waveAt(vec3 p) { return exp(-pow((length(p) - uWave) * 8., 2.)) * uBeat; }
+      float on(float seed) { return smoothstep(seed - .15, seed + .05, uReveal * 1.25); }`;
+
+    // Conexiones (la telaraña)
+    const edgePos = [];
+    const edgeT = [];
+    const edgeSeed = [];
+    edges.forEach(key => {
+      const [i, j] = key.split("-").map(Number);
+      const p = nodes[i];
+      const q = nodes[j];
+      const seed = seedOf(p);
+      edgePos.push(p.x, p.y, p.z, q.x, q.y, q.z);
+      edgeT.push(0, 1);
+      edgeSeed.push(seed, seed);
+    });
+    const edgeGeometry = new THREE.BufferGeometry();
+    edgeGeometry.setAttribute("position", new THREE.Float32BufferAttribute(edgePos, 3));
+    edgeGeometry.setAttribute("aT", new THREE.Float32BufferAttribute(edgeT, 1));
+    edgeGeometry.setAttribute("aSeed", new THREE.Float32BufferAttribute(edgeSeed, 1));
+    brain.add(new THREE.LineSegments(edgeGeometry, new THREE.ShaderMaterial({
       uniforms: brainUniforms,
       vertexShader: `
         attribute float aT;
         attribute float aSeed;
-        attribute float aHot;
         uniform float uTime;
         uniform float uBeat;
         varying float vT;
         varying float vSeed;
-        varying float vHot;
-        varying float vRadius;
+        varying vec3 vPos;
         ${breathe}
         void main() {
           vT = aT;
           vSeed = aSeed;
-          vHot = aHot;
-          vRadius = length(position);
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(breathe(position, aSeed), 1.0);
+          vPos = position;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(breathe(position), 1.0);
         }`,
       fragmentShader: `
-        uniform float uTime;
-        uniform float uReveal;
-        uniform float uBeat;
-        uniform float uWave;
+        ${glowCommon}
         varying float vT;
         varying float vSeed;
-        varying float vHot;
-        varying float vRadius;
+        varying vec3 vPos;
         void main() {
-          // Los filamentos crecen desde su origen al aparecer
-          if (vT > uReveal * 1.6 - vSeed * .5) discard;
-          float ends = smoothstep(0., .15, vT) * smoothstep(1., .7, vT);
-          float head = fract(uTime * (.25 + vSeed * .5) + vSeed * 9.);
-          float pulse = exp(-pow((vT - head) * 7., 2.));
-          // Onda de cada latido que sale del centro
-          float wave = exp(-pow((vRadius - uWave) * 9., 2.)) * uBeat;
-          vec3 cold = mix(vec3(.18, .5, 1.), vec3(.55, .9, 1.), vSeed);
-          vec3 color = mix(cold, vec3(1., .6, .25), vHot);
-          float glow = .2 + pulse * .8 + wave * 1.1 + uBeat * .2;
-          gl_FragColor = vec4(color * (1. + pulse * .6), glow * ends * min(uReveal * 1.5, 1.));
+          // Señales que corren por la red
+          float head = fract(uTime * .9 + vSeed * 13.);
+          float pulse = exp(-pow((vT - head) * 5., 2.)) * step(.72, fract(vSeed * 47.));
+          float glow = .32 + pulse * 1.1 + waveAt(vPos) * 1.4 + uBeat * .25;
+          gl_FragColor = vec4(webColor(vPos, vSeed) * (1. + pulse), glow * on(vSeed));
         }`,
       transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending
-    });
-    brain.add(new THREE.LineSegments(strandGeometry, strandMaterial));
+    })));
 
-    // Polvo de luz dentro de la masa y nodos brillantes donde se cruzan las corrientes
-    const DUST = isSmall ? 1800 : 3600;
-    const dustPos = new Float32Array(DUST * 3);
-    const dustSeed = new Float32Array(DUST);
-    const dustNode = new Float32Array(DUST);
-    for (let i = 0; i < DUST; i++) {
-      const dir = randomDir();
-      const node = Math.random() < 0.03 ? 1 : 0;
-      const p = dir.multiplyScalar(coreRadius(dir) * (node ? 0.7 + Math.random() * 0.35 : Math.pow(Math.random(), 0.6) * 1.1));
-      dustPos.set([p.x, p.y, p.z], i * 3);
-      dustSeed[i] = Math.random();
-      dustNode[i] = node;
-    }
-    const dustGeometry = new THREE.BufferGeometry();
-    dustGeometry.setAttribute("position", new THREE.BufferAttribute(dustPos, 3));
-    dustGeometry.setAttribute("aSeed", new THREE.BufferAttribute(dustSeed, 1));
-    dustGeometry.setAttribute("aNode", new THREE.BufferAttribute(dustNode, 1));
-    const dustMaterial = new THREE.ShaderMaterial({
+    // Membranas translúcidas entre las conexiones, como cristal
+    const triPos = [];
+    const triSeed = [];
+    tris.forEach(i => {
+      const p = nodes[i];
+      triPos.push(p.x, p.y, p.z);
+      triSeed.push(seedOf(p));
+    });
+    const triGeometry = new THREE.BufferGeometry();
+    triGeometry.setAttribute("position", new THREE.Float32BufferAttribute(triPos, 3));
+    triGeometry.setAttribute("aSeed", new THREE.Float32BufferAttribute(triSeed, 1));
+    brain.add(new THREE.Mesh(triGeometry, new THREE.ShaderMaterial({
       uniforms: brainUniforms,
       vertexShader: `
         attribute float aSeed;
-        attribute float aNode;
         uniform float uTime;
-        uniform float uReveal;
         uniform float uBeat;
-        uniform float uPixelRatio;
-        varying float vAlpha;
-        varying vec3 vColor;
+        varying float vSeed;
+        varying vec3 vPos;
         ${breathe}
         void main() {
-          vec4 mv = modelViewMatrix * vec4(breathe(position, aSeed), 1.0);
-          float twinkle = .5 + .5 * sin(uTime * (2. + aSeed * 4.) + aSeed * 50.);
-          gl_PointSize = (aNode * (2. + uBeat * 1.4) + 1. + aSeed * 1.2) * uPixelRatio * (16. / -mv.z);
-          gl_Position = projectionMatrix * mv;
-          vColor = mix(vec3(.45, .8, 1.), vec3(.9, .97, 1.), aNode);
-          vAlpha = smoothstep(aSeed * .8, aSeed * .8 + .2, uReveal) * (twinkle * .55 + aNode * (.5 + uBeat * .5));
+          vSeed = aSeed;
+          vPos = position;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(breathe(position), 1.0);
         }`,
       fragmentShader: `
-        varying float vAlpha;
+        ${glowCommon}
+        varying float vSeed;
+        varying vec3 vPos;
+        void main() {
+          float shimmer = .5 + .5 * sin(uTime * 2. + vPos.y * 14. + vPos.x * 9.);
+          float glow = .05 + shimmer * .04 + waveAt(vPos) * .25 + uBeat * .05;
+          gl_FragColor = vec4(webColor(vPos, vSeed), glow * on(vSeed));
+        }`,
+      transparent: true,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending
+    })));
+
+    // Los puntos donde se unen las conexiones
+    const nodePos = new Float32Array(NODES * 3);
+    const nodeSeed = new Float32Array(NODES);
+    const nodeRand = new Float32Array(NODES);
+    nodes.forEach((p, i) => {
+      nodePos.set([p.x, p.y, p.z], i * 3);
+      nodeSeed[i] = seedOf(p);
+      nodeRand[i] = Math.random();
+    });
+    const nodeGeometry = new THREE.BufferGeometry();
+    nodeGeometry.setAttribute("position", new THREE.BufferAttribute(nodePos, 3));
+    nodeGeometry.setAttribute("aSeed", new THREE.BufferAttribute(nodeSeed, 1));
+    nodeGeometry.setAttribute("aRand", new THREE.BufferAttribute(nodeRand, 1));
+    brain.add(new THREE.Points(nodeGeometry, new THREE.ShaderMaterial({
+      uniforms: brainUniforms,
+      vertexShader: `
+        attribute float aSeed;
+        attribute float aRand;
+        uniform float uPixelRatio;
         varying vec3 vColor;
+        varying float vAlpha;
+        ${glowCommon}
+        ${breathe}
+        void main() {
+          vec4 mv = modelViewMatrix * vec4(breathe(position), 1.0);
+          float fire = step(.97, fract(aRand * 23. + uTime * .5));
+          float twinkle = .6 + .4 * sin(uTime * (2. + aRand * 4.) + aRand * 40.);
+          gl_PointSize = (1.3 + aRand * 1.6 + fire * 2.5 + uBeat) * uPixelRatio * (16. / -mv.z);
+          gl_Position = projectionMatrix * mv;
+          vColor = mix(webColor(position, aRand), vec3(1.), .35 + fire * .5);
+          vAlpha = on(aSeed) * (twinkle + fire + waveAt(position) * 1.5);
+        }`,
+      fragmentShader: `
+        varying vec3 vColor;
+        varying float vAlpha;
         void main() {
           float glow = smoothstep(.5, .0, length(gl_PointCoord - .5));
           gl_FragColor = vec4(vColor, glow * glow * vAlpha);
@@ -697,8 +754,7 @@
       transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending
-    });
-    brain.add(new THREE.Points(dustGeometry, dustMaterial));
+    })));
 
     // Corazón de luz que late en el centro
     const brainGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: flashTexture, color: 0x6fc3ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
@@ -750,8 +806,7 @@
       brainUniforms.uTime.value = elapsed;
       brainUniforms.uBeat.value = beat * reveal;
       brainUniforms.uWave.value = (Math.max(t - BLAST - 0.6, 0) % 1.3) * 1.1;
-      brain.rotation.y = (t - BLAST) * 0.3;
-      brain.rotation.x = Math.sin((t - BLAST) * 0.4) * 0.2;
+      brain.rotation.y = -0.25 + (t - BLAST) * 0.24;
       brain.scale.setScalar(0.75 + reveal * 0.25);
       brainGlow.material.opacity = reveal * (0.22 + beat * 0.3);
       brainGlow.scale.setScalar(2.2 + beat * 0.5);
