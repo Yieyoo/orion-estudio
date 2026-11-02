@@ -954,20 +954,16 @@
     document.head.append(link);
   }
 
-  function cleanup() {
-    cleanups.forEach(fn => fn());
-    cleanups = [];
-  }
-
-  window.OrionConcepts = {
-    open(type, site) {
-      const demo = demos[type] || demos.store;
-      cleanup();
-      loadFonts();
-      site.className = `concept-site demo-site-${type}`;
-      site.innerHTML = demo.html();
-      site.scrollTop = 0;
-      const root = site.firstElementChild;
+  // Monta una demo en un contenedor; cada montaje lleva su propia lista de limpieza
+  function mount(type, site, { preview = false } = {}) {
+    const demo = demos[type] || demos.store;
+    const list = [];
+    cleanups = list;
+    loadFonts();
+    site.innerHTML = demo.html();
+    site.scrollTop = 0;
+    const root = site.firstElementChild;
+    if (!preview) {
       // Los enlaces internos desplazan dentro de la demo en lugar de mover la página
       root.addEventListener("click", event => {
         const link = event.target.closest('a[href^="#"]');
@@ -976,10 +972,26 @@
         const target = root.querySelector(link.getAttribute("href"));
         if (target) site.scrollTo({ top: target.getBoundingClientRect().top - site.getBoundingClientRect().top + site.scrollTop - 56, behavior: "smooth" });
       });
-      demo.init(root, site);
-      observe(root, site);
-      return demo.domain;
+    }
+    demo.init(root, site);
+    observe(root, site);
+    return { domain: demo.domain, destroy: () => list.splice(0).forEach(fn => fn()) };
+  }
+
+  let modal = null;
+  window.OrionConcepts = {
+    open(type, site) {
+      modal?.destroy();
+      site.className = `concept-site demo-site-${type}`;
+      modal = mount(type, site);
+      return modal.domain;
     },
-    close: cleanup
+    close() {
+      modal?.destroy();
+      modal = null;
+    },
+    // Vista previa sin interacción para la vitrina de la portada
+    preview: (type, site) => mount(type, site, { preview: true }),
+    domain: type => (demos[type] || demos.store).domain
   };
 })();

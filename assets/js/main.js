@@ -5,12 +5,11 @@
   const hero = document.querySelector(".hero-immersive");
 
   if (header && hero) {
-    const darkSections = [...document.querySelectorAll(".marquee, .ox-manifesto, .ox-services, .ox-contact, .ox-footer")];
     const updateHeader = () => {
       header.classList.toggle("is-scrolled", window.scrollY > hero.offsetHeight - header.offsetHeight - 24);
       // El menú se oscurece cuando debajo de él hay una sección oscura
       const line = header.offsetHeight / 2;
-      header.classList.toggle("is-dark", darkSections.some(section => {
+      header.classList.toggle("is-dark", [...document.querySelectorAll(".marquee, .ox-manifesto, .ox-show.is-dark, .ox-services, .ox-contact, .ox-footer")].some(section => {
         const r = section.getBoundingClientRect();
         return r.top <= line && r.bottom > line;
       }));
@@ -38,87 +37,131 @@
     });
   }
 
-  const carousel = document.querySelector(".work-carousel");
-  if (carousel) {
-    const track = carousel.querySelector(".work-track");
-    const stage = carousel.querySelector(".work-stage");
-    const cards = [...carousel.querySelectorAll(".work-card")];
-    const count = carousel.querySelector(".carousel-count");
-    const conceptModal = document.querySelector(".concept-modal");
-    let active = 0;
-    let pointerStart = null;
-    let suppressClick = false;
+  // Vitrina de conceptos: cada demo real se muestra desplazándose sola dentro de un navegador
+  const show = document.querySelector(".ox-show");
+  const conceptModal = document.querySelector(".concept-modal");
+  if (show && window.OrionConcepts) {
+    const concepts = {
+      store: { name: "Tienda en línea", desc: "Filtros, colores, foto comprable y un carrito que calcula el envío gratis.", theme: ["#efe6d8", "#2a241e", "#b4532a", false] },
+      professional: { name: "Servicios profesionales", desc: "Titular animado, comparador boceto–resultado y un cotizador al instante.", theme: ["#e4e2dc", "#0e0e0e", "#ff5a1f", false] },
+      events: { name: "Eventos y espacios", desc: "Calendario de disponibilidad y una calculadora que arma el presupuesto.", theme: ["#2c3520", "#f5f0e6", "#d8c08e", true] },
+      food: { name: "Restaurante", desc: "Carta interactiva y reservaciones con horarios disponibles en tiempo real.", theme: ["#14100c", "#efe6d6", "#d99a4e", true] },
+      menu: { name: "Menú digital", desc: "Menú con QR: buscador, pedido con propina y seguimiento en vivo.", theme: ["#f7d77a", "#1d1a16", "#e2412b", false] }
+    };
+    const DURATION = 12000;
+    const tabs = [...show.querySelectorAll("[data-concept]")];
+    const device = show.querySelector(".ox-show-device");
+    const screen = show.querySelector(".ox-show-screen");
+    const domainLabel = show.querySelector("[data-show-domain]");
+    const description = show.querySelector("[data-show-desc]");
+    const phone = window.matchMedia("(max-width: 760px)");
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let index = 0;
+    let preview = null;
+    let site = null;
+    let elapsed = 0;
+    let last = performance.now();
+    let visible = false;
+    let hovering = false;
+    let switching = 0;
 
-    const showCard = (index) => {
-      active = (index + cards.length) % cards.length;
-      count.innerHTML = `${String(active + 1).padStart(2, "0")} <i>/</i> ${String(cards.length).padStart(2, "0")}`;
-      cards.forEach((card, i) => {
-        const relative = (i - active + cards.length) % cards.length;
-        const position = relative === cards.length - 1 ? -1 : relative;
-        const hidden = Math.abs(position) > 1;
-        card.dataset.position = String(position);
-        card.setAttribute("aria-hidden", String(hidden));
-        card.inert = hidden;
-      });
+    // Ajusta la demo (pensada a 1280 px, o 390 px en celular) al tamaño real del marco
+    const fit = () => {
+      if (!site) return;
+      const width = phone.matches ? 390 : 1280;
+      const scale = screen.clientWidth / width;
+      site.style.width = `${width}px`;
+      site.style.height = `${screen.clientHeight / scale}px`;
+      site.style.transform = `scale(${scale})`;
+    };
+    const mountPreview = () => {
+      preview?.destroy();
+      site = document.createElement("div");
+      site.className = "ox-show-site";
+      site.inert = true;
+      screen.replaceChildren(site);
+      fit();
+      preview = window.OrionConcepts.preview(tabs[index].dataset.concept, site);
     };
 
-    stage.addEventListener("keydown", event => {
-      if (event.key === "ArrowLeft") { event.preventDefault(); showCard(active - 1); }
-      if (event.key === "ArrowRight") { event.preventDefault(); showCard(active + 1); }
-    });
+    const select = next => {
+      index = (next + tabs.length) % tabs.length;
+      const type = tabs[index].dataset.concept;
+      const [bg, ink, accent, dark] = concepts[type].theme;
+      tabs.forEach((tab, i) => {
+        tab.setAttribute("aria-selected", String(i === index));
+        tab.style.setProperty("--p", "0");
+      });
+      show.style.setProperty("--show-bg", bg);
+      show.style.setProperty("--show-ink", ink);
+      show.style.setProperty("--show-accent", accent);
+      show.classList.toggle("is-dark", dark);
+      description.textContent = concepts[type].desc;
+      domainLabel.textContent = window.OrionConcepts.domain(type);
+      device.setAttribute("aria-label", `Probar la demo: ${concepts[type].name}`);
+      // En celular, la pestaña activa se desliza a la vista
+      tabs[index].parentElement.parentElement.scrollTo({ left: tabs[index].parentElement.offsetLeft - 20, behavior: "smooth" });
+      elapsed = 0;
+      screen.classList.add("is-switching");
+      clearTimeout(switching);
+      switching = setTimeout(() => {
+        mountPreview();
+        screen.classList.remove("is-switching");
+      }, 280);
+    };
 
-    stage.addEventListener("pointerdown", event => {
-      pointerStart = { x: event.clientX, y: event.clientY };
-    }, { passive: true });
-    stage.addEventListener("pointerup", event => {
-      if (!pointerStart) return;
-      const dx = event.clientX - pointerStart.x;
-      const dy = event.clientY - pointerStart.y;
-      pointerStart = null;
-      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) {
-        suppressClick = true;
-        showCard(active + (dx < 0 ? 1 : -1));
-        window.setTimeout(() => { suppressClick = false; }, 0);
-      }
-    }, { passive: true });
-    stage.addEventListener("pointercancel", () => { pointerStart = null; }, { passive: true });
-    // Evita que el navegador arrastre la imagen y cancele el gesto con el mouse
-    stage.addEventListener("dragstart", event => event.preventDefault());
-    const openConcept = card => {
+    const ease = t => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    const loop = now => {
+      requestAnimationFrame(loop);
+      const delta = Math.min(now - last, 100);
+      last = now;
+      if (!visible || hovering || document.hidden || conceptModal?.open || !site) return;
+      elapsed += delta;
+      const t = Math.min(elapsed / DURATION, 1);
+      tabs[index].style.setProperty("--p", t.toFixed(3));
+      // Espera un momento arriba, recorre la página y pasa al siguiente concepto
+      const max = site.scrollHeight - site.clientHeight;
+      site.scrollTop = max * ease(Math.min(Math.max((t - 0.1) / 0.82, 0), 1));
+      if (t >= 1) select(index + 1);
+    };
+
+    const openConcept = () => {
       if (!conceptModal?.showModal) return;
-      const pageTypes = ["store", "professional", "events", "food", "menu"];
-      const pageType = pageTypes.find(type => card.querySelector(`.image-${type}`)) || "store";
-      if (!window.OrionConcepts) return;
-      const category = card.querySelector(".work-caption h3")?.textContent || "Concepto";
-      document.getElementById("concept-category").textContent = `· ${category.toUpperCase()}`;
+      const type = tabs[index].dataset.concept;
+      document.getElementById("concept-category").textContent = `· ${concepts[type].name.toUpperCase()}`;
       // El modal debe estar abierto antes de montar la demo para que midan bien sus elementos
       conceptModal.showModal();
-      const domain = window.OrionConcepts.open(pageType, document.getElementById("concept-site"));
+      const domain = window.OrionConcepts.open(type, document.getElementById("concept-site"));
       conceptModal.querySelector(".concept-toolbar span").textContent = `www.${domain}`;
     };
-    conceptModal?.addEventListener("close", () => window.OrionConcepts?.close());
-    track.addEventListener("click", event => {
-      if (suppressClick) { event.preventDefault(); event.stopPropagation(); return; }
-      const card = event.target.closest(".work-card");
-      if (!card) return;
-      event.preventDefault();
-      event.stopPropagation();
-      openConcept(card);
-    }, true);
-    conceptModal?.querySelector(".concept-close")?.addEventListener("click", () => conceptModal.close());
-    conceptModal?.addEventListener("click", event => {
-      if (event.target === conceptModal || event.target.closest("[data-concept-contact]")) conceptModal.close();
+
+    tabs.forEach((tab, i) => tab.addEventListener("click", () => select(i)));
+    show.querySelectorAll("[data-open-concept]").forEach(button => button.addEventListener("click", openConcept));
+    device.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openConcept(); }
     });
-    showCard(0);
+    device.addEventListener("pointerenter", event => { if (event.pointerType === "mouse") hovering = true; });
+    device.addEventListener("pointerleave", () => { hovering = false; });
+    new IntersectionObserver(entries => { visible = entries[0].isIntersecting; }, { threshold: 0.25 }).observe(device);
+    if ("ResizeObserver" in window) new ResizeObserver(fit).observe(screen);
+    // Al cruzar entre celular y escritorio la demo se vuelve a montar con su otro diseño
+    phone.addEventListener?.("change", mountPreview);
+    select(0);
+    if (!reduce) requestAnimationFrame(loop);
   }
+  conceptModal?.addEventListener("close", () => window.OrionConcepts?.close());
+  conceptModal?.querySelector(".concept-close")?.addEventListener("click", () => conceptModal.close());
+  conceptModal?.addEventListener("click", event => {
+    if (event.target === conceptModal || event.target.closest("[data-concept-contact]")) conceptModal.close();
+  });
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // Aparición escalonada de secciones al entrar en pantalla
   if ("IntersectionObserver" in window && !reduceMotion) {
     const groups = [
-      ".section-head > *",
-      ".work-carousel",
+      ".ox-show-head > *",
+      ".ox-show-stage",
       ".ox-head > *",
       ".ox-manifesto-foot > *",
       ".ox-tile",

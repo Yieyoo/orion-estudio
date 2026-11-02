@@ -118,6 +118,68 @@
     render();
   }
 
+  // El texto de la portada se eleva y se desvanece al bajar
+  const heroCopy = document.querySelector(".hero-immersive .hero-copy");
+  if (heroCopy && !reduceMotion) {
+    const update = () => {
+      const progress = clamp(scrollY / (heroCopy.closest("section").offsetHeight * 0.75));
+      heroCopy.style.transform = progress ? `translateY(${progress * -70}px)` : "";
+      heroCopy.style.opacity = progress ? String(1 - progress) : "";
+    };
+    addEventListener("scroll", update, { passive: true });
+    update();
+  }
+
+  const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+  // La vitrina se inclina siguiendo al mouse
+  const device = document.querySelector(".ox-show-device");
+  if (device && finePointer && !reduceMotion) {
+    device.addEventListener("pointermove", event => {
+      const r = device.getBoundingClientRect();
+      device.style.setProperty("--ty", `${((event.clientX - r.left) / r.width - 0.5) * 5}deg`);
+      device.style.setProperty("--tx", `${((event.clientY - r.top) / r.height - 0.5) * -4}deg`);
+    });
+    device.addEventListener("pointerleave", () => {
+      device.style.removeProperty("--tx");
+      device.style.removeProperty("--ty");
+    });
+  }
+
+  // Cursor personalizado: crece sobre enlaces y muestra una etiqueta sobre la vitrina
+  if (finePointer && !reduceMotion) {
+    const ring = document.createElement("div");
+    ring.className = "ox-cursor-ring is-hidden";
+    ring.setAttribute("aria-hidden", "true");
+    ring.innerHTML = "<span></span>";
+    document.body.append(ring);
+    const label = ring.firstChild;
+    const pos = { x: innerWidth / 2, y: innerHeight / 2 };
+    const goal = { ...pos };
+    addEventListener("pointermove", event => {
+      goal.x = event.clientX;
+      goal.y = event.clientY;
+      ring.classList.remove("is-hidden");
+    }, { passive: true });
+    document.addEventListener("pointerleave", () => ring.classList.add("is-hidden"));
+    document.addEventListener("pointerover", event => {
+      const tagged = event.target.closest("[data-cursor]");
+      const link = event.target.closest("a, button, summary, [role='button'], input, label");
+      ring.classList.toggle("is-label", Boolean(tagged));
+      ring.classList.toggle("is-link", Boolean(link) && !tagged);
+      if (tagged) label.textContent = tagged.dataset.cursor;
+    });
+    const follow = () => {
+      pos.x += (goal.x - pos.x) * 0.2;
+      pos.y += (goal.y - pos.y) * 0.2;
+      ring.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
+      // Dentro de la demo abierta, el cursor normal es suficiente
+      ring.style.visibility = document.querySelector(".concept-modal[open]") ? "hidden" : "";
+      requestAnimationFrame(follow);
+    };
+    follow();
+  }
+
   // La marca gigante del footer se llena de color al aparecer
   const wordmark = document.querySelector(".ox-wordmark");
   if (wordmark && "IntersectionObserver" in window) {
