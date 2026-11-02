@@ -542,6 +542,160 @@
     boomFlash.material.color.setHex(0xffd6ad);
     world.add(boomFlash, boomWave);
 
+    /* ------------------------------------------------------------ Núcleo neuronal dentro del planeta */
+    // Al estallar se descubre que el orbe era el caparazón de un cerebro holográfico: puntos de luz y una red de conexiones con pulsos
+    const brain = new THREE.Group();
+    brain.rotation.z = 0.24;
+    brain.visible = false;
+    world.add(brain);
+    const folds = (x, y, z) => Math.sin(13 * x + 2.2 * Math.sin(9 * y)) * Math.sin(11 * y + 1.8 * Math.sin(8 * z)) * Math.sin(12 * z + 1.6 * Math.sin(10 * x));
+    // Un punto al azar sobre (o dentro de) la forma del cerebro, visto de lado: frente a la derecha, cerebelo atrás y abajo
+    const brainPoint = () => {
+      const r = Math.random();
+      const u = Math.random() * Math.PI * 2;
+      const v = Math.acos(Math.random() * 2 - 1);
+      const dir = new THREE.Vector3(Math.sin(v) * Math.cos(u), Math.cos(v), Math.sin(v) * Math.sin(u));
+      const depth = Math.random() < 0.85 ? 1 : 0.35 + Math.random() * 0.55;
+      if (r < 0.8) {
+        // Hemisferios con pliegues; la cisura central los separa
+        const side = dir.z >= 0 ? 1 : -1;
+        const p = new THREE.Vector3(dir.x * (dir.x > 0 ? 0.74 : 0.68), dir.y * (dir.y > 0 ? 0.52 : 0.3), Math.abs(dir.z) * 0.34 * side);
+        // Lóbulo temporal: la parte de abajo cuelga un poco hacia el frente
+        if (dir.y < 0) p.y -= 0.16 * Math.exp(-Math.pow(dir.x - 0.2, 2) / 0.09) * -dir.y;
+        p.z += side * 0.04;
+        p.multiplyScalar((1 + folds(p.x, p.y, p.z) * 0.07) * depth);
+        p.y += 0.08;
+        return p;
+      }
+      if (r < 0.93) {
+        // Cerebelo con sus estrías horizontales
+        const p = new THREE.Vector3(dir.x * 0.24, dir.y * 0.15, dir.z * 0.3);
+        p.multiplyScalar((1 + Math.sin(p.y * 70) * 0.04) * depth);
+        return p.add(new THREE.Vector3(-0.48, -0.3, 0));
+      }
+      // Tallo
+      const h = Math.random();
+      const a = Math.random() * Math.PI * 2;
+      return new THREE.Vector3(-0.22 + h * 0.05 + Math.cos(a) * 0.065, -0.28 - h * 0.42, Math.sin(a) * 0.065);
+    };
+    const NEURONS = isSmall ? 4200 : 8000;
+    const neuronPos = new Float32Array(NEURONS * 3);
+    const neuronSeed = new Float32Array(NEURONS);
+    const neuronHot = new Float32Array(NEURONS);
+    const neuronFold = new Float32Array(NEURONS);
+    const neurons = [];
+    for (let i = 0; i < NEURONS; i++) {
+      const p = brainPoint().multiplyScalar(1.08);
+      neurons.push(p);
+      neuronFold[i] = folds(p.x, p.y, p.z);
+      neuronPos.set([p.x, p.y, p.z], i * 3);
+      neuronSeed[i] = Math.random();
+      neuronHot[i] = Math.random() < 0.05 ? 1 : 0;
+    }
+    const neuronGeometry = new THREE.BufferGeometry();
+    neuronGeometry.setAttribute("position", new THREE.BufferAttribute(neuronPos, 3));
+    neuronGeometry.setAttribute("aSeed", new THREE.BufferAttribute(neuronSeed, 1));
+    neuronGeometry.setAttribute("aHot", new THREE.BufferAttribute(neuronHot, 1));
+    neuronGeometry.setAttribute("aFold", new THREE.BufferAttribute(neuronFold, 1));
+    const brainUniforms = { uTime: { value: 0 }, uReveal: { value: 0 }, uPixelRatio: { value: renderer.getPixelRatio() } };
+    const neuronMaterial = new THREE.ShaderMaterial({
+      uniforms: brainUniforms,
+      vertexShader: `
+        attribute float aSeed;
+        attribute float aHot;
+        attribute float aFold;
+        uniform float uTime;
+        uniform float uReveal;
+        uniform float uPixelRatio;
+        varying vec3 vColor;
+        varying float vAlpha;
+        void main() {
+          vec4 mv = modelViewMatrix * vec4(position, 1.0);
+          // Barrido de escaneo que recorre el cerebro de abajo hacia arriba
+          float scan = exp(-pow((position.y - (fract(uTime * .35) * 1.6 - .8)) * 14., 2.));
+          float twinkle = .55 + .45 * sin(uTime * (2. + aSeed * 5.) + aSeed * 60.);
+          float fire = step(.985, fract(aSeed * 31. + uTime * .6)) * 1.5;
+          gl_PointSize = (1.1 + aSeed * 1.5 + fire * 2. + aHot * 1.2) * uPixelRatio * (16. / -mv.z);
+          gl_Position = projectionMatrix * mv;
+          vColor = mix(vec3(.35, .78, 1.), vec3(1., .66, .3), aHot) + scan * vec3(.5, .7, .8);
+          // Aparece en orden: cada neurona se enciende en su momento según su semilla
+          // Las crestas de los pliegues brillan más: así se leen las circunvoluciones
+          float ridge = .25 + .75 * smoothstep(-.1, .5, aFold);
+          vAlpha = smoothstep(aSeed * .7, aSeed * .7 + .3, uReveal) * (twinkle * .75 * ridge + scan * .6 + fire);
+        }`,
+      fragmentShader: `
+        varying vec3 vColor;
+        varying float vAlpha;
+        void main() {
+          float d = length(gl_PointCoord - .5);
+          float glow = smoothstep(.5, .0, d);
+          gl_FragColor = vec4(vColor, glow * glow * vAlpha);
+        }`,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending
+    });
+    brain.add(new THREE.Points(neuronGeometry, neuronMaterial));
+
+    // Conexiones entre neuronas cercanas, con un pulso de energía que viaja por cada una
+    const LINKS = isSmall ? 1100 : 2200;
+    const linkPos = new Float32Array(LINKS * 6);
+    const linkT = new Float32Array(LINKS * 2);
+    const linkSeed = new Float32Array(LINKS * 2);
+    for (let i = 0; i < LINKS; i++) {
+      const a = neurons[Math.floor(Math.random() * NEURONS)];
+      let best = null;
+      let bestD = Infinity;
+      for (let k = 0; k < 40; k++) {
+        const b = neurons[Math.floor(Math.random() * NEURONS)];
+        const d = a.distanceToSquared(b);
+        if (d > 0.0004 && d < bestD) { bestD = d; best = b; }
+      }
+      if (!best || bestD > 0.05) best = a.clone().lerp(new THREE.Vector3(0, 0.05, 0), 0.25);
+      linkPos.set([a.x, a.y, a.z, best.x, best.y, best.z], i * 6);
+      linkT.set([0, 1], i * 2);
+      const seed = Math.random();
+      linkSeed.set([seed, seed], i * 2);
+    }
+    const linkGeometry = new THREE.BufferGeometry();
+    linkGeometry.setAttribute("position", new THREE.BufferAttribute(linkPos, 3));
+    linkGeometry.setAttribute("aT", new THREE.BufferAttribute(linkT, 1));
+    linkGeometry.setAttribute("aSeed", new THREE.BufferAttribute(linkSeed, 1));
+    const linkMaterial = new THREE.ShaderMaterial({
+      uniforms: brainUniforms,
+      vertexShader: `
+        attribute float aT;
+        attribute float aSeed;
+        varying float vT;
+        varying float vSeed;
+        void main() {
+          vT = aT;
+          vSeed = aSeed;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }`,
+      fragmentShader: `
+        uniform float uTime;
+        uniform float uReveal;
+        varying float vT;
+        varying float vSeed;
+        void main() {
+          float head = fract(uTime * (.4 + vSeed * .8) + vSeed * 7.);
+          float pulse = exp(-pow((vT - head) * 9., 2.));
+          float on = smoothstep(vSeed * .6 + .2, vSeed * .6 + .4, uReveal);
+          vec3 color = mix(vec3(.3, .62, 1.), vec3(.85, .97, 1.), pulse);
+          gl_FragColor = vec4(color, (.06 + pulse * .85) * on);
+        }`,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending
+    });
+    brain.add(new THREE.LineSegments(linkGeometry, linkMaterial));
+
+    // Resplandor del núcleo
+    const brainGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: flashTexture, color: 0x5fb4ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+    brainGlow.scale.setScalar(2.6);
+    brain.add(brainGlow);
+
     let boomAt = -1;
     const easeInOut = k => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
     const shake = new THREE.Vector2();
@@ -555,7 +709,7 @@
       if (boomAt < 0) return;
       const t = elapsed - boomAt;
       const BLAST = 0.12;
-      const HOLD = 2.5;
+      const HOLD = 4.6;
       const BACK = 1.9;
       let spread;
       if (t < BLAST) {
@@ -574,6 +728,14 @@
       burstMaterial.uniforms.uSpread.value = spread;
       burstMaterial.uniforms.uHeat.value = t < BLAST ? 0 : Math.exp(-(t - BLAST) * 2.4);
       burstMaterial.uniforms.uTime.value = elapsed;
+      // El cerebro se enciende poco después del estallido y se apaga mientras el planeta se rearma
+      const reveal = t < HOLD ? Math.min(Math.max((t - BLAST - 0.25) / 1.4, 0), 1) : 1 - Math.min((t - HOLD) / (BACK * 0.7), 1);
+      brain.visible = exploded && reveal > 0;
+      brainUniforms.uReveal.value = reveal;
+      brainUniforms.uTime.value = elapsed;
+      brain.rotation.y = -0.2 + (t - BLAST) * 0.25;
+      brain.scale.setScalar(0.8 + reveal * 0.2);
+      brainGlow.material.opacity = reveal * 0.35;
       shardMaterial.emissiveIntensity = t < BLAST ? 0 : Math.exp(-(t - BLAST) * 1.8) * 1.5;
       shards.forEach(shard => {
         shard.visible = exploded;
