@@ -72,10 +72,10 @@
     let hovering = false;
     let switching = 0;
 
-    // Ajusta la demo (pensada a 1280 px, o 390 px en celular) al tamaño real del marco
+    // En mÃ³vil usa el ancho visible del telÃ©fono; en escritorio, un lienzo de 1280 px.
     const fit = () => {
       if (!site) return;
-      const width = phone.matches ? 390 : 1280;
+      const width = phone.matches ? screen.clientWidth : 1280;
       const scale = screen.clientWidth / width;
       site.style.width = `${width}px`;
       site.style.height = `${screen.clientHeight / scale}px`;

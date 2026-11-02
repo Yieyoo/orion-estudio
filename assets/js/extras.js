@@ -224,7 +224,7 @@
     const phoneQuery = window.matchMedia("(max-width: 700px)");
     const fit = () => {
       // El sitio viejo no se adapta: en celular se ve diminuto. El nuevo sí se reacomoda.
-      fitInto(screen, oldSite, 1100);
+      fitInto(screen, oldSite, phoneQuery.matches ? 390 : 1100);
       fitInto(screen, newSite, phoneQuery.matches ? 390 : 1100);
     };
     const setPos = value => ba.style.setProperty("--pos", `${value}%`);
@@ -234,7 +234,7 @@
       if (hinted) return;
       hinted = true;
       // Un pequeño vaivén invita a arrastrar
-      const frames = [[0, 50], [700, 22], [1500, 78], [2200, 50]];
+      const frames = [[0, 60], [700, 30], [1500, 78], [2200, 60]];
       const start = performance.now();
       const step = now => {
         const t = now - start;
