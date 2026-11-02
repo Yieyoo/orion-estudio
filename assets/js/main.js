@@ -73,10 +73,10 @@
     let hovering = false;
     let switching = 0;
 
-    // En mÃ³vil usa el ancho visible del telÃ©fono; en escritorio, un lienzo de 1280 px.
+    // En celular se dibuja como un teléfono real de 390 px y se escala; en escritorio, un lienzo de 1280 px.
     const fit = () => {
       if (!site) return;
-      const width = phone.matches ? screen.clientWidth : 1280;
+      const width = phone.matches ? 390 : 1280;
       const scale = screen.clientWidth / width;
       site.style.width = `${width}px`;
       site.style.height = `${screen.clientHeight / scale}px`;
