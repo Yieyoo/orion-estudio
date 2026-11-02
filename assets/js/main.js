@@ -5,8 +5,15 @@
   const hero = document.querySelector(".hero-immersive");
 
   if (header && hero) {
+    const darkSections = [...document.querySelectorAll(".marquee, .ox-manifesto, .ox-services, .ox-contact, .ox-footer")];
     const updateHeader = () => {
       header.classList.toggle("is-scrolled", window.scrollY > hero.offsetHeight - header.offsetHeight - 24);
+      // El menú se oscurece cuando debajo de él hay una sección oscura
+      const line = header.offsetHeight / 2;
+      header.classList.toggle("is-dark", darkSections.some(section => {
+        const r = section.getBoundingClientRect();
+        return r.top <= line && r.bottom > line;
+      }));
     };
     window.addEventListener("scroll", updateHeader, { passive: true });
     updateHeader();
@@ -105,20 +112,6 @@
     showCard(0);
   }
 
-  document.querySelectorAll(".service-card").forEach(card => {
-    const toggle = card.querySelector(".service-toggle");
-    const detail = card.querySelector(".service-detail");
-    if (!toggle || !detail) return;
-    detail.hidden = false;
-    toggle.addEventListener("click", () => {
-      const open = toggle.getAttribute("aria-expanded") !== "true";
-      toggle.setAttribute("aria-expanded", String(open));
-      card.classList.toggle("is-open", open);
-      toggle.firstChild.textContent = open ? "Ocultar detalle " : "Ver qué incluye ";
-      toggle.querySelector("span").textContent = open ? "−" : "＋";
-    });
-  });
-
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // Aparición escalonada de secciones al entrar en pantalla
@@ -126,9 +119,13 @@
     const groups = [
       ".section-head > *",
       ".work-carousel",
-      ".services-heading > *",
-      ".service-card",
-      ".contact-content > *"
+      ".ox-head > *",
+      ".ox-manifesto-foot > *",
+      ".ox-tile",
+      ".ox-plan",
+      ".ox-faq details",
+      ".ox-contact-copy > *",
+      ".ox-brief"
     ];
     const revealObserver = new IntersectionObserver(entries => {
       entries.forEach(entry => {
@@ -137,16 +134,20 @@
         element.classList.add("visible");
         revealObserver.unobserve(element);
         // Al terminar, devuelve el control a las transiciones y hovers propios del elemento
-        element.addEventListener("transitionend", () => {
+        const finish = event => {
+          if (event.target !== element) return;
+          element.removeEventListener("transitionend", finish);
           element.classList.remove("reveal", "visible");
           element.style.removeProperty("--reveal-i");
-        }, { once: true });
+        };
+        element.addEventListener("transitionend", finish);
       });
     }, { threshold: 0.15, rootMargin: "0px 0px -40px 0px" });
     groups.forEach(selector => {
-      document.querySelectorAll(selector).forEach((element, i) => {
+      document.querySelectorAll(selector).forEach(element => {
         element.classList.add("reveal");
-        element.style.setProperty("--reveal-i", String(i));
+        // El retraso escalonado cuenta desde sus hermanos, no desde toda la página
+        element.style.setProperty("--reveal-i", String([...element.parentElement.children].indexOf(element)));
         revealObserver.observe(element);
       });
     });
@@ -182,6 +183,7 @@
   if (year) year.textContent = new Date().getFullYear();
 
   const WHATSAPP_NUMBER = "525522574365";
+  window.ORION_WHATSAPP = WHATSAPP_NUMBER;
   const whatsappHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hola Orion Studio, quiero platicar sobre un proyecto digital.")}`;
   ["whatsapp-link", "whatsapp-float"].forEach(id => {
     const link = document.getElementById(id);
