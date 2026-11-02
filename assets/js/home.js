@@ -55,20 +55,50 @@
     let held = false;
     let inView = false;
     let timer = 0;
+    let touchedAt = 0;
+    const swipe = window.matchMedia("(max-width: 700px)");
+    const dots = document.querySelector(".ox-bento-dots");
+    if (dots) dots.innerHTML = tiles.map(() => "<i></i>").join("");
     const turn = i => {
       if (i === current) return;
       current = i;
       tiles.forEach((tile, k) => tile.classList.toggle("is-on", k === i));
       [...(dots?.children || [])].forEach((dot, k) => dot.classList.toggle("is-on", k === i));
     };
-    const swipe = window.matchMedia("(max-width: 700px)");
-    const dots = document.querySelector(".ox-bento-dots");
-    if (dots) dots.innerHTML = tiles.map(() => "<i></i>").join("");
+    // En celular el carrusel avanza solo; si la persona lo toca, espera un rato antes de seguir
+    // Deslizamiento lento con su propia curva; el imán del carrusel se apaga mientras dura
+    const slideTo = i => {
+      const tile = tiles[i];
+      const from = bento.scrollLeft;
+      const to = tile.offsetLeft - (bento.clientWidth - tile.offsetWidth) / 2;
+      const duration = i === 0 ? 1600 : 1100;
+      turn(i);
+      const start = performance.now();
+      bento.style.scrollSnapType = "none";
+      const step = now => {
+        const t = Math.min((now - start) / duration, 1);
+        const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        if (Date.now() - touchedAt < 300) { bento.style.scrollSnapType = ""; return; }
+        bento.scrollLeft = from + (to - from) * eased;
+        if (t < 1) requestAnimationFrame(step);
+        else bento.style.scrollSnapType = "";
+      };
+      requestAnimationFrame(step);
+    };
     const schedule = () => {
       clearTimeout(timer);
-      if (held || !inView || swipe.matches) return;
-      timer = setTimeout(() => { turn((current + 1) % tiles.length); schedule(); }, 6500);
+      if (held || !inView) return;
+      timer = setTimeout(() => {
+        const next = (current + 1) % tiles.length;
+        if (!swipe.matches) turn(next);
+        else if (Date.now() - touchedAt > 6000) slideTo(next);
+        schedule();
+      }, swipe.matches ? 5000 : 6500);
     };
+    const touched = () => { touchedAt = Date.now(); };
+    bento.addEventListener("touchstart", touched, { passive: true });
+    bento.addEventListener("pointerdown", touched);
+    bento.addEventListener("wheel", touched, { passive: true });
     bento.classList.add("is-calm");
     tiles.forEach((tile, i) => {
       const hold = () => { held = true; clearTimeout(timer); turn(i); };
