@@ -5,17 +5,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f5f3ee">
   <meta name="description" content="Orion Studio crea sitios web e identidades digitales para negocios con ambición.">
+  <link rel="canonical" href="https://orionwebmx.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Orion Studio">
+  <meta property="og:locale" content="es_MX">
+  <meta property="og:url" content="https://orionwebmx.com/">
+  <meta property="og:title" content="Orion Studio · Diseño web que destaca">
+  <meta property="og:description" content="Sitios web y sistemas a la medida para negocios con ambición. Prueba nuestros conceptos en vivo.">
+  <meta property="og:image" content="https://orionwebmx.com/assets/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Orion Studio: un planeta con anillos en el espacio junto al texto Ideas con una gran presencia">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Orion Studio · Diseño web que destaca">
+  <meta name="twitter:description" content="Sitios web y sistemas a la medida para negocios con ambición.">
+  <meta name="twitter:image" content="https://orionwebmx.com/assets/og-image.jpg">
+  <script>
+    // La pantalla de entrada se muestra solo la primera vez por sesión
+    try {
+      if (sessionStorage.getItem("orion-intro") || matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("no-intro");
+      else sessionStorage.setItem("orion-intro", "1");
+    } catch (error) { document.documentElement.classList.add("no-intro"); }
+  </script>
   <title>Orion Studio® — Diseño digital con intención</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://images.unsplash.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/styles.css?v=10">
-  <link rel="stylesheet" href="assets/css/concepts.css?v=10">
-  <link rel="stylesheet" href="assets/css/home.css?v=10">
+  <link rel="stylesheet" href="assets/css/styles.css?v=11">
+  <link rel="stylesheet" href="assets/css/concepts.css?v=11">
+  <link rel="stylesheet" href="assets/css/home.css?v=11">
+  <link rel="stylesheet" href="assets/css/extras.css?v=11">
 </head>
 <body>
+  <div class="ox-intro" aria-hidden="true">
+    <div class="ox-intro-mark"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40"/><circle cx="50" cy="50" r="40"/></svg><b>orion<span>.</span></b></div>
+    <small>STUDIO DIGITAL</small>
+  </div>
   <header class="header">
     <a class="brand" href="#inicio" aria-label="Orion Studio, inicio">
       <span class="brand-mark">O<span>·</span></span>
@@ -24,8 +51,10 @@
     <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Abrir menú"><span></span><span></span></button>
     <nav class="nav" id="site-nav" aria-label="Navegación principal">
       <a href="#proyectos">Conceptos</a>
+      <a href="#crea">Crea el tuyo</a>
       <a href="#servicios">Servicios</a>
       <a href="#proceso">Proceso</a>
+      <button class="lang-toggle" type="button" data-lang-toggle aria-label="Switch to English"><span>ES</span><span>EN</span></button>
       <a class="nav-contact" href="#contacto">Hablemos <svg class="icon-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5M8 5h11v11"/></svg></a>
     </nav>
   </header>
@@ -36,7 +65,7 @@
       <div class="hero-atmosphere" aria-hidden="true"></div>
       <div class="hero-copy">
         <p class="eyebrow"><span class="status-dot"></span> ESTUDIO DIGITAL INDEPENDIENTE · CDMX</p>
-        <h1 class="hero-title"><span class="w" style="--i:0">Ideas</span> <span class="w" style="--i:1">con</span><br><span class="w" style="--i:2">una</span> <span class="w" style="--i:3">gran</span> <em class="w" style="--i:4">presencia.</em></h1>
+        <h1 class="hero-title" data-i18n="hero.title"><span class="w" style="--i:0">Ideas</span> <span class="w" style="--i:1">con</span><br><span class="w" style="--i:2">una</span> <span class="w" style="--i:3">gran</span> <em class="w" style="--i:4">presencia.</em></h1>
         <p class="hero-description">Diseñamos sitios web y experiencias digitales que hacen que tu negocio se vea tan bien como lo que ofrece.</p>
         <div class="hero-actions">
           <a class="button button-glow" href="#contacto" data-magnetic>Cuéntame tu idea <svg class="icon-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5M8 5h11v11"/></svg></a>
@@ -51,7 +80,7 @@
     <section class="ox-manifesto" id="manifiesto" aria-label="Por qué Orion">
       <div class="ox-orbit" aria-hidden="true"><i></i><i></i><i></i></div>
       <p class="ox-kicker"><span></span>POR QUÉ ORION</p>
-      <p class="ox-manifesto-text" data-words>Tu sitio es lo primero que ven tus clientes. Lo diseñamos para que en segundos entiendan qué haces, <em>confíen en ti</em> y <em>te escriban.</em></p>
+      <p class="ox-manifesto-text" data-words data-i18n="manifesto">Tu sitio es lo primero que ven tus clientes. Lo diseñamos para que en segundos entiendan qué haces, <em>confíen en ti</em> y <em>te escriban.</em></p>
       <div class="ox-manifesto-foot">
         <span><b>01</b>Diseño original, sin plantillas</span>
         <span><b>02</b>Pensado primero para el celular</span>
@@ -104,6 +133,24 @@
         </div>
         <p class="concept-note">Una muestra de estilo; el contenido se adapta a cada proyecto.</p>
       </dialog>
+    </section>
+
+    <section class="ox-make" id="crea">
+      <div class="ox-head ox-head-light">
+        <p class="ox-kicker"><span></span>ARMA TU SITIO EN VIVO</p>
+        <h2>Diseña tu web <em>en 30 segundos.</em></h2>
+        <p>Elige giro, colores, tipografía y estilo. Así imaginamos contigo; tu sitio final se diseña a la medida.</p>
+      </div>
+      <div class="ox-make-body" data-make>
+        <div class="ox-make-panel"></div>
+        <div class="ox-make-stage">
+          <div class="ox-make-browser">
+            <span class="ox-make-bar" aria-hidden="true"><i></i><i></i><i></i><em data-make-domain>cafeaurora.mx</em></span>
+            <div class="ox-make-screen"><div class="ox-make-site" data-make-site></div></div>
+          </div>
+          <div class="ox-make-phone" aria-hidden="true"><div class="ox-make-screen"><div class="ox-make-site" data-make-phone></div></div></div>
+        </div>
+      </div>
     </section>
 
     <section class="ox-services" id="servicios">
@@ -191,6 +238,68 @@
       </div>
     </section>
 
+    <section class="ox-ba" id="antes-despues">
+      <div class="ox-head ox-head-light">
+        <p class="ox-kicker"><span></span>ANTES Y DESPUÉS</p>
+        <h2>La diferencia se nota <em>en un segundo.</em></h2>
+        <p>Arrastra para comparar un sitio típico con uno diseñado por Orion. Mismo negocio, otra historia.</p>
+      </div>
+      <div class="ox-ba-frame" data-ba>
+        <div class="ox-ba-bar" aria-hidden="true"><i></i><i></i><i></i><em>panaderialaespiga.mx</em></div>
+        <div class="ox-ba-screen">
+          <div class="ox-ba-site ox-ba-old" aria-hidden="true">
+              <div class="old-top">¡¡¡ BIENVENIDOS A LA PAGINA OFICIAL DE PANADERIA LA ESPIGA !!!</div>
+              <div class="old-wrap">
+                <table class="old-nav"><tr><td><a>Inicio</a></td><td><a>Productos</a></td><td><a>Quienes Somos</a></td><td><a>Galeria</a></td><td><a>Contactenos</a></td></tr></table>
+                <div class="old-main">
+                  <div class="old-left"><img class="old-img" src="https://images.unsplash.com/photo-1608198093002-ad4e005484ec?auto=format&fit=crop&w=70&q=75" alt=""><p class="old-caption">foto de nuestros productos</p><span class="old-uc">EN CONSTRUCCION</span></div>
+                  <div class="old-text"><h1>Panaderia La Espiga S.A. de C.V.</h1><p>Somos una empresa lider en el ramo de la panificacion con mas de 20 años de experiencia ofreciendo productos de la mas alta calidad a nuestros distinguidos clientes.</p><p>Contamos con una amplia variedad de pan dulce, pan salado, pasteles para toda ocasion y mucho mas. Para mayor informacion favor de enviar un correo electronico y a la brevedad posible le daremos respuesta.</p><p class="old-mail">Correo: panaderia_laespiga@hotmail.com</p></div>
+                </div>
+                <div class="old-foot"><span>Visitante No. <b class="old-counter">000347</b></span><span>Ultima actualizacion: 12/03/2014</span><span>Se ve mejor en Internet Explorer 1024x768</span></div>
+              </div>
+          </div>
+          <div class="ox-ba-site ox-ba-new" aria-hidden="true">
+              <nav class="new-nav"><b>la espiga<em>.</em></b><span>Pan del día</span><span>Pasteles</span><span>Visítanos</span><a>Pedir por WhatsApp</a></nav>
+              <section class="new-hero"><div><small>PANADERÍA ARTESANAL · DESDE 2004</small><h1>Pan recién horneado, <em>todos los días.</em></h1><p>Masa madre, mantequilla de verdad y recetas de la familia. Aparta tu pedido y pasa por él calientito.</p><div class="new-cta"><span class="new-btn">Hacer pedido</span><span class="new-rating"><i></i>4.9 en Google</span></div></div><figure><img src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=900&q=75" alt="" loading="lazy"></figure></section>
+              <section class="new-cards"><article><img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=200&q=75" alt="" loading="lazy"><b>Hogaza de masa madre</b><span>$95</span></article><article><img src="https://images.unsplash.com/photo-1517433670267-08bbd4be890f?auto=format&fit=crop&w=200&q=75" alt="" loading="lazy"><b>Caja de 6 conchas</b><span>$120</span></article><article><img src="https://images.unsplash.com/photo-1549931319-a545dcf3bc73?auto=format&fit=crop&w=200&q=75" alt="" loading="lazy"><b>Pan de caja integral</b><span>$70</span></article></section>
+          </div>
+          <div class="ox-ba-handle"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 7-5 5 5 5M15 7l5 5-5 5"/></svg></span></div>
+          <b class="ox-ba-label l">Antes</b><b class="ox-ba-label r">Después</b>
+          <input type="range" min="0" max="100" value="50" aria-label="Comparar antes y después" data-ba-range>
+        </div>
+      </div>
+      <ul class="ox-ba-points">
+        <li><s>Se ve anticuado</s><b>Se ve profesional</b></li>
+        <li><s>Difícil de usar en celular</s><b>Perfecto en cualquier pantalla</b></li>
+        <li><s>Un correo que nadie revisa</s><b>WhatsApp a un toque</b></li>
+      </ul>
+    </section>
+
+    <section class="ox-sys" id="sistemas">
+      <div class="ox-head">
+        <p class="ox-kicker"><span></span>SISTEMAS A LA MEDIDA</p>
+        <h2>Más que páginas: <em>herramientas para tu negocio.</em></h2>
+        <p>También construimos sistemas: clientes, prospectos, cotizaciones y reportes en un solo lugar. Pruébalo; son datos de ejemplo.</p>
+      </div>
+      <div class="ox-sys-app" data-sys>
+        <aside class="ox-sys-side">
+          <b class="ox-sys-logo">O<span>·</span> Panel</b>
+          <nav class="ox-sys-nav" aria-label="Secciones del panel"></nav>
+          <div class="ox-sys-user"><i>TN</i><span>Tu negocio</span></div>
+        </aside>
+        <div class="ox-sys-main">
+          <header class="ox-sys-top"><h3 data-sys-title>Inicio</h3><span class="ox-sys-badge">Datos de ejemplo</span></header>
+          <div class="ox-sys-view" data-sys-view></div>
+        </div>
+      </div>
+      <ul class="ox-sys-feats">
+        <li><i class="ox-check"></i>Clientes y embudo de ventas</li>
+        <li><i class="ox-check"></i>Prospección con Google Maps</li>
+        <li><i class="ox-check"></i>Tickets y recibos por WhatsApp</li>
+        <li><i class="ox-check"></i>Reportes al día</li>
+      </ul>
+    </section>
+
     <section class="ox-process" id="proceso">
       <div class="ox-head ox-head-light">
         <p class="ox-kicker"><span></span>CÓMO TRABAJAMOS</p>
@@ -246,7 +355,7 @@
   <footer class="ox-footer">
     <div class="ox-footer-top">
       <p class="ox-footer-cta">¿Listo para destacar?<br><a href="#contacto">Empecemos hoy <svg class="icon-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5M8 5h11v11"/></svg></a></p>
-      <nav aria-label="Enlaces del pie de página"><a href="#proyectos">Conceptos</a><a href="#servicios">Servicios</a><a href="#proceso">Proceso</a><a href="#preguntas">Preguntas</a><a href="#contacto">Contacto</a></nav>
+      <nav aria-label="Enlaces del pie de página"><a href="#proyectos">Conceptos</a><a href="#crea">Crea el tuyo</a><a href="#servicios">Servicios</a><a href="#proceso">Proceso</a><a href="#preguntas">Preguntas</a><a href="#contacto">Contacto</a></nav>
     </div>
     <div class="ox-wordmark" aria-hidden="true">orion<span>.</span></div>
     <div class="ox-footer-bottom">
@@ -258,10 +367,12 @@
       </a>
     </div>
   </footer>
-  <script src="assets/js/concepts.js?v=10"></script>
-  <script src="assets/js/main.js?v=10"></script>
-  <script src="assets/js/home.js?v=10"></script>
+  <script src="assets/js/i18n.js?v=11"></script>
+  <script src="assets/js/concepts.js?v=11"></script>
+  <script src="assets/js/main.js?v=11"></script>
+  <script src="assets/js/home.js?v=11"></script>
+  <script src="assets/js/extras.js?v=11"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="assets/js/hero-scene.js?v=10"></script>
+  <script src="assets/js/hero-scene.js?v=11"></script>
 </body>
 </html>

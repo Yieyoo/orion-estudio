@@ -6,22 +6,27 @@
   // Las palabras del manifiesto se encienden conforme bajas
   const manifesto = document.querySelector("[data-words]");
   if (manifesto) {
-    const walker = document.createTreeWalker(manifesto, NodeFilter.SHOW_TEXT);
-    const textNodes = [];
-    while (walker.nextNode()) textNodes.push(walker.currentNode);
-    textNodes.forEach(node => {
-      const fragment = document.createDocumentFragment();
-      node.textContent.split(/(\s+)/).forEach(part => {
-        if (!part) return;
-        if (/^\s+$/.test(part)) { fragment.append(part); return; }
-        const word = document.createElement("span");
-        word.className = "mw";
-        word.textContent = part;
-        fragment.append(word);
+    let words = [];
+    const split = () => {
+      const walker = document.createTreeWalker(manifesto, NodeFilter.SHOW_TEXT);
+      const textNodes = [];
+      while (walker.nextNode()) textNodes.push(walker.currentNode);
+      textNodes.forEach(node => {
+        const fragment = document.createDocumentFragment();
+        node.textContent.split(/(\s+)/).forEach(part => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { fragment.append(part); return; }
+          const word = document.createElement("span");
+          word.className = "mw";
+          word.textContent = part;
+          fragment.append(word);
+        });
+        node.replaceWith(fragment);
       });
-      node.replaceWith(fragment);
-    });
-    const words = [...manifesto.querySelectorAll(".mw")];
+      words = [...manifesto.querySelectorAll(".mw")];
+    };
+    split();
+    document.addEventListener("orion:lang", () => { split(); update(); });
     const update = () => {
       const r = manifesto.getBoundingClientRect();
       const progress = reduceMotion ? 1 : clamp((innerHeight * 0.85 - r.top) / (r.height + innerHeight * 0.3));
@@ -44,11 +49,11 @@
   // Búsqueda de Google que se escribe sola
   const typed = document.querySelector("[data-type]");
   if (typed) {
-    const phrases = typed.dataset.type.split("|");
+    const phrases = () => typed.dataset.type.split("|");
     const result = document.querySelector(".ox-result");
     let index = 0;
     const typePhrase = () => {
-      const phrase = phrases[index++ % phrases.length];
+      const phrase = phrases()[index++ % phrases().length];
       let length = 0;
       result.style.opacity = ".2";
       result.classList.remove("is-pop");
@@ -63,7 +68,7 @@
       };
       tick();
     };
-    if (reduceMotion) typed.textContent = phrases[0];
+    if (reduceMotion) typed.textContent = phrases()[0];
     else typePhrase();
   }
 
@@ -112,7 +117,7 @@
     });
     sample.addEventListener("focus", () => {
       stopDemo();
-      if (sample.textContent === "Tu marca") {
+      if (["Tu marca", "Your brand"].includes(sample.textContent)) {
         const range = document.createRange();
         range.selectNodeContents(sample);
         getSelection().removeAllRanges();
@@ -127,7 +132,7 @@
       event.preventDefault();
       document.execCommand("insertText", false, (event.clipboardData.getData("text") || "").slice(0, 18));
     });
-    sample.addEventListener("blur", () => { if (!sample.textContent.trim()) sample.textContent = "Tu marca"; });
+    sample.addEventListener("blur", () => { if (!sample.textContent.trim()) sample.textContent = document.documentElement.lang === "en" ? "Your brand" : "Tu marca"; });
   }
 
   // Contacto como conversación: Orion pregunta, el cliente toca respuestas y lo envía por WhatsApp
@@ -136,15 +141,39 @@
     const body = chat.querySelector("[data-chat-body]");
     const input = chat.querySelector("[data-chat-input]");
     const status = chat.querySelector("[data-chat-status]");
-    const flow = [
-      { key: "tipo", ask: "¡Hola! Soy Orion. Vamos a armar tu idea en cuatro preguntas. ¿Qué tipo de negocio tienes?",
-        options: [["Restaurante", "un restaurante"], ["Tienda", "una tienda"], ["Servicios", "un negocio de servicios profesionales"], ["Salud", "un consultorio o clínica"], ["Eventos", "un espacio para eventos"], ["Otro", "otro tipo de negocio"]] },
-      { key: "meta", ask: "¡Me encanta! ¿Qué es lo más importante que quieres lograr con tu web?",
-        options: [["Más clientes", "conseguir más clientes"], ["Vender en línea", "vender en línea"], ["Reservaciones", "recibir reservaciones"], ["Verme profesional", "verme más profesional"], ["Menú digital", "tener un menú digital"]] },
-      { key: "cuando", ask: "Perfecto. ¿Para cuándo te gustaría tenerla?",
-        options: [["Lo antes posible", "lo antes posible"], ["Este mes", "este mes"], ["Sin prisa", "sin prisa, estoy explorando opciones"]] },
-      { key: "nombre", ask: "Última pregunta: ¿cómo te llamas?", text: true }
-    ];
+    const copy = {
+      es: {
+        flow: [
+          { key: "tipo", ask: "¡Hola! Soy Orion. Vamos a armar tu idea en cuatro preguntas. ¿Qué tipo de negocio tienes?",
+            options: [["Restaurante", "un restaurante"], ["Tienda", "una tienda"], ["Servicios", "un negocio de servicios profesionales"], ["Salud", "un consultorio o clínica"], ["Eventos", "un espacio para eventos"], ["Otro", "otro tipo de negocio"]] },
+          { key: "meta", ask: "¡Me encanta! ¿Qué es lo más importante que quieres lograr con tu web?",
+            options: [["Más clientes", "conseguir más clientes"], ["Vender en línea", "vender en línea"], ["Reservaciones", "recibir reservaciones"], ["Verme profesional", "verme más profesional"], ["Menú digital", "tener un menú digital"]] },
+          { key: "cuando", ask: "Perfecto. ¿Para cuándo te gustaría tenerla?",
+            options: [["Lo antes posible", "lo antes posible"], ["Este mes", "este mes"], ["Sin prisa", "sin prisa, estoy explorando opciones"]] },
+          { key: "nombre", ask: "Última pregunta: ¿cómo te llamas?", text: true }
+        ],
+        online: "en línea", typing: "escribiendo…", placeholder: "Escribe tu nombre", nameLabel: "Tu nombre", sendLabel: "Enviar",
+        skip: "Prefiero no decirlo", done: name => `¡Listo${name ? `, ${name}` : ""}! Esto es lo que nos vas a mandar:`,
+        yours: "Tu mensaje", send: "Enviar por WhatsApp", again: "Empezar de nuevo",
+        message: a => `Hola Orion Studio${a.nombre ? `, soy ${a.nombre}` : ""}. Tengo ${a.tipo} y quiero una página web para ${a.meta}. Me gustaría tenerla ${a.cuando}.`
+      },
+      en: {
+        flow: [
+          { key: "tipo", ask: "Hi! I'm Orion. Let's shape your idea in four questions. What kind of business do you have?",
+            options: [["Restaurant", "a restaurant"], ["Store", "a store"], ["Services", "a professional services business"], ["Health", "a clinic or practice"], ["Events", "an event venue"], ["Other", "another kind of business"]] },
+          { key: "meta", ask: "Love it! What's the most important thing you want your website to do?",
+            options: [["More customers", "get more customers"], ["Sell online", "sell online"], ["Bookings", "take bookings"], ["Look professional", "look more professional"], ["Digital menu", "have a digital menu"]] },
+          { key: "cuando", ask: "Perfect. When would you like to have it?",
+            options: [["As soon as possible", "as soon as possible"], ["This month", "this month"], ["No rush", "with no rush, I'm exploring options"]] },
+          { key: "nombre", ask: "Last question: what's your name?", text: true }
+        ],
+        online: "online", typing: "typing…", placeholder: "Type your name", nameLabel: "Your name", sendLabel: "Send",
+        skip: "I'd rather not say", done: name => `Done${name ? `, ${name}` : ""}! Here's what you'll send us:`,
+        yours: "Your message", send: "Send on WhatsApp", again: "Start over",
+        message: a => `Hi Orion Studio${a.nombre ? `, I'm ${a.nombre}` : ""}. I have ${a.tipo} and I want a website to ${a.meta}. I'd like to have it ${a.cuando}.`
+      }
+    };
+    const t = () => copy[document.documentElement.lang === "en" ? "en" : "es"];
     const answers = {};
     let started = false;
     const timers = [];
@@ -159,7 +188,7 @@
       return p;
     };
     const botSays = async text => {
-      status.textContent = "escribiendo…";
+      status.textContent = t().typing;
       const typing = document.createElement("p");
       typing.className = "ox-msg bot typing";
       typing.innerHTML = "<i></i><i></i><i></i>";
@@ -167,32 +196,28 @@
       scrollDown();
       await wait(650 + Math.min(text.length * 12, 900));
       typing.remove();
-      status.textContent = "en línea";
+      status.textContent = t().online;
       bubble(text, "bot");
     };
-    const message = () => {
-      let text = `Hola Orion Studio${answers.nombre ? `, soy ${answers.nombre}` : ""}. `;
-      text += `Tengo ${answers.tipo} y quiero una página web para ${answers.meta}. `;
-      text += `Me gustaría tenerla ${answers.cuando}.`;
-      return text;
-    };
+    const message = () => t().message(answers);
     const ask = async step => {
       input.replaceChildren();
+      const flow = t().flow;
       if (step >= flow.length) return finish();
       const item = flow[step];
       await botSays(item.ask);
       if (item.text) {
         const form = document.createElement("form");
         form.className = "ox-name-form";
-        form.innerHTML = '<input name="nombre" autocomplete="given-name" placeholder="Escribe tu nombre" aria-label="Tu nombre" maxlength="40"><button type="submit" aria-label="Enviar"><svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>';
+        form.innerHTML = `<input name="nombre" autocomplete="given-name" placeholder="${t().placeholder}" aria-label="${t().nameLabel}" maxlength="40"><button type="submit" aria-label="${t().sendLabel}"><svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>`;
         const skip = document.createElement("button");
         skip.type = "button";
         skip.className = "ox-reply ghost";
-        skip.textContent = "Prefiero no decirlo";
+        skip.textContent = t().skip;
         input.append(form, skip);
         const reply = value => {
           answers.nombre = value;
-          bubble(value || "Prefiero no decirlo", "me");
+          bubble(value || t().skip, "me");
           ask(step + 1);
         };
         form.addEventListener("submit", event => { event.preventDefault(); reply(form.elements.nombre.value.trim()); });
@@ -215,10 +240,10 @@
       });
     };
     const finish = async () => {
-      await botSays(`¡Listo${answers.nombre ? `, ${answers.nombre}` : ""}! Esto es lo que nos vas a mandar:`);
+      await botSays(t().done(answers.nombre));
       const summary = bubble(message(), "bot", "summary");
       const label = document.createElement("small");
-      label.textContent = "Tu mensaje";
+      label.textContent = t().yours;
       summary.prepend(label);
       const number = window.ORION_WHATSAPP || "525522574365";
       const send = document.createElement("a");
@@ -226,11 +251,11 @@
       send.href = `https://wa.me/${number}?text=${encodeURIComponent(message())}`;
       send.target = "_blank";
       send.rel = "noopener";
-      send.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 18.8L4 20z"/></svg>Enviar por WhatsApp';
+      send.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 18.8L4 20z"/></svg>${t().send}`;
       const again = document.createElement("button");
       again.type = "button";
       again.className = "ox-reply ghost";
-      again.textContent = "Empezar de nuevo";
+      again.textContent = t().again;
       again.addEventListener("click", restart);
       input.replaceChildren(send, again);
     };
@@ -254,6 +279,11 @@
     addEventListener("scroll", check, { passive: true });
     check();
     setTimeout(check, 600);
+    // Al cambiar de idioma la conversación vuelve a empezar en el nuevo idioma
+    document.addEventListener("orion:lang", () => {
+      status.textContent = t().online;
+      if (started) restart();
+    });
   }
 
   // El texto de la portada se eleva y se desvanece al bajar

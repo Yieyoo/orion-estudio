@@ -9,7 +9,7 @@
       header.classList.toggle("is-scrolled", window.scrollY > hero.offsetHeight - header.offsetHeight - 24);
       // El menú se oscurece cuando debajo de él hay una sección oscura
       const line = header.offsetHeight / 2;
-      header.classList.toggle("is-dark", [...document.querySelectorAll(".ox-manifesto, .ox-show.is-dark, .ox-services, .ox-contact, .ox-footer")].some(section => {
+      header.classList.toggle("is-dark", [...document.querySelectorAll(".ox-manifesto, .ox-show.is-dark, .ox-services, .ox-sys, .ox-contact, .ox-footer")].some(section => {
         const r = section.getBoundingClientRect();
         return r.top <= line && r.bottom > line;
       }));
@@ -42,13 +42,14 @@
   const conceptModal = document.querySelector(".concept-modal");
   if (show && window.OrionConcepts) {
     const concepts = {
-      store: { name: "Tienda en línea", desc: "Filtros, colores, foto comprable y un carrito que calcula el envío gratis.", theme: ["#efe6d8", "#2a241e", "#b4532a", false] },
-      professional: { name: "Servicios profesionales", desc: "Titular animado, comparador boceto–resultado y un cotizador al instante.", theme: ["#e4e2dc", "#0e0e0e", "#ff5a1f", false] },
-      events: { name: "Eventos y espacios", desc: "Calendario de disponibilidad y una calculadora que arma el presupuesto.", theme: ["#2c3520", "#f5f0e6", "#d8c08e", true] },
-      food: { name: "Restaurante", desc: "Carta interactiva y reservaciones con horarios disponibles en tiempo real.", theme: ["#14100c", "#efe6d6", "#d99a4e", true] },
-      menu: { name: "Menú digital", desc: "Menú con QR: buscador, pedido con propina y seguimiento en vivo.", theme: ["#f7d77a", "#1d1a16", "#e2412b", false] }
+      store: { name: "Tienda en línea", en: ["Online store", "Filters, colors, a shoppable photo and a cart that tracks free shipping."], desc: "Filtros, colores, foto comprable y un carrito que calcula el envío gratis.", theme: ["#efe6d8", "#2a241e", "#b4532a", false] },
+      professional: { name: "Servicios profesionales", en: ["Professional services", "Animated headline, sketch-to-result comparison and an instant quote tool."], desc: "Titular animado, comparador boceto–resultado y un cotizador al instante.", theme: ["#e4e2dc", "#0e0e0e", "#ff5a1f", false] },
+      events: { name: "Eventos y espacios", en: ["Events and venues", "Availability calendar and a calculator that builds the budget."], desc: "Calendario de disponibilidad y una calculadora que arma el presupuesto.", theme: ["#2c3520", "#f5f0e6", "#d8c08e", true] },
+      food: { name: "Restaurante", en: ["Restaurant", "Interactive menu and reservations with real-time availability."], desc: "Carta interactiva y reservaciones con horarios disponibles en tiempo real.", theme: ["#14100c", "#efe6d6", "#d99a4e", true] },
+      menu: { name: "Menú digital", en: ["Digital menu", "QR menu: search, order with tip and live tracking."], desc: "Menú con QR: buscador, pedido con propina y seguimiento en vivo.", theme: ["#f7d77a", "#1d1a16", "#e2412b", false] }
     };
     const DURATION = 12000;
+    const english = () => document.documentElement.lang === "en";
     const tabs = [...show.querySelectorAll("[data-concept]")];
     const device = show.querySelector(".ox-show-device");
     const screen = show.querySelector(".ox-show-screen");
@@ -97,10 +98,10 @@
       show.style.setProperty("--show-ink", ink);
       show.style.setProperty("--show-accent", accent);
       show.classList.toggle("is-dark", dark);
-      description.textContent = concepts[type].desc;
+      description.textContent = english() ? concepts[type].en[1] : concepts[type].desc;
       counter.textContent = `${String(index + 1).padStart(2, "0")} / ${String(tabs.length).padStart(2, "0")}`;
       domainLabel.textContent = window.OrionConcepts.domain(type);
-      device.setAttribute("aria-label", `Probar la demo: ${concepts[type].name}`);
+      device.setAttribute("aria-label", english() ? `Try the demo: ${concepts[type].en[0]}` : `Probar la demo: ${concepts[type].name}`);
       // En celular, la pestaña activa se desliza a la vista
       tabs[index].parentElement.parentElement.scrollTo({ left: tabs[index].parentElement.offsetLeft - 20, behavior: "smooth" });
       elapsed = 0;
@@ -131,7 +132,7 @@
     const openConcept = () => {
       if (!conceptModal?.showModal) return;
       const type = tabs[index].dataset.concept;
-      document.getElementById("concept-category").textContent = `· ${concepts[type].name.toUpperCase()}`;
+      document.getElementById("concept-category").textContent = `· ${(english() ? concepts[type].en[0] : concepts[type].name).toUpperCase()}`;
       // El modal debe estar abierto antes de montar la demo para que midan bien sus elementos
       conceptModal.showModal();
       const domain = window.OrionConcepts.open(type, document.getElementById("concept-site"));
@@ -190,6 +191,10 @@
     phone.addEventListener?.("change", mountPreview);
     select(0);
     if (!reduce) requestAnimationFrame(loop);
+    document.addEventListener("orion:lang", () => {
+      const type = tabs[index].dataset.concept;
+      description.textContent = english() ? concepts[type].en[1] : concepts[type].desc;
+    });
   }
   conceptModal?.addEventListener("close", () => window.OrionConcepts?.close());
   conceptModal?.querySelector(".concept-close")?.addEventListener("click", () => conceptModal.close());
@@ -207,6 +212,11 @@
       ".ox-head > *",
       ".ox-manifesto-foot > *",
       ".ox-tile",
+      ".ox-make-body",
+      ".ox-ba-frame",
+      ".ox-ba-points li",
+      ".ox-sys-app",
+      ".ox-sys-feats li",
       ".ox-plan",
       ".ox-faq details",
       ".ox-contact-copy > *",
