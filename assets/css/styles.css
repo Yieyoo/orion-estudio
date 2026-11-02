@@ -429,7 +429,7 @@ h1,h2,h3,p { margin-top: 0; }
 .work-card .work-title>span{display:inline-block;margin-bottom:1px;color:#ffffffc9;font-size:7px;letter-spacing:1.35px}
 .work-card .work-title h3{margin-top:7px;text-wrap:balance;text-shadow:0 2px 18px #0005}
 .work-card .work-caption{position:relative;min-height:76px;padding:16px 48px 13px 18px;background:linear-gradient(115deg,#fbfaf7,#f1efe9);}
-.work-card .work-caption:after{content:"↗";position:absolute;right:17px;top:50%;width:27px;height:27px;display:grid;place-items:center;transform:translateY(-50%);border:1px solid #d9d7d0;border-radius:50%;color:var(--blue);font-size:14px;transition:background .2s,color .2s,transform .2s}
+.work-card .work-caption:after{content:"↗︎";position:absolute;right:17px;top:50%;width:27px;height:27px;display:grid;place-items:center;transform:translateY(-50%);border:1px solid #d9d7d0;border-radius:50%;color:var(--blue);font-size:14px;transition:background .2s,color .2s,transform .2s}
 .work-card:hover .work-caption:after{background:var(--blue);color:#fff;transform:translateY(-50%) rotate(45deg)}
 .work-card .work-caption h3{font:600 13px var(--display);letter-spacing:-.01em}
 .work-card[data-position="1"],.work-card[data-position="-1"]{opacity:.82}
@@ -636,7 +636,7 @@ h1,h2,h3,p { margin-top: 0; }
 .concept-nav-links a{color:#777a80;font:7px var(--mono);letter-spacing:.55px;text-decoration:none;white-space:nowrap}
 .concept-nav-links a:hover{color:var(--blue)}
 .concept-nav-action{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #d9d9d5;color:inherit;font:7px var(--mono);letter-spacing:.3px;text-decoration:none;white-space:nowrap}
-.concept-nav-action:after{content:"↗";color:var(--blue);font-size:11px}
+.concept-nav-action:after{content:"↗︎";color:var(--blue);font-size:11px}
 .concept-cards article{position:relative;overflow:hidden;min-height:250px;padding:0 0 14px;background:#fff}
 .concept-card-image{height:132px;overflow:hidden;background:#dedbd4}
 .concept-card-image img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
@@ -968,7 +968,7 @@ h1,h2,h3,p { margin-top: 0; }
 .marquee-track{display:flex;flex:none;min-width:100%;justify-content:space-around;margin:0;padding:0;list-style:none;animation:marquee 32s linear infinite}
 .marquee:hover .marquee-track{animation-play-state:paused}
 .marquee li{display:flex;align-items:center;gap:28px;padding:19px 0 19px 28px;white-space:nowrap;font:500 clamp(14px,1.4vw,18px) var(--display);letter-spacing:-.01em}
-.marquee li:after{content:"✳";color:#c7d3ff;font-size:.9em}
+.marquee li:after{content:"";flex:none;width:13px;height:13px;background:#c7d3ff;clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%)}
 @keyframes marquee{to{transform:translateX(-100%)}}
 @media(max-width:700px){.marquee li{padding-block:14px;gap:20px;padding-left:20px}}
 
@@ -989,3 +989,6 @@ h1,h2,h3,p { margin-top: 0; }
   .marquee-track{animation:none}.marquee-track[aria-hidden]{display:none}.marquee{flex-wrap:wrap}.marquee-track{min-width:0;flex-wrap:wrap;justify-content:center}
   .whatsapp-float:before{animation:none;display:none}
 }
+
+/* Celular: espacio bajo el texto del hero para el orbe con sus anillos */
+@media(max-width:700px){.hero-immersive{padding-bottom:340px}}

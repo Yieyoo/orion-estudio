@@ -98,7 +98,7 @@
       if (!addButton) return;
       const bagCount = document.querySelector("#concept-site .mini-bag-count");
       bagCount.textContent = String(Number(bagCount.textContent) + 1);
-      addButton.textContent = "AGREGADO A TU BOLSA ✓";
+      addButton.textContent = "AGREGADO A TU BOLSA ✓︎";
     });
     track.addEventListener("click", event => {
       if (suppressClick) { event.preventDefault(); event.stopPropagation(); return; }
