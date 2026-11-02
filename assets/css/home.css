@@ -291,26 +291,6 @@ html{-webkit-tap-highlight-color:transparent}
 @keyframes logo-shine{0%,55%{background-position:100% 0}85%,100%{background-position:0 0}}
 @media(prefers-reduced-motion:reduce){.header .brand-mark,.header .brand-word{animation:none}}
 
-/* ------------------------------------------------------------ Cintas cruzadas */
-.ox-ribbons{position:relative;overflow:hidden;padding:58px 0 66px;background:#070b16;isolation:isolate}
-.ox-ribbon{position:relative;width:114%;margin-left:-7%;overflow:hidden}
-.ox-ribbon-back{z-index:1;margin-bottom:-56px;background:#e9edf8;color:#070b16;transform:rotate(2.4deg)}
-.ox-ribbon-front{z-index:2;background:linear-gradient(90deg,#2f52f0,#5574ff 50%,#2f52f0);color:#fff;box-shadow:0 24px 60px #365cf54d;transform:rotate(-2.6deg)}
-.ox-ribbon-track{display:flex;width:max-content;animation:ox-ribbon 46s linear infinite}
-.ox-ribbon-back .ox-ribbon-track{animation-duration:58s;animation-direction:reverse}
-.ox-ribbons:hover .ox-ribbon-track{animation-play-state:paused}
-.ox-ribbon ul{display:flex;margin:0;padding:0;list-style:none}
-.ox-ribbon li{display:flex;align-items:center;gap:30px;padding:22px 0 22px 30px;font:600 clamp(22px,2.6vw,40px)/1 var(--display);letter-spacing:-.035em;white-space:nowrap}
-.ox-ribbon li:after{content:"";flex:none;width:22px;height:22px;clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%)}
-.ox-ribbon-front li:after{background:#c7d3ff}
-.ox-ribbon-front li:nth-child(even){color:transparent;-webkit-text-stroke:1.2px #fff}
-.ox-ribbon-back li{padding:16px 0 16px 26px;font-size:clamp(18px,2vw,30px)}
-.ox-ribbon-back li:after{background:#365cf5}
-.ox-ribbon-back li:nth-child(even){color:transparent;-webkit-text-stroke:1.1px #070b16}
-@keyframes ox-ribbon{to{transform:translateX(-50%)}}
-@media(max-width:700px){.ox-ribbons{padding:40px 0 48px}.ox-ribbon-back{margin-bottom:-44px}.ox-ribbon li{gap:20px;padding:16px 0 16px 20px}.ox-ribbon li:after{width:16px;height:16px}}
-@media(prefers-reduced-motion:reduce){.ox-ribbon-track{animation:none}}
-
 /* ------------------------------------------------------------ Vitrina: invita a pasar al siguiente */
 .ox-show-deck{position:relative;isolation:isolate}
 .ox-show-deck:before,.ox-show-deck:after{content:"";position:absolute;inset:0;z-index:-1;border-radius:16px;background:color-mix(in srgb,var(--show-ink) 11%,transparent);transform:translateX(26px) scale(.95);transition:transform .6s cubic-bezier(.2,.7,.2,1),background-color .9s}
