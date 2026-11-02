@@ -129,12 +129,72 @@
     });
   });
 
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Aparición escalonada de secciones al entrar en pantalla
+  if ("IntersectionObserver" in window && !reduceMotion) {
+    const groups = [
+      ".section-head > *",
+      ".work-carousel",
+      ".services-heading > *",
+      ".service-card",
+      ".contact-content > *"
+    ];
+    const revealObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const element = entry.target;
+        element.classList.add("visible");
+        revealObserver.unobserve(element);
+        // Al terminar, devuelve el control a las transiciones y hovers propios del elemento
+        element.addEventListener("transitionend", () => {
+          element.classList.remove("reveal", "visible");
+          element.style.removeProperty("--reveal-i");
+        }, { once: true });
+      });
+    }, { threshold: 0.15, rootMargin: "0px 0px -40px 0px" });
+    groups.forEach(selector => {
+      document.querySelectorAll(selector).forEach((element, i) => {
+        element.classList.add("reveal");
+        element.style.setProperty("--reveal-i", String(i));
+        revealObserver.observe(element);
+      });
+    });
+  }
+
+  // Botones que siguen ligeramente al cursor
+  if (!reduceMotion && window.matchMedia("(pointer: fine)").matches) {
+    document.querySelectorAll("[data-magnetic]").forEach(button => {
+      button.addEventListener("pointermove", event => {
+        const rect = button.getBoundingClientRect();
+        const x = (event.clientX - rect.left - rect.width / 2) * 0.25;
+        const y = (event.clientY - rect.top - rect.height / 2) * 0.35;
+        button.style.transform = `translate(${x}px, ${y}px)`;
+      });
+      button.addEventListener("pointerleave", () => { button.style.transform = ""; });
+    });
+  }
+
+  // WhatsApp flotante: aparece después del hero y se oculta en la sección de contacto
+  const whatsappFloat = document.getElementById("whatsapp-float");
+  const contactSection = document.getElementById("contacto");
+  if (whatsappFloat && hero) {
+    const updateFloat = () => {
+      const pastHero = window.scrollY > hero.offsetHeight * 0.6;
+      const contactTop = contactSection ? contactSection.getBoundingClientRect().top : Infinity;
+      whatsappFloat.classList.toggle("is-visible", pastHero && contactTop > window.innerHeight * 0.6);
+    };
+    window.addEventListener("scroll", updateFloat, { passive: true });
+    updateFloat();
+  }
+
   const year = document.getElementById("year");
   if (year) year.textContent = new Date().getFullYear();
 
   const WHATSAPP_NUMBER = "525522574365";
-  const whatsapp = document.getElementById("whatsapp-link");
-  if (whatsapp) {
-    whatsapp.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hola Orion Studio, quiero platicar sobre un proyecto digital.")}`;
-  }
+  const whatsappHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hola Orion Studio, quiero platicar sobre un proyecto digital.")}`;
+  ["whatsapp-link", "whatsapp-float"].forEach(id => {
+    const link = document.getElementById(id);
+    if (link) link.href = whatsappHref;
+  });
 })();

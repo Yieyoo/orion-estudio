@@ -15,6 +15,8 @@
     const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
     camera.position.set(0, 0, 10);
 
+    // Altura de la esfera en celular: queda en el espacio libre bajo el texto del hero
+    const MOBILE_Y = -3.3;
     const world = new THREE.Group();
     world.position.set(2.25, 0, 0);
     scene.add(world);
@@ -151,14 +153,17 @@
       camera.aspect = bounds.width / bounds.height;
       const mobile = bounds.width < 700;
       camera.position.z = mobile ? 13.2 : 10.3;
-      world.scale.setScalar(mobile ? 0.76 : 1.04);
-      world.position.x = mobile ? 1.4 : 2.1;
-      world.position.y = mobile ? -4.25 : 0;
+      world.scale.setScalar(mobile ? 0.6 : 1.04);
+      // En celular, la esfera (con su halo) se mantiene completa dentro del ancho visible
+      const halfWidth = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.position.z * camera.aspect;
+      world.position.x = mobile ? Math.min(1.1, halfWidth - 0.95) : 2.1;
+      world.position.y = mobile ? MOBILE_Y : 0;
       ringA.visible = !mobile;
       ringB.visible = !mobile;
       arc.visible = !mobile;
       satellitePath.visible = !mobile;
       markers.forEach(marker => { marker.visible = !mobile; });
+      orbit.visible = !mobile;
       orbit.scale.set(mobile ? 0.62 : 1.05, mobile ? 0.27 : 0.82, mobile ? 0.62 : 0.62);
       camera.updateProjectionMatrix();
       renderer.render(scene, camera);
@@ -170,7 +175,7 @@
       pointer.x += (target.x - pointer.x) * 0.035;
       pointer.y += (target.y - pointer.y) * 0.035;
       world.rotation.y += reducedMotion ? 0 : 0.0018;
-      world.position.y = (window.innerWidth < 700 ? -4.25 : 0) + (reducedMotion ? 0 : Math.sin(frame * 0.006) * 0.045);
+      world.position.y = (window.innerWidth < 700 ? MOBILE_Y : 0) + (reducedMotion ? 0 : Math.sin(frame * 0.006) * 0.045);
       world.rotation.x = pointer.y * 0.055 + (reducedMotion ? 0 : Math.sin(frame * 0.003) * 0.035);
       world.rotation.z = pointer.x * 0.035;
       ringA.rotation.z += reducedMotion ? 0 : 0.0013;
