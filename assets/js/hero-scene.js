@@ -509,11 +509,28 @@
     world.add(burst);
 
     // Fragmentos sólidos que giran mientras salen disparados
-    const shardMaterial = new THREE.MeshStandardMaterial({ color: 0x2b3f78, roughness: 0.55, metalness: 0.2, emissive: 0xff7a33, emissiveIntensity: 0 });
+    const shardMaterial = new THREE.MeshStandardMaterial({ color: 0x24365f, roughness: 0.9, metalness: 0, flatShading: true, emissive: 0xff7a33, emissiveIntensity: 0 });
+    // Cada fragmento es una roca irregular distinta: los vértices se empujan al azar (igual en las caras que los comparten)
+    const rock = size => {
+      const geometry = new THREE.IcosahedronGeometry(size, 1);
+      const position = geometry.attributes.position;
+      const bumps = new Map();
+      for (let i = 0; i < position.count; i++) {
+        const key = [position.getX(i), position.getY(i), position.getZ(i)].map(v => v.toFixed(4)).join();
+        if (!bumps.has(key)) bumps.set(key, 0.62 + Math.random() * 0.6);
+        const k = bumps.get(key);
+        position.setXYZ(i, position.getX(i) * k, position.getY(i) * k, position.getZ(i) * k);
+      }
+      geometry.computeVertexNormals();
+      return geometry;
+    };
     const shards = Array.from({ length: isSmall ? 26 : 44 }, () => {
-      const shard = new THREE.Mesh(new THREE.IcosahedronGeometry(0.03 + Math.random() * 0.07, 0), shardMaterial);
+      const shard = new THREE.Mesh(rock(0.015 + Math.pow(Math.random(), 1.6) * 0.045), shardMaterial);
+      // Un poco alargados y aplastados, como astillas de roca
+      shard.scale.set(1 + Math.random() * 0.7, 0.55 + Math.random() * 0.4, 0.7 + Math.random() * 0.4);
+      shard.userData.base = shard.scale.clone();
       const from = new THREE.Vector3(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalize();
-      shard.userData = { from: from.clone().multiplyScalar(0.9), vel: from.multiplyScalar(1.4 + Math.random() * 3), spin: new THREE.Vector3(Math.random() * 6, Math.random() * 6, Math.random() * 6) };
+      shard.userData = { ...shard.userData, from: from.clone().multiplyScalar(0.9), vel: from.multiplyScalar(1.4 + Math.random() * 3), spin: new THREE.Vector3(Math.random() * 6, Math.random() * 6, Math.random() * 6) };
       shard.visible = false;
       world.add(shard);
       return shard;
@@ -557,11 +574,13 @@
       burstMaterial.uniforms.uSpread.value = spread;
       burstMaterial.uniforms.uHeat.value = t < BLAST ? 0 : Math.exp(-(t - BLAST) * 2.4);
       burstMaterial.uniforms.uTime.value = elapsed;
-      shardMaterial.emissiveIntensity = t < BLAST ? 0 : Math.exp(-(t - BLAST) * 1.8) * 2.2;
+      shardMaterial.emissiveIntensity = t < BLAST ? 0 : Math.exp(-(t - BLAST) * 1.8) * 1.5;
       shards.forEach(shard => {
         shard.visible = exploded;
-        const { from, vel, spin } = shard.userData;
+        const { from, vel, spin, base } = shard.userData;
         shard.position.copy(from).addScaledVector(vel, spread);
+        // Se hacen más pequeños conforme se alejan, como si se perdieran en el espacio
+        shard.scale.copy(base).multiplyScalar(1 / (1 + spread * 0.7));
         shard.rotation.set(spin.x * spread, spin.y * spread, spin.z * spread);
       });
       // Destello, onda expansiva y temblor de cámara
