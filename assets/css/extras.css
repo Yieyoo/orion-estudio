@@ -381,6 +381,68 @@ html[lang="es"] .lang-toggle span:first-child,html[lang="en"] .lang-toggle span:
   .ox-make-site .mk-btable span,.ox-make-site .mk-btable b,.ox-make-site .mk-btable em{padding:7px 6px;font-size:11px}
   .ox-make-site .mk-bstrip{padding:9px;font-size:12px}
 }
+
+/* Acabado visual propio para cada concepto del armador */
+.ox-make-site .mk{position:relative;isolation:isolate}
+.ox-make-site .mk-nav{position:sticky;top:0;z-index:5;border-bottom:1px solid color-mix(in srgb,var(--ink) 10%,transparent);background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px)}
+.ox-make-site .mk-nav-cta{box-shadow:0 8px 20px color-mix(in srgb,var(--accent) 22%,transparent);transition:transform .25s,box-shadow .25s}
+.ox-make-site .mk-nav-cta:hover{transform:translateY(-2px);box-shadow:0 12px 24px color-mix(in srgb,var(--accent) 34%,transparent)}
+.ox-make-site .mk-copy h1,.ox-make-site .mk-ed-copy h1,.ox-make-site .mk-bcopy h1{ text-wrap:balance }
+.ox-make-site .mk-media img,.ox-make-site .mk-blob img{animation:mk-photo-in .9s cubic-bezier(.2,.7,.2,1) both}
+.ox-make-site .mk-copy>*{animation:mk-copy-in .65s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--n,0) * 90ms)}
+.ox-make-site .mk-copy small{--n:0}
+.ox-make-site .mk-copy h1{--n:1}
+.ox-make-site .mk-copy p{--n:2}
+.ox-make-site .mk-copy .mk-btn{--n:3}
+.ox-make-site .mk-cards article,.ox-make-site .mk-pcards article{animation:mk-card-in .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0) * 90ms)}
+.ox-make-site .mk-minimal .mk-media{border-radius:28px 28px 90px 28px;box-shadow:0 28px 60px -30px color-mix(in srgb,var(--ink) 40%,transparent)}
+.ox-make-site .mk-minimal .mk-copy small{display:flex;align-items:center;gap:9px;letter-spacing:.18em}
+.ox-make-site .mk-minimal .mk-copy small:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 5px color-mix(in srgb,var(--accent) 14%,transparent)}
+.ox-make-site .mk-minimal .mk-cards article{border:1px solid color-mix(in srgb,var(--ink) 8%,transparent);box-shadow:0 12px 28px -24px color-mix(in srgb,var(--ink) 40%,transparent);transition:transform .3s,box-shadow .3s}
+.ox-make-site .mk-minimal .mk-cards article:hover{transform:translateY(-4px);box-shadow:0 18px 30px -22px color-mix(in srgb,var(--ink) 40%,transparent)}
+.ox-make-site .mk-bold .mk-hero{isolation:isolate;background:#10131b}
+.ox-make-site .mk-bold .mk-media:after{background:linear-gradient(90deg,#090b12ed 0%,#090b12a8 48%,#090b1240 100%),linear-gradient(0deg,#090b1280,transparent 55%)}
+.ox-make-site .mk-bold .mk-copy small{display:inline-flex;padding:8px 11px;border:1px solid #ffffff50;border-radius:99px;background:#090b124d;color:#fff;letter-spacing:.16em}
+.ox-make-site .mk-bold .mk-copy h1{max-width:10ch;font-weight:800;line-height:.88;letter-spacing:-.065em;text-wrap:pretty}
+.ox-make-site .mk-bold .mk-btn{background:var(--accent);box-shadow:0 12px 28px color-mix(in srgb,var(--accent) 35%,transparent)}
+.ox-make-site .mk-ticker{letter-spacing:.08em}
+.ox-make-site .mk-list div{border-bottom-color:color-mix(in srgb,var(--accent) 35%,transparent)}
+.ox-make-site .mk-list strong{letter-spacing:-.055em}
+.ox-make-site .mk-cta{position:relative;overflow:hidden}
+.ox-make-site .mk-cta:after{content:"";position:absolute;right:-60px;top:-100px;width:220px;height:220px;border:1px solid color-mix(in srgb,var(--bg) 22%,transparent);border-radius:50%;box-shadow:0 0 0 28px color-mix(in srgb,var(--bg) 7%,transparent),0 0 0 58px color-mix(in srgb,var(--bg) 5%,transparent);pointer-events:none}
+.ox-make-site .mk-elegant .mk-copy small{letter-spacing:.22em}
+.ox-make-site .mk-elegant .mk-copy h1{font-weight:400;letter-spacing:-.055em}
+.ox-make-site .mk-elegant .mk-btn{border-color:color-mix(in srgb,var(--ink) 28%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ink) 6%,transparent)}
+.ox-make-site .mk-elegant .mk-media{box-shadow:0 24px 50px -34px color-mix(in srgb,var(--ink) 45%,transparent)}
+.ox-make-site .mk-elegant .mk-gallery figure:nth-child(2){transform:translateY(12px)}
+.ox-make-site .mk-elegant .mk-quote{position:relative;color:color-mix(in srgb,var(--ink) 78%,var(--accent));font-weight:400}
+.ox-make-site .mk-elegant .mk-menu{border-top:1px solid color-mix(in srgb,var(--ink) 20%,transparent)}
+.ox-make-site .mk-elegant .mk-menu div{border-bottom:1px solid color-mix(in srgb,var(--ink) 12%,transparent)}
+.ox-make-site .mk-editorial .mk-mast{background:color-mix(in srgb,var(--soft) 48%,var(--bg))}
+.ox-make-site .mk-editorial .mk-ed-grid .mk-media{box-shadow:14px 14px 0 color-mix(in srgb,var(--accent) 18%,transparent)}
+.ox-make-site .mk-editorial .mk-ed-copy{padding-left:24px;border-left:1px solid color-mix(in srgb,var(--accent) 55%,transparent)}
+.ox-make-site .mk-editorial .mk-ed-copy h1{font-weight:400}
+.ox-make-site .mk-editorial .mk-ed-cols article{position:relative}
+.ox-make-site .mk-editorial .mk-ed-cols article:after{content:"";position:absolute;right:12px;top:24px;width:5px;height:5px;border-radius:50%;background:var(--accent)}
+.ox-make-site .mk-playful .mk-nav-cta,.ox-make-site .mk-playful .mk-btn{box-shadow:0 5px 0 color-mix(in srgb,var(--accent) 58%,var(--ink)),0 12px 24px color-mix(in srgb,var(--accent) 24%,transparent)}
+.ox-make-site .mk-playful .mk-blob img{box-shadow:0 22px 50px -22px color-mix(in srgb,var(--accent) 55%,transparent)}
+.ox-make-site .mk-playful .mk-sticker:not(.s2){animation:mk-sticker-in .65s .3s cubic-bezier(.2,.8,.2,1) both}
+.ox-make-site .mk-playful .mk-pcards article{transition:transform .35s,box-shadow .35s}
+.ox-make-site .mk-playful .mk-pcards article:hover{z-index:2;transform:rotate(0) translateY(-5px);box-shadow:0 22px 36px #0002}
+.ox-make-site .mk-brutal .mk-bnav{align-items:stretch;background:var(--bg)}
+.ox-make-site .mk-brutal .mk-bnav b{letter-spacing:-.06em}
+.ox-make-site .mk-brutal .mk-bhero{background:var(--soft)}
+.ox-make-site .mk-brutal .mk-bcopy h1{letter-spacing:-.075em}
+.ox-make-site .mk-brutal .mk-bmedia img{filter:saturate(.82) contrast(1.05)}
+.ox-make-site .mk-brutal .mk-btable div:nth-child(2){background:color-mix(in srgb,var(--accent) 10%,var(--bg))}
+.ox-make-site .mk-brutal .mk-btable em{color:var(--accent)}
+@keyframes mk-photo-in{from{opacity:.55;transform:scale(1.045)}to{opacity:1;transform:scale(1)}}
+@keyframes mk-copy-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes mk-card-in{from{opacity:0;translate:0 12px}to{opacity:1;translate:0 0}}
+@keyframes mk-sticker-in{from{opacity:0;transform:translateY(8px) rotate(-14deg) scale(.85)}to{opacity:1;transform:translateY(0) rotate(-8deg) scale(1)}}
+@media(prefers-reduced-motion:reduce){
+  .ox-make-site .mk-media img,.ox-make-site .mk-blob img,.ox-make-site .mk-copy>*,.ox-make-site .mk-cards article,.ox-make-site .mk-pcards article,.ox-make-site .mk-playful .mk-sticker{animation:none!important}
+}
 @media(max-width:1000px){
   .ox-make-body{grid-template-columns:1fr;gap:30px}
   .ox-make-panel{position:static;order:2}
@@ -388,7 +450,15 @@ html[lang="es"] .lang-toggle span:first-child,html[lang="en"] .lang-toggle span:
 }
 @media(max-width:700px){
   .ox-make{padding:90px 5% 80px}
-  .ox-make-panel{padding:20px 16px;border-radius:22px}
+  .ox-make-panel{gap:14px;padding:16px 14px;border-radius:22px}
+  .ox-make-name input{height:44px}
+  .ox-make-group{gap:7px;min-width:0}
+  .ox-make-chips,.ox-make-palettes,.ox-make-styles{flex-wrap:nowrap;max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin;scrollbar-color:#c9c5bb transparent}
+  .ox-make-chips::-webkit-scrollbar,.ox-make-palettes::-webkit-scrollbar,.ox-make-styles::-webkit-scrollbar{height:3px}
+  .ox-make-chips::-webkit-scrollbar-thumb,.ox-make-palettes::-webkit-scrollbar-thumb,.ox-make-styles::-webkit-scrollbar-thumb{border-radius:99px;background:#c9c5bb}
+  .ox-make-chips button,.ox-make-palettes button{flex:0 0 auto;scroll-snap-align:start}
+  .ox-make-styles button{flex:0 0 88px;min-width:88px;padding:8px 6px;scroll-snap-align:start}
+  .ox-make-styles{scroll-snap-type:x proximity}
   .ox-make-phone{right:-6px;width:34%;border-radius:22px;padding:5px}
   .ox-make-phone .ox-make-screen{border-radius:18px}
 }
