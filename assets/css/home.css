@@ -322,14 +322,6 @@ html{-webkit-tap-highlight-color:transparent}
 .ox-show.has-swiped .ox-show-swipe{opacity:0;transition:opacity .4s}
 @keyframes ox-nudge{0%,70%,100%{transform:translateX(0)}80%{transform:translateX(4px)}90%{transform:translateX(-1px)}}
 @keyframes ox-swipe{0%{transform:translateX(36px);opacity:0}25%{opacity:1}75%{transform:translateX(0);opacity:1}100%{transform:translateX(0);opacity:0}}
-@media(max-width:760px){
-  .ox-show-deck{width:min(300px,80vw);margin:0 auto}
-  .ox-show-deck .ox-show-device{width:100%}
-  .ox-show-deck:before,.ox-show-deck:after{border-radius:44px;transform:translateX(16px) scale(.94)}
-  .ox-show-deck:after{transform:translateX(32px) scale(.88)}
-  .ox-show-swipe{display:flex}
-  .ox-show-actions{flex-direction:column}
-}
 
 /* ------------------------------------------------------------ Celular con contenido real */
 .ox-phone-wrap{position:relative;flex:1;display:grid;place-items:center;min-height:430px;margin-top:22px}

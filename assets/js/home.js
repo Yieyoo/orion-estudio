@@ -59,10 +59,14 @@
       if (i === current) return;
       current = i;
       tiles.forEach((tile, k) => tile.classList.toggle("is-on", k === i));
+      [...(dots?.children || [])].forEach((dot, k) => dot.classList.toggle("is-on", k === i));
     };
+    const swipe = window.matchMedia("(max-width: 700px)");
+    const dots = document.querySelector(".ox-bento-dots");
+    if (dots) dots.innerHTML = tiles.map(() => "<i></i>").join("");
     const schedule = () => {
       clearTimeout(timer);
-      if (held || !inView) return;
+      if (held || !inView || swipe.matches) return;
       timer = setTimeout(() => { turn((current + 1) % tiles.length); schedule(); }, 6500);
     };
     bento.classList.add("is-calm");
@@ -84,6 +88,14 @@
     };
     addEventListener("scroll", check, { passive: true });
     check();
+    // Carrusel en celular: se anima la tarjeta que queda al centro
+    const middle = tile => tile.offsetLeft + tile.offsetWidth / 2;
+    bento.addEventListener("scroll", () => {
+      if (!swipe.matches) return;
+      const center = bento.scrollLeft + bento.clientWidth / 2;
+      turn(tiles.reduce((best, tile, k) => Math.abs(middle(tile) - center) < Math.abs(middle(tiles[best]) - center) ? k : best, 0));
+    }, { passive: true });
+    swipe.addEventListener?.("change", schedule);
   }
 
   // Búsqueda de Google que se escribe sola

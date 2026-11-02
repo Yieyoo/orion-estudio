@@ -802,24 +802,63 @@ html[lang="es"] .lang-toggle span:first-child,html[lang="en"] .lang-toggle span:
 html.no-intro .hero-boom{animation-delay:1.2s}
 @media(max-width:700px){.hero-boom{right:5%;bottom:58px}}
 
-/* ------------------------------------------------------------ Vitrina en celular: teléfonos vecinos y puntos */
-.ox-show-peek,.ox-show-dots{display:none}
+/* ------------------------------------------------------------ Vitrina en celular: un teléfono al centro, vecinos que se asoman y un solo control */
+.ox-show-peek{display:none}
+.ox-show-label strong,.ox-show-progress{display:none}
+.ox-show-label small{font:inherit}
 @media(max-width:760px){
-  .ox-show-deck{width:min(270px,68vw)}
+  .ox-show{padding:84px 0 76px;overflow-x:clip}
+  .ox-show-head{margin-bottom:34px}
+  .ox-show-body{grid-template-columns:minmax(0,1fr);gap:0}
+  .ox-show-body,.ox-show-stage,.ox-show-head>*{min-width:0;max-width:100%}
+  .ox-show-list,.ox-show-hint{display:none}
+  .ox-show-stage{gap:0;padding:0 6%}
+  .ox-show-deck{width:min(256px,64vw);margin:0 auto}
   .ox-show-deck:before,.ox-show-deck:after{display:none}
-  .ox-show-peek{position:absolute;top:7%;bottom:7%;left:0;z-index:-1;display:block;width:100%;padding:8px;border:0;border-radius:40px;background:#0b0d12;opacity:.55;filter:brightness(.55) saturate(.8);box-shadow:0 20px 40px #0006;cursor:pointer;transition:transform .55s cubic-bezier(.2,.7,.2,1),opacity .3s}
-  .ox-show-peek.is-prev{transform:translateX(-66%) rotate(-6deg) scale(.78)}
-  .ox-show-peek.is-next{transform:translateX(66%) rotate(6deg) scale(.78)}
-  .ox-show-peek:active{opacity:.85;filter:none}
-  .ox-show-swipe{gap:10px;font-size:10px;letter-spacing:.06em;text-align:center}
-  .ox-show-peek span{display:block;height:100%;border-radius:32px;background:var(--cover) center/cover,var(--peek-bg,#333)}
-  .ox-show-dots{display:flex;justify-content:center;gap:8px}
-  .ox-show-dots i{position:relative;width:8px;height:8px;overflow:hidden;border-radius:99px;background:color-mix(in srgb,var(--show-ink) 22%,transparent);transition:width .4s cubic-bezier(.2,.7,.2,1)}
-  .ox-show-dots i.is-on{width:36px}
-  .ox-show-dots b{position:absolute;inset:0;background:var(--show-accent);transform:scaleX(var(--p,0));transform-origin:left}
-  .ox-show-nav{display:none}
-  .ox-show-actions{width:100%}
-  .ox-show-cta{justify-content:center;width:100%;padding:18px 24px;font-size:15px}
-  .ox-show-meta p{font-size:14px}
+  .ox-show-deck .ox-show-device{width:100%;aspect-ratio:9/18;padding:8px;border-radius:42px;box-shadow:0 44px 70px -30px #000c,inset 0 0 0 1.5px #ffffff1f}
+  .ox-show-deck .ox-show-device:before{top:16px;width:28%;height:20px}
+  .ox-show-screen{border-radius:34px}
+  .ox-show-peek{position:absolute;top:8%;bottom:8%;left:0;z-index:-1;display:block;width:100%;padding:6px;border:0;border-radius:36px;background:#0b0d12;opacity:.38;cursor:pointer;transition:transform .6s cubic-bezier(.2,.7,.2,1),opacity .3s}
+  .ox-show-peek.is-prev{transform:translateX(-97%) scale(.84)}
+  .ox-show-peek.is-next{transform:translateX(97%) scale(.84)}
+  .ox-show-peek:active{opacity:.7}
+  .ox-show-peek span{display:block;height:100%;border-radius:30px;background:var(--cover) center/cover,var(--peek-bg,#333)}
+  .ox-show-deck.is-nudge .ox-show-device{animation:ox-show-nudge 1.5s .4s cubic-bezier(.45,0,.2,1) 2}
+  .ox-show-meta{display:grid;gap:0;margin-top:30px;text-align:center}
+  .ox-show-actions{display:contents}
+  .ox-show-nav{order:1;display:grid;grid-template-columns:48px minmax(0,1fr) 48px;align-items:center;gap:10px;width:100%;padding:0;border:0}
+  .ox-show-nav button{width:48px;height:48px;border:1px solid color-mix(in srgb,var(--show-ink) 20%,transparent)}
+  .ox-show-nav button[data-show-step="1"]{border-color:transparent}
+  .ox-show-nav .ox-show-label{display:grid;justify-items:center;gap:6px;min-width:0}
+  .ox-show-label small{font:500 10.5px var(--mono);letter-spacing:.14em;opacity:.6}
+  .ox-show-label strong{display:block;max-width:100%;overflow:hidden;font:600 21px/1.1 var(--display);letter-spacing:-.03em;white-space:nowrap;text-overflow:ellipsis}
+  .ox-show-progress{position:relative;display:block;width:64px;height:2px;margin-top:4px;overflow:hidden;border-radius:2px;background:color-mix(in srgb,var(--show-ink) 16%,transparent)}
+  .ox-show-progress b{position:absolute;inset:0;background:var(--show-accent);transform:scaleX(var(--p,0));transform-origin:left}
+  .ox-show-meta p{order:2;max-width:300px;margin:14px auto 22px;font-size:14px;line-height:1.55}
+  .ox-show-cta{order:3;justify-content:center;width:100%;padding:17px 24px;font-size:15px}
 }
-@media(max-width:760px){.ox-show{overflow-x:clip}.ox-show-body{grid-template-columns:minmax(0,1fr)}.ox-show-body,.ox-show-list,.ox-show-stage,.ox-show-head>*{min-width:0;max-width:100%}.ox-show-list{width:100%;box-sizing:border-box}}
+@keyframes ox-show-nudge{0%,100%{transform:none}35%{transform:translateX(-24px) rotate(-1.5deg)}65%{transform:translateX(5px)}}
+
+/* ------------------------------------------------------------ Celular: servicios en carrusel y menos espacio entre secciones */
+.ox-bento-dots{display:none}
+@media(max-width:700px){
+  .ox-services{padding:80px 0 70px}
+  .ox-services .ox-head{padding:0 5%}
+  .ox-bento{position:relative;display:flex;gap:12px;overflow-x:auto;padding:0 7% 4px;scroll-snap-type:x mandatory;scroll-padding:0 7%;scrollbar-width:none;overscroll-behavior-x:contain}
+  .ox-bento::-webkit-scrollbar{display:none}
+  .ox-bento .ox-tile{flex:0 0 86%;min-height:460px;scroll-snap-align:center}
+  .ox-bento .ox-phone-wrap{min-height:360px}
+  .ox-bento-dots{display:flex;justify-content:center;gap:7px;margin-top:22px}
+  .ox-bento-dots i{width:7px;height:7px;border-radius:99px;background:#ffffff2e;transition:width .35s cubic-bezier(.2,.7,.2,1),background-color .35s}
+  .ox-bento-dots i.is-on{width:26px;background:#9fb1ff}
+  .ox-manifesto{padding:84px 6% 56px}
+  .ox-ba{padding:10px 5% 76px}
+  .ox-process{gap:56px;padding:80px 6% 76px}
+  .ox-process .ox-head{margin-bottom:32px}
+  .ox-steps{gap:24px}
+  .ox-steps li:not(:last-child):after{height:calc(100% + 24px)}
+  .ox-step-card h3{font-size:19px}
+  .ox-step-card p{font-size:14px}
+  .ox-faq summary{padding:20px 0}
+}
+@media(max-width:760px){html,body{overflow-x:clip}}

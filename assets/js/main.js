@@ -57,10 +57,11 @@
     const description = show.querySelector("[data-show-desc]");
     const counter = show.querySelector("[data-show-count]");
     const peeks = [...show.querySelectorAll(".ox-show-peek")];
-    const dots = show.querySelector(".ox-show-dots");
+    const nameLabel = show.querySelector("[data-show-name]");
+    const progress = show.querySelector(".ox-show-progress");
+    const deck = show.querySelector(".ox-show-deck");
     // Foto de portada de cada concepto, para los teléfonos que se asoman a los lados en celular
     const covers = { store: "1616486338812-3dadae4b4ace", professional: "1600585154340-be6161a56a0c", events: "1523438885200-e635ba2c371e", food: "1517248135467-4c7edcad34c4", menu: "1613514785940-daed07799d9b" };
-    dots.innerHTML = tabs.map(() => "<i><b></b></i>").join("");
     const phone = window.matchMedia("(max-width: 760px)");
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let index = 0;
@@ -99,7 +100,8 @@
         tab.setAttribute("aria-selected", String(i === index));
         tab.style.setProperty("--p", "0");
       });
-      [...dots.children].forEach((dot, i) => { dot.classList.toggle("is-on", i === index); dot.style.setProperty("--p", "0"); });
+      progress.style.setProperty("--p", "0");
+      nameLabel.textContent = english() ? concepts[type].en[0] : concepts[type].name;
       peeks.forEach(peek => {
         const near = tabs[(index + Number(peek.dataset.showStep) + tabs.length) % tabs.length].dataset.concept;
         peek.style.setProperty("--cover", `url("https://images.unsplash.com/photo-${covers[near]}?auto=format&fit=crop&w=400&q=70")`);
@@ -134,7 +136,7 @@
       elapsed += delta;
       const t = Math.min(elapsed / DURATION, 1);
       tabs[index].style.setProperty("--p", t.toFixed(3));
-      dots.children[index]?.style.setProperty("--p", t.toFixed(3));
+      progress.style.setProperty("--p", t.toFixed(3));
       // Espera un momento arriba, recorre la página y pasa al siguiente concepto
       const max = site.scrollHeight - site.clientHeight;
       site.scrollTop = max * ease(Math.min(Math.max((t - 0.1) / 0.82, 0), 1));
@@ -170,7 +172,8 @@
       if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(event.clientY - dragStart.y)) {
         dragged = true;
         device.classList.add("is-dragging");
-        device.style.translate = `${dx * 0.35}px 0`;
+        device.style.translate = `${dx * 0.6}px 0`;
+        device.style.rotate = `${dx * 0.02}deg`;
       }
     });
     const endDrag = event => {
@@ -179,6 +182,7 @@
       dragStart = null;
       device.classList.remove("is-dragging");
       device.style.translate = "";
+      device.style.rotate = "";
       if (dragged && Math.abs(dx) > 50) {
         show.classList.add("has-swiped");
         select(index + (dx < 0 ? 1 : -1), dx < 0 ? 1 : -1);
@@ -197,7 +201,16 @@
     });
     device.addEventListener("pointerenter", event => { if (event.pointerType === "mouse") hovering = true; });
     device.addEventListener("pointerleave", () => { hovering = false; });
-    new IntersectionObserver(entries => { visible = entries[0].isIntersecting; }, { threshold: 0.25 }).observe(device);
+    // La primera vez que se ve en celular, el teléfono amaga con deslizarse para invitar a hacerlo
+    let nudged = false;
+    new IntersectionObserver(entries => {
+      visible = entries[0].isIntersecting;
+      if (visible && !nudged && phone.matches && !reduce && !show.classList.contains("has-swiped")) {
+        nudged = true;
+        deck.classList.add("is-nudge");
+        deck.addEventListener("animationend", () => deck.classList.remove("is-nudge"), { once: true });
+      }
+    }, { threshold: 0.25 }).observe(device);
     if ("ResizeObserver" in window) new ResizeObserver(fit).observe(screen);
     // Al cruzar entre celular y escritorio la demo se vuelve a montar con su otro diseño
     phone.addEventListener?.("change", mountPreview);
@@ -206,6 +219,7 @@
     document.addEventListener("orion:lang", () => {
       const type = tabs[index].dataset.concept;
       description.textContent = english() ? concepts[type].en[1] : concepts[type].desc;
+      nameLabel.textContent = english() ? concepts[type].en[0] : concepts[type].name;
     });
   }
   conceptModal?.addEventListener("close", () => window.OrionConcepts?.close());
