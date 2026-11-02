@@ -18,7 +18,7 @@
     ["ESTUDIO DIGITAL INDEPENDIENTE · CDMX", "INDEPENDENT DIGITAL STUDIO · MEXICO CITY"],
     ["Diseñamos sitios web y experiencias digitales que hacen que tu negocio se vea tan bien como lo que ofrece.", "We design websites and digital experiences that make your business look as good as what it offers."],
     ["Cuéntame tu idea", "Tell me your idea"], ["Ver conceptos", "See concepts"],
-    ["ESTRATEGIA", "STRATEGY"], ["DISEÑO", "DESIGN"], ["DESARROLLO", "DEVELOPMENT"], ["DESLIZA PARA EXPLORAR", "SCROLL TO EXPLORE"],
+    ["ESTRATEGIA", "STRATEGY"], ["DISEÑO", "DESIGN"], ["DESARROLLO", "DEVELOPMENT"], ["DESLIZA PARA EXPLORAR", "SCROLL TO EXPLORE"], ["TOCA EL PLANETA", "TAP THE PLANET"],
     ["POR QUÉ ORION", "WHY ORION"],
     ["Diseño original, sin plantillas", "Original design, no templates"],
     ["Pensado primero para el celular", "Mobile-first by design"],

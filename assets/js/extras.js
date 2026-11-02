@@ -18,23 +18,23 @@
   /* ------------------------------------------------------------ Arma tu sitio en vivo */
   const giros = {
     cafe: { img: "1509042239860-f550ce710b93", img2: "1501339847302-ac426a4a7cbb",
-      es: { label: "Cafetería", name: "Café Aurora", tag: "Café de especialidad", headline: "Tu café favorito, a dos cuadras.", text: "Granos mexicanos tostados en casa, pan del día y un lugar para quedarte.", cta: "Ordenar para llevar", links: ["Menú", "Nosotros", "Ubicación"], items: [["Espresso", "$45"], ["Latte de temporada", "$68"], ["Pan de la casa", "$38"]], strip: "Pide desde tu celular y recoge sin hacer fila" },
-      en: { label: "Coffee shop", name: "Aurora Coffee", tag: "Specialty coffee", headline: "Your favorite coffee, around the corner.", text: "Mexican beans roasted in house, fresh bread and a place to stay.", cta: "Order to go", links: ["Menu", "About", "Location"], items: [["Espresso", "$45"], ["Seasonal latte", "$68"], ["House bread", "$38"]], strip: "Order from your phone and skip the line" } },
+      es: { label: "Cafetería", name: "Café Aurora", tag: "Café de especialidad", headline: "Tu café favorito, a dos cuadras.", text: "Granos mexicanos tostados en casa, pan del día y un lugar para quedarte.", cta: "Ordenar para llevar", links: ["Menú", "Nosotros", "Ubicación"], items: [["Espresso", "$45"], ["Latte de temporada", "$68"], ["Pan de la casa", "$38"]], about: "Tostamos cada semana en pequeños lotes para que cada taza sepa a su origen.", quote: "El mejor latte de la colonia, y siempre te reciben con una sonrisa.", strip: "Pide desde tu celular y recoge sin hacer fila" },
+      en: { label: "Coffee shop", name: "Aurora Coffee", tag: "Specialty coffee", headline: "Your favorite coffee, around the corner.", text: "Mexican beans roasted in house, fresh bread and a place to stay.", cta: "Order to go", links: ["Menu", "About", "Location"], items: [["Espresso", "$45"], ["Seasonal latte", "$68"], ["House bread", "$38"]], about: "We roast small batches every week so each cup tastes like its origin.", quote: "The best latte in the neighborhood, always served with a smile.", strip: "Order from your phone and skip the line" } },
     barber: { img: "1585747860715-2ba37e788b70", img2: "1622286342621-4bd786c2447c",
-      es: { label: "Barbería", name: "Barbería Norte", tag: "Cortes clásicos y modernos", headline: "Sal sintiéndote como nuevo.", text: "Corte, barba y toalla caliente con barberos que saben lo que hacen.", cta: "Agendar cita", links: ["Servicios", "Barberos", "Citas"], items: [["Corte clásico", "$250"], ["Barba completa", "$180"], ["Corte + barba", "$380"]], strip: "Agenda en línea en menos de un minuto" },
-      en: { label: "Barbershop", name: "North Barbers", tag: "Classic and modern cuts", headline: "Walk out feeling brand new.", text: "Cut, beard and hot towel with barbers who know their craft.", cta: "Book now", links: ["Services", "Barbers", "Booking"], items: [["Classic cut", "$250"], ["Full beard", "$180"], ["Cut + beard", "$380"]], strip: "Book online in under a minute" } },
+      es: { label: "Barbería", name: "Barbería Norte", tag: "Cortes clásicos y modernos", headline: "Sal sintiéndote como nuevo.", text: "Corte, barba y toalla caliente con barberos que saben lo que hacen.", cta: "Agendar cita", links: ["Servicios", "Barberos", "Citas"], items: [["Corte clásico", "$250"], ["Barba completa", "$180"], ["Corte + barba", "$380"]], about: "Barberos con oficio, buena música y una cerveza fría mientras esperas.", quote: "Llevo años viniendo y nunca he salido inconforme.", strip: "Agenda en línea en menos de un minuto" },
+      en: { label: "Barbershop", name: "North Barbers", tag: "Classic and modern cuts", headline: "Walk out feeling brand new.", text: "Cut, beard and hot towel with barbers who know their craft.", cta: "Book now", links: ["Services", "Barbers", "Booking"], items: [["Classic cut", "$250"], ["Full beard", "$180"], ["Cut + beard", "$380"]], about: "Skilled barbers, good music and a cold beer while you wait.", quote: "I've been coming for years and never left unhappy.", strip: "Book online in under a minute" } },
     dental: { img: "1629909613654-28e377c37b09", img2: "1606811971618-4486d14f3f99",
-      es: { label: "Dentista", name: "Sonríe Dental", tag: "Odontología integral", headline: "Una sonrisa sana, sin miedo al dentista.", text: "Tecnología moderna, trato cálido y citas puntuales para toda la familia.", cta: "Agendar valoración", links: ["Tratamientos", "Equipo", "Contacto"], items: [["Limpieza dental", "$700"], ["Blanqueamiento", "$3,500"], ["Valoración", "$300"]], strip: "Confirmamos tu cita por WhatsApp" },
-      en: { label: "Dentist", name: "Smile Dental", tag: "Complete dental care", headline: "A healthy smile, no fear of the dentist.", text: "Modern technology, warm care and on-time appointments for the whole family.", cta: "Book a checkup", links: ["Treatments", "Team", "Contact"], items: [["Cleaning", "$700"], ["Whitening", "$3,500"], ["Checkup", "$300"]], strip: "We confirm your appointment on WhatsApp" } },
+      es: { label: "Dentista", name: "Sonríe Dental", tag: "Odontología integral", headline: "Una sonrisa sana, sin miedo al dentista.", text: "Tecnología moderna, trato cálido y citas puntuales para toda la familia.", cta: "Agendar valoración", links: ["Tratamientos", "Equipo", "Contacto"], items: [["Limpieza dental", "$700"], ["Blanqueamiento", "$3,500"], ["Valoración", "$300"]], about: "Tratamientos explicados con calma, sin sorpresas en el precio.", quote: "Por fin un dentista al que no me da miedo ir.", strip: "Confirmamos tu cita por WhatsApp" },
+      en: { label: "Dentist", name: "Smile Dental", tag: "Complete dental care", headline: "A healthy smile, no fear of the dentist.", text: "Modern technology, warm care and on-time appointments for the whole family.", cta: "Book a checkup", links: ["Treatments", "Team", "Contact"], items: [["Cleaning", "$700"], ["Whitening", "$3,500"], ["Checkup", "$300"]], about: "Treatments explained calmly, with no surprises on the bill.", quote: "Finally a dentist I'm not afraid to visit.", strip: "We confirm your appointment on WhatsApp" } },
     flowers: { img: "1487070183336-b863922373d4", img2: "1561181286-d3fee7d55364",
-      es: { label: "Florería", name: "Florería Pétalo", tag: "Arreglos hechos a mano", headline: "Flores frescas para cada momento.", text: "Arreglos a domicilio el mismo día en toda la ciudad.", cta: "Enviar flores", links: ["Arreglos", "Ocasiones", "Envíos"], items: [["Ramo de tulipanes", "$650"], ["Caja de rosas", "$890"], ["Arreglo de temporada", "$540"]], strip: "Envío el mismo día si pides antes de las 2 pm" },
-      en: { label: "Florist", name: "Petal Flowers", tag: "Handmade arrangements", headline: "Fresh flowers for every moment.", text: "Same-day delivery across the city.", cta: "Send flowers", links: ["Bouquets", "Occasions", "Delivery"], items: [["Tulip bouquet", "$650"], ["Box of roses", "$890"], ["Seasonal arrangement", "$540"]], strip: "Same-day delivery if you order before 2 pm" } },
+      es: { label: "Florería", name: "Florería Pétalo", tag: "Arreglos hechos a mano", headline: "Flores frescas para cada momento.", text: "Arreglos a domicilio el mismo día en toda la ciudad.", cta: "Enviar flores", links: ["Arreglos", "Ocasiones", "Envíos"], items: [["Ramo de tulipanes", "$650"], ["Caja de rosas", "$890"], ["Arreglo de temporada", "$540"]], about: "Flores de temporada elegidas cada mañana en el mercado.", quote: "El arreglo llegó a tiempo y más bonito que en la foto.", strip: "Envío el mismo día si pides antes de las 2 pm" },
+      en: { label: "Florist", name: "Petal Flowers", tag: "Handmade arrangements", headline: "Fresh flowers for every moment.", text: "Same-day delivery across the city.", cta: "Send flowers", links: ["Bouquets", "Occasions", "Delivery"], items: [["Tulip bouquet", "$650"], ["Box of roses", "$890"], ["Seasonal arrangement", "$540"]], about: "Seasonal flowers picked every morning at the market.", quote: "The arrangement arrived on time and prettier than the photo.", strip: "Same-day delivery if you order before 2 pm" } },
     gym: { img: "1534438327276-14e5300c3a48", img2: "1571019613454-1cb2f99b2d8b",
-      es: { label: "Gimnasio", name: "Pulso Gym", tag: "Entrena a tu ritmo", headline: "Más fuerte cada semana.", text: "Clases grupales, pesas y coaches que te acompañan desde el primer día.", cta: "Prueba una clase", links: ["Clases", "Horarios", "Planes"], items: [["Clase de prueba", "$0"], ["Mensualidad", "$799"], ["Coach personal", "$1,200"]], strip: "Reserva tu lugar en la clase desde el celular" },
-      en: { label: "Gym", name: "Pulse Gym", tag: "Train at your pace", headline: "Stronger every week.", text: "Group classes, weights and coaches with you from day one.", cta: "Try a class", links: ["Classes", "Schedule", "Plans"], items: [["Trial class", "$0"], ["Monthly", "$799"], ["Personal coach", "$1,200"]], strip: "Save your spot in class from your phone" } },
+      es: { label: "Gimnasio", name: "Pulso Gym", tag: "Entrena a tu ritmo", headline: "Más fuerte cada semana.", text: "Clases grupales, pesas y coaches que te acompañan desde el primer día.", cta: "Prueba una clase", links: ["Clases", "Horarios", "Planes"], items: [["Clase de prueba", "$0"], ["Mensualidad", "$799"], ["Coach personal", "$1,200"]], about: "Coaches certificados y un ambiente donde todos se apoyan.", quote: "En tres meses cambió por completo mi energía.", strip: "Reserva tu lugar en la clase desde el celular" },
+      en: { label: "Gym", name: "Pulse Gym", tag: "Train at your pace", headline: "Stronger every week.", text: "Group classes, weights and coaches with you from day one.", cta: "Try a class", links: ["Classes", "Schedule", "Plans"], items: [["Trial class", "$0"], ["Monthly", "$799"], ["Personal coach", "$1,200"]], about: "Certified coaches and a place where everyone has your back.", quote: "In three months my energy completely changed.", strip: "Save your spot in class from your phone" } },
     beauty: { img: "1522335789203-aabd1fc54bc9", img2: "1490750967868-88aa4486c946",
-      es: { label: "Belleza", name: "Estudio Bella", tag: "Salón de belleza", headline: "Tu mejor versión empieza aquí.", text: "Maquillaje, uñas y peinado con productos profesionales.", cta: "Reservar cita", links: ["Servicios", "Galería", "Citas"], items: [["Maquillaje social", "$900"], ["Manicure gel", "$350"], ["Peinado", "$600"]], strip: "Elige servicio, día y hora en un solo paso" },
-      en: { label: "Beauty", name: "Bella Studio", tag: "Beauty salon", headline: "Your best version starts here.", text: "Makeup, nails and hair with professional products.", cta: "Book now", links: ["Services", "Gallery", "Booking"], items: [["Event makeup", "$900"], ["Gel manicure", "$350"], ["Hairstyle", "$600"]], strip: "Pick service, day and time in one step" } }
+      es: { label: "Belleza", name: "Estudio Bella", tag: "Salón de belleza", headline: "Tu mejor versión empieza aquí.", text: "Maquillaje, uñas y peinado con productos profesionales.", cta: "Reservar cita", links: ["Servicios", "Galería", "Citas"], items: [["Maquillaje social", "$900"], ["Manicure gel", "$350"], ["Peinado", "$600"]], about: "Productos profesionales y un equipo que escucha lo que quieres.", quote: "Salí lista para la boda y me sentí increíble.", strip: "Elige servicio, día y hora en un solo paso" },
+      en: { label: "Beauty", name: "Bella Studio", tag: "Beauty salon", headline: "Your best version starts here.", text: "Makeup, nails and hair with professional products.", cta: "Book now", links: ["Services", "Gallery", "Booking"], items: [["Event makeup", "$900"], ["Gel manicure", "$350"], ["Hairstyle", "$600"]], about: "Professional products and a team that listens to what you want.", quote: "I left ready for the wedding and felt amazing.", strip: "Pick service, day and time in one step" } }
   };
   const palettes = [
     { es: "Noche", en: "Night", bg: "#0e1220", ink: "#f2f4fa", accent: "#6c8cff", soft: "#1a2033" },
@@ -53,7 +53,10 @@
   const layouts = [
     { id: "minimal", es: "Minimal", en: "Minimal" },
     { id: "bold", es: "Audaz", en: "Bold" },
-    { id: "elegant", es: "Elegante", en: "Elegant" }
+    { id: "elegant", es: "Elegante", en: "Elegant" },
+    { id: "editorial", es: "Revista", en: "Editorial" },
+    { id: "playful", es: "Divertido", en: "Playful" },
+    { id: "brutal", es: "Brutalista", en: "Brutalist" }
   ];
   const makeText = {
     es: { name: "Nombre de tu negocio", giro: "Giro", colors: "Colores", font: "Tipografía", style: "Estilo", send: "Quiero un sitio así", surprise: "Sorpréndeme" },
@@ -77,24 +80,62 @@
         <div class="ox-make-group"><span>${t.giro}</span><div class="ox-make-chips">${Object.entries(giros).map(([id, g]) => chip("giro", id, g[l].label, state.giro === id)).join("")}</div></div>
         <div class="ox-make-group"><span>${t.colors}</span><div class="ox-make-palettes">${palettes.map((p, i) => chip("palette", i, `<i style="background:${p.bg}"></i><i style="background:${p.accent}"></i><i style="background:${p.ink}"></i><small>${p[l]}</small>`, state.palette === i, `aria-label="${p[l]}"`)).join("")}</div></div>
         <div class="ox-make-group"><span>${t.font}</span><div class="ox-make-chips">${fonts.map((f, i) => chip("font", i, f[l], state.font === i, `style="font-family:${f.css.replace(/"/g, "'")}"`)).join("")}</div></div>
-        <div class="ox-make-group"><span>${t.style}</span><div class="ox-make-styles">${layouts.map(s => chip("layout", s.id, `<i class="ox-ws ox-ws-${s.id}"><b></b><b></b><b></b></i>${s[l]}`, state.layout === s.id)).join("")}</div></div>
+        <div class="ox-make-group"><span>${t.style}</span><div class="ox-make-styles">${layouts.map(s => chip("layout", s.id, `<i class="ox-ws ox-ws-${s.id}"><b></b><b></b><b></b><b></b></i>${s[l]}`, state.layout === s.id)).join("")}</div></div>
         <div class="ox-make-actions">
           <button type="button" class="ox-make-send" data-make-send>${t.send} ${arrow}</button>
           <button type="button" class="ox-make-random" data-make-random><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l10 10h3M4 17h3l3-3M14 10l3-3h3M18 4l3 3-3 3M18 14l3 3-3 3"/></svg>${t.surprise}</button>
         </div>`;
     };
 
+    // Cada plantilla tiene su propia estructura, no solo otra foto
+    const templates = {
+      minimal: c => `
+        ${c.nav}
+        <section class="mk-hero"><div class="mk-media"><img src="${c.img1}" alt=""></div><div class="mk-copy"><small>${c.t.tag}</small><h1>${c.t.headline}</h1><p>${c.t.text}</p><span class="mk-btn">${c.t.cta}</span></div></section>
+        <section class="mk-cards">${c.t.items.map(([item, price], i) => `<article><div class="mk-thumb" style="background-image:url('${i === 1 ? c.thumb2 : c.thumb1}')"></div><b>${item}</b><span>${price}</span></article>`).join("")}</section>
+        <div class="mk-strip">${c.t.strip}</div>`,
+      bold: c => `
+        ${c.nav}
+        <section class="mk-hero"><div class="mk-media"><img src="${c.img1}" alt=""></div><div class="mk-copy"><small>${c.t.tag}</small><h1>${c.t.headline}</h1><p>${c.t.text}</p><span class="mk-btn">${c.t.cta}</span></div></section>
+        <div class="mk-ticker"><div>${[...c.t.links, c.t.tag, ...c.t.links, c.t.tag].map(word => `<span>${word}</span>`).join("")}</div></div>
+        <section class="mk-list">${c.t.items.map(([item, price], i) => `<div><b>0${i + 1}</b><strong>${item}</strong><span>${price}</span></div>`).join("")}</section>
+        <section class="mk-cta"><h2>${c.t.strip}</h2><span class="mk-btn">${c.t.cta}</span></section>`,
+      elegant: c => `
+        ${c.nav}
+        <section class="mk-hero"><div class="mk-copy"><small>${c.t.tag}</small><h1>${c.t.headline}</h1><p>${c.t.text}</p><span class="mk-btn">${c.t.cta}</span></div><div class="mk-media"><img src="${c.img1}" alt=""></div></section>
+        <section class="mk-gallery">${[c.thumb1, c.thumb2, c.thumb1].map((src, i) => `<figure><img src="${src}" alt=""><figcaption>${c.t.items[i][0]}</figcaption></figure>`).join("")}</section>
+        <blockquote class="mk-quote">“${c.t.quote}”</blockquote>
+        <section class="mk-menu">${c.t.items.map(([item, price]) => `<div><span>${item}</span><i></i><b>${price}</b></div>`).join("")}</section>`,
+      editorial: c => `
+        <header class="mk-mast"><span>${c.t.tag}</span><b>${c.name}</b><span>N.º 01 · 2026</span></header>
+        <nav class="mk-nav mk-nav-thin"><span class="mk-links">${c.t.links.map(link => `<i>${link}</i>`).join("")}</span><span class="mk-nav-cta">${c.t.cta}</span></nav>
+        <section class="mk-ed-grid"><div class="mk-media"><img src="${c.img1}" alt=""></div><div class="mk-ed-copy"><small>${c.t.links[0]}</small><h1>${c.t.headline}</h1><p class="mk-drop">${c.t.about} ${c.t.text}</p><span class="mk-btn">${c.t.cta}</span></div></section>
+        <section class="mk-ed-cols">${c.t.items.map(([item, price], i) => `<article><b>0${i + 1}</b><h3>${item}</h3><p>${price}</p></article>`).join("")}</section>
+        <blockquote class="mk-pull">“${c.t.quote}”</blockquote>`,
+      playful: c => `
+        ${c.nav}
+        <section class="mk-hero"><div class="mk-copy"><span class="mk-sticker">${c.l === "en" ? "New!" : "¡Nuevo!"}</span><small>${c.t.tag}</small><h1>${c.t.headline}</h1><p>${c.t.text}</p><span class="mk-btn">${c.t.cta}</span></div><div class="mk-blob"><img src="${c.img1}" alt=""><span class="mk-sticker s2">${c.t.items[0][0]}</span></div></section>
+        <svg class="mk-wave" viewBox="0 0 1100 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30 Q 70 0 140 30 T 280 30 T 420 30 T 560 30 T 700 30 T 840 30 T 980 30 T 1120 30 V60 H0z"/></svg>
+        <section class="mk-pcards">${c.t.items.map(([item, price], i) => `<article style="--r:${[-3, 2, -2][i]}deg"><div style="background-image:url('${i === 1 ? c.thumb2 : c.thumb1}')"></div><b>${item}</b><span>${price}</span></article>`).join("")}</section>
+        <section class="mk-pquote"><p>“${c.t.quote}”</p><span class="mk-btn">${c.t.cta}</span></section>`,
+      brutal: c => `
+        <nav class="mk-bnav"><b>${c.name}</b>${c.t.links.map(link => `<span>${link}</span>`).join("")}<span class="mk-bnav-cta">${c.t.cta}</span></nav>
+        <section class="mk-bhero"><div class="mk-bcopy"><small>[ ${c.t.tag} ]</small><h1>${c.t.headline}</h1></div><div class="mk-bmedia"><img src="${c.img1}" alt=""></div><p class="mk-btext">${c.t.text}</p><span class="mk-bbtn">${c.t.cta} →</span></section>
+        <div class="mk-btable">${c.t.items.map(([item, price], i) => `<div><span>0${i + 1}</span><b>${item}</b><em>${price}</em></div>`).join("")}</div>
+        <div class="mk-bstrip">${c.t.strip} ✱ ${c.t.strip}</div>`
+    };
     const siteHtml = () => {
+      const l = lang();
       const g = giros[state.giro];
-      const t = g[lang()];
+      const t = g[l];
       const p = palettes[state.palette];
       const name = esc(state.name.trim() || t.name);
-      return `<div class="mk mk-${state.layout}" style="--bg:${p.bg};--ink:${p.ink};--accent:${p.accent};--soft:${p.soft};--font:${fonts[state.font].css.replace(/"/g, "'")}">
-        <nav class="mk-nav"><b class="mk-brand">${name}</b><span class="mk-links">${t.links.map(link => `<i>${link}</i>`).join("")}</span><span class="mk-nav-cta">${t.cta}</span></nav>
-        <section class="mk-hero"><div class="mk-media"><img src="${img(g.img, 1200)}" alt=""></div><div class="mk-copy"><small>${t.tag}</small><h1>${t.headline}</h1><p>${t.text}</p><span class="mk-btn">${t.cta}</span></div></section>
-        <section class="mk-cards">${t.items.map(([item, price], i) => `<article><div class="mk-thumb" style="background-image:url('${img(i === 1 ? g.img2 : g.img, 500)}')"></div><b>${item}</b><span>${price}</span></article>`).join("")}</section>
-        <div class="mk-strip">${t.strip}</div>
-      </div>`;
+      const c = {
+        l, t, name,
+        img1: img(g.img, 1200), thumb1: img(g.img, 500), thumb2: img(g.img2, 500),
+        nav: `<nav class="mk-nav"><b class="mk-brand">${name}</b><span class="mk-links">${t.links.map(link => `<i>${link}</i>`).join("")}</span><span class="mk-nav-cta">${t.cta}</span></nav>`
+      };
+      return `<div class="mk mk-${state.layout}" style="--bg:${p.bg};--ink:${p.ink};--accent:${p.accent};--soft:${p.soft};--font:${fonts[state.font].css.replace(/"/g, "'")}">${templates[state.layout](c)}</div>`;
     };
 
     const renderSite = () => {
@@ -105,6 +146,7 @@
         requestAnimationFrame(() => site.classList.remove("is-swap"));
       });
       const name = state.name.trim() || giros[state.giro][lang()].name;
+      tour = 0;
       domain.textContent = `${name.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]/g, "") || "tunegocio"}.mx`;
     };
 
@@ -145,6 +187,25 @@
       state.name = event.target.value;
       renderSite();
     });
+
+    // La vista previa baja y sube sola para mostrar todo el diseño; se detiene si el cursor está encima
+    let tour = 0;
+    let touring = true;
+    const stage = make.querySelector(".ox-make-stage");
+    stage.addEventListener("pointerenter", event => { if (event.pointerType === "mouse") touring = false; });
+    stage.addEventListener("pointerleave", () => { touring = true; });
+    let last = performance.now();
+    const loop = now => {
+      requestAnimationFrame(loop);
+      const delta = Math.min(now - last, 100);
+      last = now;
+      const r = make.getBoundingClientRect();
+      if (!touring || reduceMotion || r.bottom < 0 || r.top > innerHeight) return;
+      tour += delta / 14000;
+      const k = (1 - Math.cos(Math.min(Math.max((tour % 1) * 1.25 - 0.1, 0), 1) * Math.PI * 2)) / 2;
+      [desk, phone].forEach(site => { site.scrollTop = (site.scrollHeight - site.clientHeight) * k; });
+    };
+    requestAnimationFrame(loop);
 
     renderPanel();
     renderSite();

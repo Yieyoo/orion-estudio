@@ -33,10 +33,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://images.unsplash.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/styles.css?v=11">
-  <link rel="stylesheet" href="assets/css/concepts.css?v=11">
-  <link rel="stylesheet" href="assets/css/home.css?v=11">
-  <link rel="stylesheet" href="assets/css/extras.css?v=11">
+  <link rel="stylesheet" href="assets/css/styles.css?v=12">
+  <link rel="stylesheet" href="assets/css/concepts.css?v=12">
+  <link rel="stylesheet" href="assets/css/home.css?v=12">
+  <link rel="stylesheet" href="assets/css/extras.css?v=12">
 </head>
 <body>
   <div class="ox-intro" aria-hidden="true">
@@ -73,6 +73,7 @@
         </div>
         <div class="hero-note"><span>ESTRATEGIA</span><i></i><span>DISEÑO</span><i></i><span>DESARROLLO</span></div>
       </div>
+      <button class="hero-boom" type="button" data-boom><i></i><span>TOCA EL PLANETA</span></button>
       <div class="hero-scroll" aria-hidden="true"><span></span> DESLIZA PARA EXPLORAR</div>
       <div class="hero-coordinate" aria-hidden="true">19°25' N&nbsp;&nbsp; 99°08' W</div>
     </section>
@@ -104,12 +105,15 @@
         </ol>
         <div class="ox-show-stage">
           <div class="ox-show-deck">
+          <button class="ox-show-peek is-prev" type="button" data-show-step="-1" aria-label="Concepto anterior"><span></span></button>
+          <button class="ox-show-peek is-next" type="button" data-show-step="1" aria-label="Siguiente concepto"><span></span></button>
           <div class="ox-show-device" role="button" tabindex="0" data-open-concept data-cursor="Probar" aria-label="Probar la demo">
             <span class="ox-show-toolbar" aria-hidden="true"><i></i><i></i><i></i><em data-show-domain>casalino.mx</em></span>
             <span class="ox-show-screen"></span>
             <span class="ox-show-hint" aria-hidden="true">Toca para probarla <svg class="icon-arrow" viewBox="0 0 24 24"><path d="M5 19 19 5M8 5h11v11"/></svg></span>
           </div>
           </div>
+          <div class="ox-show-dots" aria-hidden="true"></div>
           <p class="ox-show-swipe" aria-hidden="true"><i></i>Desliza para ver otro concepto</p>
           <div class="ox-show-meta">
             <p data-show-desc></p>
@@ -275,31 +279,6 @@
       </ul>
     </section>
 
-    <section class="ox-sys" id="sistemas">
-      <div class="ox-head">
-        <p class="ox-kicker"><span></span>SISTEMAS A LA MEDIDA</p>
-        <h2>Más que páginas: <em>herramientas para tu negocio.</em></h2>
-        <p>También construimos sistemas: clientes, prospectos, cotizaciones y reportes en un solo lugar. Pruébalo; son datos de ejemplo.</p>
-      </div>
-      <div class="ox-sys-app" data-sys>
-        <aside class="ox-sys-side">
-          <b class="ox-sys-logo">O<span>·</span> Panel</b>
-          <nav class="ox-sys-nav" aria-label="Secciones del panel"></nav>
-          <div class="ox-sys-user"><i>TN</i><span>Tu negocio</span></div>
-        </aside>
-        <div class="ox-sys-main">
-          <header class="ox-sys-top"><h3 data-sys-title>Inicio</h3><span class="ox-sys-badge">Datos de ejemplo</span></header>
-          <div class="ox-sys-view" data-sys-view></div>
-        </div>
-      </div>
-      <ul class="ox-sys-feats">
-        <li><i class="ox-check"></i>Clientes y embudo de ventas</li>
-        <li><i class="ox-check"></i>Prospección con Google Maps</li>
-        <li><i class="ox-check"></i>Tickets y recibos por WhatsApp</li>
-        <li><i class="ox-check"></i>Reportes al día</li>
-      </ul>
-    </section>
-
     <section class="ox-process" id="proceso">
       <div class="ox-head ox-head-light">
         <p class="ox-kicker"><span></span>CÓMO TRABAJAMOS</p>
@@ -367,12 +346,12 @@
       </a>
     </div>
   </footer>
-  <script src="assets/js/i18n.js?v=11"></script>
-  <script src="assets/js/concepts.js?v=11"></script>
-  <script src="assets/js/main.js?v=11"></script>
-  <script src="assets/js/home.js?v=11"></script>
-  <script src="assets/js/extras.js?v=11"></script>
+  <script src="assets/js/i18n.js?v=12"></script>
+  <script src="assets/js/concepts.js?v=12"></script>
+  <script src="assets/js/main.js?v=12"></script>
+  <script src="assets/js/home.js?v=12"></script>
+  <script src="assets/js/extras.js?v=12"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="assets/js/hero-scene.js?v=11"></script>
+  <script src="assets/js/hero-scene.js?v=12"></script>
 </body>
 </html>

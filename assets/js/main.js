@@ -56,6 +56,11 @@
     const domainLabel = show.querySelector("[data-show-domain]");
     const description = show.querySelector("[data-show-desc]");
     const counter = show.querySelector("[data-show-count]");
+    const peeks = [...show.querySelectorAll(".ox-show-peek")];
+    const dots = show.querySelector(".ox-show-dots");
+    // Foto de portada de cada concepto, para los teléfonos que se asoman a los lados en celular
+    const covers = { store: "1616486338812-3dadae4b4ace", professional: "1600585154340-be6161a56a0c", events: "1523438885200-e635ba2c371e", food: "1517248135467-4c7edcad34c4", menu: "1613514785940-daed07799d9b" };
+    dots.innerHTML = tabs.map(() => "<i><b></b></i>").join("");
     const phone = window.matchMedia("(max-width: 760px)");
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let index = 0;
@@ -94,6 +99,12 @@
         tab.setAttribute("aria-selected", String(i === index));
         tab.style.setProperty("--p", "0");
       });
+      [...dots.children].forEach((dot, i) => { dot.classList.toggle("is-on", i === index); dot.style.setProperty("--p", "0"); });
+      peeks.forEach(peek => {
+        const near = tabs[(index + Number(peek.dataset.showStep) + tabs.length) % tabs.length].dataset.concept;
+        peek.style.setProperty("--cover", `url("https://images.unsplash.com/photo-${covers[near]}?auto=format&fit=crop&w=400&q=70")`);
+        peek.style.setProperty("--peek-bg", concepts[near].theme[0]);
+      });
       show.style.setProperty("--show-bg", bg);
       show.style.setProperty("--show-ink", ink);
       show.style.setProperty("--show-accent", accent);
@@ -123,6 +134,7 @@
       elapsed += delta;
       const t = Math.min(elapsed / DURATION, 1);
       tabs[index].style.setProperty("--p", t.toFixed(3));
+      dots.children[index]?.style.setProperty("--p", t.toFixed(3));
       // Espera un momento arriba, recorre la página y pasa al siguiente concepto
       const max = site.scrollHeight - site.clientHeight;
       site.scrollTop = max * ease(Math.min(Math.max((t - 0.1) / 0.82, 0), 1));

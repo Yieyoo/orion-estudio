@@ -428,6 +428,186 @@
       });
     }
 
+    /* ------------------------------------------------------------ Explosión al tocar el planeta */
+    // El planeta se rompe en partículas y fragmentos, el anillo se dispersa y luego todo se vuelve a armar en espiral
+    const BURST = isSmall ? 5000 : 10000;
+    const burstStart = new Float32Array(BURST * 3);
+    const burstVel = new Float32Array(BURST * 3);
+    const burstColor = new Float32Array(BURST * 3);
+    const burstSize = new Float32Array(BURST);
+    const burstSeed = new Float32Array(BURST);
+    const planetTones = [[0.16, 0.26, 0.5], [0.58, 0.66, 0.82], [0.06, 0.1, 0.26], [0.29, 0.24, 0.48], [0.75, 0.8, 0.95]];
+    const tmp = new THREE.Vector3();
+    const dir = new THREE.Vector3();
+    ring.updateMatrix();
+    for (let i = 0; i < BURST; i++) {
+      const fromRing = i < BURST * 0.38;
+      if (fromRing) {
+        const r = RING_INNER + Math.random() * (RING_OUTER - RING_INNER);
+        const a = Math.random() * Math.PI * 2;
+        tmp.set(Math.cos(a) * r, Math.sin(a) * r, (Math.random() - 0.5) * 0.03).applyMatrix4(ring.matrix);
+        dir.copy(tmp).normalize().multiplyScalar(0.7 + Math.random() * 1.8);
+        dir.y += (Math.random() - 0.5) * 0.6;
+        burstColor.set([0.78 + Math.random() * 0.15, 0.8 + Math.random() * 0.12, 0.9 + Math.random() * 0.1], i * 3);
+      } else {
+        dir.set(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalize();
+        tmp.copy(dir).multiplyScalar(0.96 + Math.random() * 0.04);
+        dir.multiplyScalar(1.1 + Math.pow(Math.random(), 2) * 3.6);
+        const tone = planetTones[Math.floor(Math.random() * planetTones.length)];
+        burstColor.set(tone, i * 3);
+      }
+      burstStart.set([tmp.x, tmp.y, tmp.z], i * 3);
+      burstVel.set([dir.x, dir.y, dir.z], i * 3);
+      burstSize[i] = 0.6 + Math.pow(Math.random(), 3) * 2.8;
+      burstSeed[i] = Math.random();
+    }
+    const burstGeometry = new THREE.BufferGeometry();
+    burstGeometry.setAttribute("position", new THREE.BufferAttribute(burstStart, 3));
+    burstGeometry.setAttribute("aVel", new THREE.BufferAttribute(burstVel, 3));
+    burstGeometry.setAttribute("aColor", new THREE.BufferAttribute(burstColor, 3));
+    burstGeometry.setAttribute("aSize", new THREE.BufferAttribute(burstSize, 1));
+    burstGeometry.setAttribute("aSeed", new THREE.BufferAttribute(burstSeed, 1));
+    const burstMaterial = new THREE.ShaderMaterial({
+      uniforms: { uSpread: { value: 0 }, uHeat: { value: 0 }, uTime: { value: 0 }, uPixelRatio: { value: renderer.getPixelRatio() } },
+      vertexShader: `
+        attribute vec3 aVel;
+        attribute vec3 aColor;
+        attribute float aSize;
+        attribute float aSeed;
+        uniform float uSpread;
+        uniform float uHeat;
+        uniform float uTime;
+        uniform float uPixelRatio;
+        varying vec3 vColor;
+        varying float vAlpha;
+        void main() {
+          vec3 p = position + aVel * uSpread;
+          // Al volver, cada partícula gira un poco: el planeta se rearma en espiral
+          float angle = uSpread * (aSeed - .5) * 1.6;
+          p.xz = mat2(cos(angle), -sin(angle), sin(angle), cos(angle)) * p.xz;
+          vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
+          gl_PointSize = aSize * uPixelRatio * (20. / -mvPosition.z) * (1. + uHeat * 1.6);
+          gl_Position = projectionMatrix * mvPosition;
+          vec3 hot = mix(vec3(1., .9, .72), vec3(1., .46, .14), aSeed);
+          vColor = mix(aColor * 1.35, hot * 1.4, uHeat * step(.25, aSeed)) + uHeat * .3;
+          vAlpha = .6 + .4 * sin(uTime * 7. + aSeed * 40.) * uHeat + .3;
+        }`,
+      fragmentShader: `
+        varying vec3 vColor;
+        varying float vAlpha;
+        void main() {
+          float glow = smoothstep(.5, .0, length(gl_PointCoord - .5));
+          gl_FragColor = vec4(vColor, glow * glow * vAlpha);
+        }`,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending
+    });
+    const burst = new THREE.Points(burstGeometry, burstMaterial);
+    burst.frustumCulled = false;
+    burst.visible = false;
+    world.add(burst);
+
+    // Fragmentos sólidos que giran mientras salen disparados
+    const shardMaterial = new THREE.MeshStandardMaterial({ color: 0x2b3f78, roughness: 0.55, metalness: 0.2, emissive: 0xff7a33, emissiveIntensity: 0 });
+    const shards = Array.from({ length: isSmall ? 26 : 44 }, () => {
+      const shard = new THREE.Mesh(new THREE.IcosahedronGeometry(0.03 + Math.random() * 0.07, 0), shardMaterial);
+      const from = new THREE.Vector3(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalize();
+      shard.userData = { from: from.clone().multiplyScalar(0.9), vel: from.multiplyScalar(1.4 + Math.random() * 3), spin: new THREE.Vector3(Math.random() * 6, Math.random() * 6, Math.random() * 6) };
+      shard.visible = false;
+      world.add(shard);
+      return shard;
+    });
+
+    const boomFlash = new THREE.Sprite(new THREE.SpriteMaterial({ map: flashTexture, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+    const boomWave = new THREE.Sprite(new THREE.SpriteMaterial({ map: ringTexture, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+    boomWave.material.color.setHex(0xbcd0ff);
+    boomFlash.material.color.setHex(0xffd6ad);
+    world.add(boomFlash, boomWave);
+
+    let boomAt = -1;
+    const easeInOut = k => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+    const shake = new THREE.Vector2();
+    function explode() {
+      if (boomAt >= 0 || reducedMotion) return;
+      boomAt = elapsed;
+      canvas.closest("section")?.classList.add("has-boomed");
+    }
+    function updateBoom() {
+      shake.set(0, 0);
+      if (boomAt < 0) return;
+      const t = elapsed - boomAt;
+      const BLAST = 0.12;
+      const HOLD = 2.5;
+      const BACK = 1.9;
+      let spread;
+      if (t < BLAST) {
+        // Se carga: el planeta se infla un instante antes de estallar
+        planet.scale.setScalar(1 + Math.sin((t / BLAST) * Math.PI) * 0.06);
+        spread = 0;
+      } else if (t < HOLD) {
+        spread = (1 - Math.exp(-(t - BLAST) * 2.6)) * (1 + (t - BLAST) * 0.04);
+      } else {
+        const peak = (1 - Math.exp(-(HOLD - BLAST) * 2.6)) * (1 + (HOLD - BLAST) * 0.04);
+        spread = peak * (1 - easeInOut(Math.min((t - HOLD) / BACK, 1)));
+      }
+      const exploded = t >= BLAST && t < HOLD + BACK;
+      planet.visible = atmosphere.visible = ring.visible = !exploded;
+      burst.visible = exploded;
+      burstMaterial.uniforms.uSpread.value = spread;
+      burstMaterial.uniforms.uHeat.value = t < BLAST ? 0 : Math.exp(-(t - BLAST) * 2.4);
+      burstMaterial.uniforms.uTime.value = elapsed;
+      shardMaterial.emissiveIntensity = t < BLAST ? 0 : Math.exp(-(t - BLAST) * 1.8) * 2.2;
+      shards.forEach(shard => {
+        shard.visible = exploded;
+        const { from, vel, spin } = shard.userData;
+        shard.position.copy(from).addScaledVector(vel, spread);
+        shard.rotation.set(spin.x * spread, spin.y * spread, spin.z * spread);
+      });
+      // Destello, onda expansiva y temblor de cámara
+      const b = Math.max(t - BLAST, 0);
+      boomFlash.material.opacity = t < BLAST ? 0 : Math.max(0, 1 - b / 0.6);
+      boomFlash.scale.setScalar(1 + Math.min(b / 0.35, 1) * 7);
+      boomWave.material.opacity = t < BLAST ? 0 : Math.max(0, 0.9 * (1 - b / 1.4));
+      boomWave.scale.setScalar(1 + b * 11);
+      if (t >= BLAST && t < BLAST + 0.9) shake.set((Math.random() - 0.5), (Math.random() - 0.5)).multiplyScalar(0.18 * Math.exp(-b * 4));
+      // Al rearmarse, un destello suave y el planeta aparece con un pequeño rebote
+      const back = t - (HOLD + BACK);
+      if (back >= 0) {
+        boomFlash.material.opacity = Math.max(0, 0.55 * (1 - back / 0.5));
+        boomFlash.scale.setScalar(3.2);
+        const pop = Math.min(back / 0.6, 1);
+        planet.scale.setScalar(1 + Math.sin(pop * Math.PI) * 0.05);
+        if (pop >= 1) {
+          planet.scale.setScalar(1);
+          boomFlash.material.opacity = 0;
+          boomAt = -1;
+        }
+      }
+    }
+
+    // Tocar o hacer clic sobre el planeta lo hace explotar
+    const heroSection = canvas.closest("section");
+    const raycaster = new THREE.Raycaster();
+    const ndc = new THREE.Vector2();
+    const hitsPlanet = event => {
+      const r = canvas.getBoundingClientRect();
+      ndc.set(((event.clientX - r.left) / r.width) * 2 - 1, -((event.clientY - r.top) / r.height) * 2 + 1);
+      raycaster.setFromCamera(ndc, camera);
+      return planet.visible && raycaster.intersectObject(planet).length > 0;
+    };
+    if (heroSection && !reducedMotion) {
+      heroSection.addEventListener("click", event => {
+        if (event.target.closest("a, button")) return;
+        if (hitsPlanet(event)) explode();
+      });
+      heroSection.addEventListener("pointermove", event => {
+        if (event.pointerType !== "mouse") return;
+        heroSection.style.cursor = !event.target.closest("a, button") && hitsPlanet(event) ? "pointer" : "";
+      }, { passive: true });
+      document.addEventListener("orion:boom", explode);
+    }
+
     const pointer = { x: 0, y: 0 };
     const target = { x: 0, y: 0 };
     window.addEventListener("pointermove", event => {
@@ -489,9 +669,10 @@
         world.rotation.x = 0.06 + pointer.y * 0.05 + scroll * 0.3;
         world.rotation.y = pointer.x * 0.08 + scroll * 0.45;
         world.position.y = (window.innerWidth < 700 ? mobileY : 0) + Math.sin(elapsed * 0.3) * 0.03 + scroll * 1.5;
-        camera.position.x = pointer.x * 0.15;
-        camera.position.y = -pointer.y * 0.1;
-        camera.lookAt(0, 0, 0);
+        updateBoom();
+        camera.position.x = pointer.x * 0.15 + shake.x;
+        camera.position.y = -pointer.y * 0.1 + shake.y;
+        camera.lookAt(shake.x * 0.5, shake.y * 0.5, 0);
         stars.rotation.y = elapsed * 0.008;
         stars.rotation.z = elapsed * 0.003;
         stars.position.y = scroll * 0.8;

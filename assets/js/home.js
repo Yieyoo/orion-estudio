@@ -348,6 +348,9 @@
     follow();
   }
 
+  // El botón junto al planeta también lo hace explotar
+  document.querySelector("[data-boom]")?.addEventListener("click", () => document.dispatchEvent(new Event("orion:boom")));
+
   // La marca gigante del footer se llena de color al aparecer
   const wordmark = document.querySelector(".ox-wordmark");
   if (wordmark && "IntersectionObserver" in window) {
