@@ -15,9 +15,7 @@
     const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
     camera.position.set(0, 0, 10);
 
-    // En celular el orbe completo (con anillos) ocupa el espacio reservado bajo el texto del hero
-    const MOBILE_ORB_RADIUS_PX = 150;
-    const MOBILE_ORB_CENTER_FROM_BOTTOM_PX = 175;
+    // En celular el orbe se ve grande, a la derecha y detrás del texto, como en escritorio
     let mobileY = 0;
     const world = new THREE.Group();
     world.position.set(2.25, 0, 0);
@@ -121,23 +119,168 @@
       scene.add(light);
     });
 
-    const starCount = 420;
+    // Fondo de espacio: estrellas que titilan, estrellas fugaces y pequeñas explosiones
+    const starCount = 1600;
     const starPositions = new Float32Array(starCount * 3);
+    const starColors = new Float32Array(starCount * 3);
+    const starSizes = new Float32Array(starCount);
+    const starPhases = new Float32Array(starCount);
+    const starPalette = [0xb7caff, 0xb7caff, 0xffffff, 0x8fb0ff, 0xffdcb8].map(hex => new THREE.Color(hex));
     for (let i = 0; i < starCount; i++) {
-      starPositions[i * 3] = (Math.random() - 0.5) * 21;
-      starPositions[i * 3 + 1] = (Math.random() - 0.5) * 12;
-      starPositions[i * 3 + 2] = (Math.random() - 0.5) * 9 - 1;
+      starPositions[i * 3] = (Math.random() - 0.5) * 30;
+      starPositions[i * 3 + 1] = (Math.random() - 0.5) * 18;
+      starPositions[i * 3 + 2] = -Math.random() * 12 + 2;
+      const color = starPalette[Math.floor(Math.random() * starPalette.length)];
+      starColors.set([color.r, color.g, color.b], i * 3);
+      starSizes[i] = 0.9 + Math.pow(Math.random(), 4) * 3.8;
+      starPhases[i] = Math.random() * Math.PI * 2;
     }
     const starGeometry = new THREE.BufferGeometry();
     starGeometry.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
-    const stars = new THREE.Points(starGeometry, new THREE.PointsMaterial({
-      color: 0xb7caff,
-      size: 0.014,
+    starGeometry.setAttribute("aColor", new THREE.BufferAttribute(starColors, 3));
+    starGeometry.setAttribute("aSize", new THREE.BufferAttribute(starSizes, 1));
+    starGeometry.setAttribute("aPhase", new THREE.BufferAttribute(starPhases, 1));
+    const starMaterial = new THREE.ShaderMaterial({
+      uniforms: { uTime: { value: 0 }, uPixelRatio: { value: renderer.getPixelRatio() } },
+      vertexShader: `
+        attribute vec3 aColor;
+        attribute float aSize;
+        attribute float aPhase;
+        uniform float uTime;
+        uniform float uPixelRatio;
+        varying vec3 vColor;
+        varying float vAlpha;
+        void main() {
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+          vAlpha = 0.45 + 0.55 * sin(uTime * (0.5 + fract(aPhase) * 1.8) + aPhase);
+          vColor = aColor;
+          gl_PointSize = aSize * uPixelRatio * (21.0 / -mvPosition.z);
+          gl_Position = projectionMatrix * mvPosition;
+        }`,
+      fragmentShader: `
+        varying vec3 vColor;
+        varying float vAlpha;
+        void main() {
+          float glow = smoothstep(0.5, 0.0, length(gl_PointCoord - 0.5));
+          gl_FragColor = vec4(vColor, glow * glow * vAlpha);
+        }`,
       transparent: true,
-      opacity: 0.46,
-      sizeAttenuation: true
-    }));
+      depthWrite: false,
+      blending: THREE.AdditiveBlending
+    });
+    const stars = new THREE.Points(starGeometry, starMaterial);
     scene.add(stars);
+
+    // Ancho y alto visibles a cierta profundidad, para que los efectos aparezcan en pantalla
+    function viewSizeAt(z) {
+      const halfHeight = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * (camera.position.z - z);
+      return { halfWidth: halfHeight * camera.aspect, halfHeight };
+    }
+    const random = (min, max) => min + Math.random() * (max - min);
+
+    const shootingStars = Array.from({ length: 3 }, () => {
+      const geometry = new THREE.PlaneGeometry(2.2, 0.022);
+      geometry.translate(1.1, 0, 0);
+      // Cabeza brillante, cola que se desvanece
+      geometry.setAttribute("color", new THREE.Float32BufferAttribute([1, 1, 1, 0, 0, 0, 0.85, 0.9, 1, 0, 0, 0], 3));
+      const mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({
+        vertexColors: true, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide
+      }));
+      mesh.visible = false;
+      mesh.userData = { life: 0, duration: 1, velocity: new THREE.Vector3() };
+      scene.add(mesh);
+      return mesh;
+    });
+
+    function makeGlowTexture(stops) {
+      const size = 128;
+      const glowCanvas = document.createElement("canvas");
+      glowCanvas.width = glowCanvas.height = size;
+      const context = glowCanvas.getContext("2d");
+      const gradient = context.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+      stops.forEach(([offset, color]) => gradient.addColorStop(offset, color));
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, size, size);
+      return new THREE.CanvasTexture(glowCanvas);
+    }
+    const flashTexture = makeGlowTexture([[0, "rgba(255,255,255,1)"], [0.12, "rgba(220,230,255,.9)"], [0.35, "rgba(120,150,255,.28)"], [1, "rgba(60,90,255,0)"]]);
+    const ringTexture = makeGlowTexture([[0, "rgba(255,255,255,0)"], [0.62, "rgba(160,185,255,0)"], [0.78, "rgba(200,215,255,.55)"], [0.86, "rgba(120,150,255,.18)"], [1, "rgba(80,110,255,0)"]]);
+    const novaTints = [0xffffff, 0xa9bcff, 0x8fd0ff, 0xffd6b0];
+    const novas = Array.from({ length: 3 }, () => {
+      const flash = new THREE.Sprite(new THREE.SpriteMaterial({ map: flashTexture, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+      const ring = new THREE.Sprite(new THREE.SpriteMaterial({ map: ringTexture, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+      const group = new THREE.Group();
+      group.add(flash, ring);
+      group.visible = false;
+      group.userData = { life: 0, duration: 1.8, size: 1, flash, ring };
+      scene.add(group);
+      return group;
+    });
+
+    function launchShootingStar() {
+      const star = shootingStars.find(item => !item.visible);
+      if (!star) return;
+      const z = random(-4, 0);
+      const { halfWidth, halfHeight } = viewSizeAt(z);
+      const angle = random(0.32, 0.62);
+      const speed = random(7, 11);
+      star.position.set(random(-halfWidth * 0.4, halfWidth * 1.2), halfHeight * random(0.45, 0.95), z);
+      star.rotation.set(0, 0, angle);
+      star.userData.velocity.set(-Math.cos(angle) * speed, -Math.sin(angle) * speed, 0);
+      star.userData.life = 0;
+      star.userData.duration = random(0.8, 1.3);
+      star.visible = true;
+    }
+
+    function launchNova() {
+      const nova = novas.find(item => !item.visible);
+      if (!nova) return;
+      const z = random(-7, -3);
+      const { halfWidth, halfHeight } = viewSizeAt(z);
+      // Sobre todo a la derecha, lejos del texto
+      nova.position.set(random(-halfWidth * 0.1, halfWidth * 0.95), random(-halfHeight * 0.8, halfHeight * 0.85), z);
+      const tint = novaTints[Math.floor(Math.random() * novaTints.length)];
+      nova.userData.flash.material.color.setHex(tint);
+      nova.userData.ring.material.color.setHex(tint);
+      nova.userData.size = random(0.7, 1.4);
+      nova.userData.life = 0;
+      nova.userData.duration = random(1.5, 2.3);
+      nova.visible = true;
+    }
+
+    let nextShootingStar = random(1.2, 3);
+    let nextNova = random(0.8, 2);
+    function updateSpace(delta) {
+      nextShootingStar -= delta;
+      nextNova -= delta;
+      if (nextShootingStar <= 0) { launchShootingStar(); nextShootingStar = random(2.5, 6); }
+      if (nextNova <= 0) { launchNova(); nextNova = random(1.8, 4.2); }
+
+      shootingStars.forEach(star => {
+        if (!star.visible) return;
+        const data = star.userData;
+        data.life += delta;
+        const t = data.life / data.duration;
+        if (t >= 1) { star.visible = false; return; }
+        star.position.addScaledVector(data.velocity, delta);
+        star.material.opacity = Math.sin(Math.PI * t) * 0.95;
+      });
+
+      novas.forEach(nova => {
+        if (!nova.visible) return;
+        const data = nova.userData;
+        data.life += delta;
+        const t = data.life / data.duration;
+        if (t >= 1) { nova.visible = false; return; }
+        const flashIn = Math.min(t / 0.08, 1);
+        const flashOut = Math.pow(1 - t, 3);
+        data.flash.scale.setScalar(data.size * (0.25 + 0.75 * flashIn) * (0.6 + 0.4 * flashOut));
+        data.flash.material.opacity = flashIn * flashOut;
+        const ringProgress = 1 - Math.pow(1 - t, 3);
+        data.ring.scale.setScalar(data.size * 2.4 * ringProgress);
+        data.ring.material.opacity = Math.pow(1 - t, 1.6) * 0.9;
+      });
+    }
 
     const pointer = { x: 0, y: 0 };
     const target = { x: 0, y: 0 };
@@ -157,10 +300,10 @@
       camera.position.z = mobile ? 13.2 : 10.3;
       // Convierte píxeles de pantalla a unidades de la escena para colocar el orbe en celular
       const unitsPerPx = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.position.z / bounds.height;
-      const orbRadiusPx = Math.min(bounds.width * 0.44, MOBILE_ORB_RADIUS_PX);
-      mobileY = -(bounds.height / 2 - MOBILE_ORB_CENTER_FROM_BOTTOM_PX) * unitsPerPx;
+      const orbRadiusPx = bounds.width * 0.95;
+      mobileY = bounds.height * 0.04 * unitsPerPx;
       world.scale.setScalar(mobile ? orbRadiusPx * unitsPerPx / 2.82 : 1.04);
-      world.position.x = mobile ? bounds.width * 0.06 * unitsPerPx : 2.1;
+      world.position.x = mobile ? bounds.width * 0.45 * unitsPerPx : 2.1;
       world.position.y = mobile ? mobileY : 0;
       camera.updateProjectionMatrix();
       renderer.render(scene, camera);
@@ -168,7 +311,11 @@
 
     let frame = 0;
     let raf = 0;
+    const clock = new THREE.Clock();
     function animate() {
+      const delta = Math.min(clock.getDelta(), 0.05);
+      starMaterial.uniforms.uTime.value += delta;
+      if (!reducedMotion) updateSpace(delta);
       pointer.x += (target.x - pointer.x) * 0.035;
       pointer.y += (target.y - pointer.y) * 0.035;
       world.rotation.y += reducedMotion ? 0 : 0.0018;
@@ -183,7 +330,8 @@
       if (!reducedMotion) markers.forEach((marker, index) => {
         marker.scale.setScalar(1 + Math.sin(frame * 0.035 + index * 1.8) * 0.16);
       });
-      stars.rotation.y += reducedMotion ? 0 : 0.00012;
+      stars.rotation.y += reducedMotion ? 0 : 0.00022;
+      stars.rotation.z += reducedMotion ? 0 : 0.00006;
       renderer.render(scene, camera);
       frame++;
       if (!reducedMotion) raf = requestAnimationFrame(animate);
@@ -196,7 +344,7 @@
 
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) cancelAnimationFrame(raf);
-      else if (!reducedMotion) animate();
+      else if (!reducedMotion) { clock.getDelta(); animate(); }
     });
   } catch (error) {
     console.warn("Orion 3D cover could not start:", error);

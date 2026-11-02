@@ -990,5 +990,9 @@ h1,h2,h3,p { margin-top: 0; }
   .whatsapp-float:before{animation:none;display:none}
 }
 
-/* Celular: espacio bajo el texto del hero para el orbe con sus anillos */
-@media(max-width:700px){.hero-immersive{padding-bottom:340px}}
+/* Celular: el orbe queda detrás del texto; un velo más ligero lo deja ver sin perder legibilidad */
+@media(max-width:700px){
+  .hero-atmosphere{background:linear-gradient(90deg,#080d18d9 0%,#080d1899 50%,#080d1826 100%),linear-gradient(0deg,#080d18c9,transparent 30%,transparent 80%,#080d1866)}
+  .hero-immersive h1,.hero-immersive .hero-description,.hero-immersive .eyebrow,.hero-immersive .hero-note{text-shadow:0 2px 18px #080d18,0 0 6px #080d18b0}
+  .hero-immersive .hero-title em.w{text-shadow:none}
+}
