@@ -266,24 +266,35 @@
     const timers = [];
     const wait = ms => new Promise(resolve => timers.push(setTimeout(resolve, reduceMotion ? 0 : ms)));
     const scrollDown = () => body.scrollTo({ top: body.scrollHeight, behavior: reduceMotion ? "auto" : "smooth" });
+    // El robot de Orion es quien contesta: aparece en el encabezado y junto a sus mensajes
+    const robot = chat.querySelector(".ox-chatbox-avatar .ox-bot").outerHTML;
+    const mood = value => { chat.dataset.mood = value; };
     const bubble = (text, who, extra = "") => {
       const p = document.createElement("p");
       p.className = `ox-msg ${who} ${extra}`.trim();
       p.textContent = text;
-      body.append(p);
+      if (who === "bot") {
+        const row = document.createElement("div");
+        row.className = "ox-row bot";
+        row.innerHTML = `<span class="ox-face">${robot}</span>`;
+        row.append(p);
+        body.append(row);
+      } else body.append(p);
       scrollDown();
       return p;
     };
     const botSays = async text => {
       status.textContent = t().typing;
-      const typing = document.createElement("p");
-      typing.className = "ox-msg bot typing";
-      typing.innerHTML = "<i></i><i></i><i></i>";
+      mood("typing");
+      const typing = document.createElement("div");
+      typing.className = "ox-row bot is-typing";
+      typing.innerHTML = `<span class="ox-face">${robot}</span><p class="ox-msg bot typing"><i></i><i></i><i></i></p>`;
       body.append(typing);
       scrollDown();
       await wait(650 + Math.min(text.length * 12, 900));
       typing.remove();
       status.textContent = t().online;
+      mood("idle");
       bubble(text, "bot");
     };
     const message = () => t().message(answers);
@@ -329,6 +340,7 @@
     const finish = async () => {
       await botSays(t().done(answers.nombre));
       const summary = bubble(message(), "bot", "summary");
+      mood("happy");
       const label = document.createElement("small");
       label.textContent = t().yours;
       summary.prepend(label);
@@ -350,6 +362,7 @@
       timers.splice(0).forEach(clearTimeout);
       Object.keys(answers).forEach(key => delete answers[key]);
       body.replaceChildren();
+      mood("idle");
       ask(0);
     };
     const finePointerChat = window.matchMedia("(hover: hover) and (pointer: fine)").matches;

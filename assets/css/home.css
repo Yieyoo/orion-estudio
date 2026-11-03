@@ -392,7 +392,40 @@ html{-webkit-tap-highlight-color:transparent}
 /* ------------------------------------------------------------ Contacto: conversación */
 .ox-chatbox{display:flex;flex-direction:column;height:600px;overflow:hidden;border:1px solid #ffffff1c;border-radius:28px;background:#0b141a;box-shadow:0 40px 100px #0009}
 .ox-chatbox-head{display:flex;align-items:center;gap:12px;padding:16px 20px;background:#111b21;border-bottom:1px solid #ffffff10}
-.ox-chatbox-avatar{position:relative;display:grid;place-items:center;width:42px;height:42px;flex:none;border-radius:50%;background:linear-gradient(135deg,#365cf5,#9fb1ff);color:#fff;font:800 18px var(--brand)}
+.ox-chatbox-avatar{position:relative;display:grid;place-items:center;width:44px;height:44px;flex:none;border-radius:50%;background:radial-gradient(circle at 50% 35%,#2b3b9a,#121735 72%);box-shadow:inset 0 0 0 1px #9fb1ff40,0 0 18px -4px #365cf5aa}
+.ox-chatbox-avatar .ox-bot{width:38px;height:38px;margin-top:2px}
+
+/* ------------------------------------------------------------ Robot de Orion */
+.ox-bot{display:block;overflow:visible}
+.ox-bot-shell{fill:#f4f6fb;stroke:#0c0f24;stroke-width:2.4}
+.ox-bot-ear{fill:none;stroke:#3d7bff;stroke-width:2.6}
+.ox-bot-shade{fill:none;stroke:#c8cfe0;stroke-width:3;stroke-linecap:round}
+.ox-bot-visor{fill:#0b0e27;stroke:#0c0f24;stroke-width:1.6}
+.ox-bot-shine{fill:none;stroke:#ffffff38;stroke-width:2;stroke-linecap:round}
+.ox-bot-eyes{filter:drop-shadow(0 0 2px #59a8ff)}
+.ox-bot-happy path{fill:none;stroke:#9fd8ff;stroke-width:3.2;stroke-linecap:round}
+.ox-bot-open rect{fill:#9fd8ff}
+.ox-bot-happy,.ox-bot-open{transform-box:fill-box;transform-origin:center;transition:opacity .25s}
+.ox-bot-open{opacity:0}
+/* En reposo sonríe y parpadea; mientras escribe abre los ojos y lee de lado a lado; al final rebota de gusto */
+.ox-bot-happy{animation:ox-bot-blink 4.5s infinite}
+.ox-bot-ear{transform-box:fill-box;transform-origin:center}
+[data-mood="typing"] .ox-chatbox-avatar .ox-bot-happy,.ox-row.is-typing .ox-bot-happy{opacity:0;animation:none}
+[data-mood="typing"] .ox-chatbox-avatar .ox-bot-open,.ox-row.is-typing .ox-bot-open{opacity:1;animation:ox-bot-read 1.1s ease-in-out infinite}
+[data-mood="typing"] .ox-chatbox-avatar .ox-bot-ear,.ox-row.is-typing .ox-bot-ear{animation:ox-bot-ear .8s ease-in-out infinite}
+[data-mood="happy"] .ox-chatbox-avatar .ox-bot{animation:ox-bot-hop .9s cubic-bezier(.3,1.6,.5,1) 2}
+@keyframes ox-bot-blink{0%,92%,100%{transform:none}95%{transform:scaleY(.15)}}
+@keyframes ox-bot-read{0%,100%{transform:translateX(-2.2px)}50%{transform:translateX(2.2px)}}
+@keyframes ox-bot-ear{50%{stroke:#9fd8ff;transform:scale(1.15)}}
+@keyframes ox-bot-hop{40%{transform:translateY(-4px) rotate(-6deg)}70%{transform:translateY(0) rotate(4deg)}}
+.ox-row{display:flex;align-items:flex-end;gap:8px;align-self:flex-start;max-width:88%;animation:ox-msg-in .35s cubic-bezier(.2,.8,.2,1.1) both}
+.ox-row .ox-msg{max-width:none;animation:none}
+.ox-row:has(.summary){max-width:96%}
+.ox-face{display:grid;place-items:center;width:30px;height:30px;flex:none;border-radius:50%;background:radial-gradient(circle at 50% 35%,#26337f,#121735 72%);box-shadow:inset 0 0 0 1px #9fb1ff33}
+.ox-face .ox-bot{width:26px;height:26px;margin-top:2px}
+/* Solo el último mensaje de una racha lleva la carita, como en un chat real */
+.ox-row.bot:has(+ .ox-row.bot) .ox-face{visibility:hidden}
+@media(prefers-reduced-motion:reduce){.ox-bot,.ox-bot *{animation:none!important}}
 .ox-chatbox-avatar i{position:absolute;right:0;bottom:1px;width:11px;height:11px;border:2px solid #111b21;border-radius:50%;background:#2fbf71}
 .ox-chatbox-head div{display:grid;flex:1}
 .ox-chatbox-head b{color:#e9edef;font-size:15px}
