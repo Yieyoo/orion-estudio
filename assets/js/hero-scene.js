@@ -15,6 +15,7 @@
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
     camera.position.set(0, 0, 10);
+    let cameraRestZ = camera.position.z;
 
     // En celular el planeta se ve grande, a la derecha y detrás del texto, como en escritorio
     let mobileY = 0;
@@ -73,7 +74,7 @@
 
     /* ------------------------------------------------------------ Planeta */
     const planetMaterial = new THREE.ShaderMaterial({
-      uniforms: { uTime: { value: 0 }, ...shared },
+      uniforms: { uTime: { value: 0 }, uFeed: { value: 0 }, uFeedSpread: { value: 0 }, uFeedDir: { value: new THREE.Vector3(0, 0, 1) }, ...shared },
       vertexShader: `
         varying vec3 vPos;
         varying vec3 vNormalW;
@@ -94,6 +95,9 @@
         uniform vec3 uCenter;
         uniform float uRingInner;
         uniform float uRingOuter;
+        uniform float uFeed;
+        uniform float uFeedSpread;
+        uniform vec3 uFeedDir;
         varying vec3 vPos;
         varying vec3 vNormalW;
         varying vec3 vViewDir;
@@ -102,7 +106,8 @@
         ${ringDensity}
         void main() {
           vec3 p = normalize(vPos);
-          float t = uTime * .012;
+          // El clima del planeta se desplaza a una velocidad perceptible, como una toma espacial viva.
+          float t = uTime * .045;
           // Bandas por latitud, deformadas por turbulencia como en un gigante gaseoso
           float lat = p.y + .03 * fbm(p * 3.2 + vec3(t, 0., 0.)) + .008 * fbm(p * 14. - t);
           float b1 = sin(lat * 18. + sin(lat * 5.) * 1.6);
@@ -140,6 +145,16 @@
           // Atmósfera delgada, solo en el borde iluminado
           lit += vec3(.32, .48, 1.) * pow(1. - ndv, 4.) * smoothstep(-.2, .6, ndl) * .85;
           lit += color * .01;
+
+          // Luz que la luna le comparte: entra por un punto y se esparce por la superficie siguiendo las nubes
+          if (uFeed > .001) {
+            float reach = acos(clamp(dot(p, uFeedDir), -1., 1.));
+            float inside = smoothstep(uFeedSpread, uFeedSpread - .5, reach);
+            float front = exp(-pow((reach - uFeedSpread) * 5., 2.));
+            float veins = smoothstep(.42, .9, fbm(vec3(p.x * 6. + t * 6., lat * 38., p.z * 6.)));
+            vec3 energy = mix(vec3(1., .8, .5), vec3(.5, .8, 1.), smoothstep(.0, 1.4, reach));
+            lit += energy * uFeed * (inside * (.14 + veins * 1.3) + front * (.35 + veins * 1.8)) * (.45 + .55 * day);
+          }
           gl_FragColor = vec4(lit, 1.);
         }`
     });
@@ -789,7 +804,8 @@
       uniform vec3 uPulses;
       uniform float uTime;
       float pulseAt(float t) {
-        return exp(-pow((t - uPulses.x) * 38., 2.)) + exp(-pow((t - uPulses.y) * 38., 2.)) + exp(-pow((t - uPulses.z) * 38., 2.));
+        // Pulsos con núcleo definido y halo amplio para que se lean como energía en movimiento.
+        return exp(-pow((t - uPulses.x) * 30., 2.)) + exp(-pow((t - uPulses.y) * 30., 2.)) + exp(-pow((t - uPulses.z) * 30., 2.));
       }
       vec3 threadColor(float t) { return mix(vec3(1., .76, .38), vec3(.55, .84, 1.), t); }`;
     const threadGlow = new THREE.Points(threadGeometry, new THREE.ShaderMaterial({
@@ -804,7 +820,7 @@
           vT = aT;
           vPulse = pulseAt(aT);
           vec4 mv = modelViewMatrix * vec4(position, 1.0);
-          gl_PointSize = (1.6 + vPulse * 7.) * uPixelRatio * (18. / -mv.z);
+          gl_PointSize = (1.1 + vPulse * 8.5) * uPixelRatio * (18. / -mv.z);
           gl_Position = projectionMatrix * mv;
         }`,
       fragmentShader: `
@@ -814,10 +830,10 @@
         void main() {
           if (vT > uDraw) discard;
           float glow = smoothstep(.5, .0, length(gl_PointCoord - .5));
-          float breath = .22 + .08 * sin(uTime * 2.2 - vT * 9.);
-          float tip = smoothstep(uDraw - .08, uDraw, vT) * step(uDraw, .999) * 1.5;
-          vec3 color = mix(threadColor(vT), vec3(1.), min(vPulse, 1.) * .55);
-          gl_FragColor = vec4(color, glow * glow * (breath + vPulse + tip) * uFade);
+          float breath = .13 + .05 * sin(uTime * 1.8 - vT * 7.);
+          float tip = smoothstep(uDraw - .045, uDraw, vT) * step(uDraw, .999) * .8;
+          vec3 color = mix(threadColor(vT), vec3(1.), min(vPulse, 1.) * .72);
+          gl_FragColor = vec4(color, glow * glow * (breath + vPulse * .9 + tip) * uFade);
         }`,
       transparent: true,
       depthWrite: false,
@@ -847,11 +863,6 @@
     threadGlow.visible = threadCore.visible = false;
     world.add(threadCore, threadGlow);
 
-    // El planeta absorbe la luz: un halo cálido que crece y una onda lenta y suave
-    const absorbRing = new THREE.Sprite(new THREE.SpriteMaterial({ map: ringTexture, color: 0xffe2a8, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
-    const powerHalo = new THREE.Sprite(new THREE.SpriteMaterial({ map: flashTexture, color: 0x8fb4ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
-    powerHalo.scale.setScalar(3.4);
-    world.add(absorbRing, powerHalo);
 
     const FEED_EVERY = 8;
     const GATHER = 1.2;
@@ -862,6 +873,7 @@
     const feedTarget = new THREE.Vector3();
     const bend = new THREE.Vector3();
     const point = new THREE.Vector3();
+    const feedLocal = new THREE.Vector3();
     const smooth = k => k * k * (3 - 2 * k);
     function updateFeed() {
       const since = elapsed - 1.2;
@@ -882,7 +894,9 @@
       const active = phase >= 0 && t >= 0 && t < REACH + FLOW + RELEASE && !hidden;
       threadGlow.visible = threadCore.visible = active;
       if (active) {
-        bend.copy(moonAt).add(feedTarget).multiplyScalar(0.5).add(new THREE.Vector3(0, 0.45, 0.4));
+        // Curva con volumen y un leve movimiento para que el enlace no parezca un rayo rígido.
+        bend.copy(moonAt).add(feedTarget).multiplyScalar(0.5)
+          .add(new THREE.Vector3(0, 0.38 + Math.sin(elapsed * 1.1) * 0.045, 0.34));
         for (let i = 0; i < THREAD; i++) {
           const k = threadT[i];
           point.copy(moonAt).multiplyScalar((1 - k) * (1 - k)).addScaledVector(bend, 2 * (1 - k) * k).addScaledVector(feedTarget, k * k);
@@ -891,21 +905,23 @@
         threadGeometry.attributes.position.needsUpdate = true;
         const flowT = t - REACH;
         const pulse = offset => {
-          const k = (flowT - offset) / 1.4;
+          const k = (flowT - offset) / 1.35;
           return k >= 0 && k <= 1 ? smooth(k) : -1;
         };
         threadUniforms.uDraw.value = smooth(Math.min(t / REACH, 1));
         threadUniforms.uFade.value = t < REACH + FLOW ? 1 : 1 - (t - REACH - FLOW) / RELEASE;
-        threadUniforms.uPulses.value.set(pulse(0), pulse(0.4), pulse(0.8));
+        threadUniforms.uPulses.value.set(pulse(0), pulse(0.52), pulse(1.04));
         threadUniforms.uTime.value = elapsed;
       }
-      // Cada esfera que llega suma luz: el planeta brilla cálido y una onda suave se expande
-      const arrived = t - REACH - 1.4;
-      const absorb = phase >= 0 && arrived >= 0 && arrived < 2.4 ? Math.sin(Math.min(arrived / 2.4, 1) * Math.PI) : 0;
-      absorbRing.position.copy(feedTarget);
-      absorbRing.material.opacity = absorb * 0.45;
-      absorbRing.scale.setScalar(0.4 + Math.max(arrived, 0) * 0.55);
-      powerHalo.material.opacity = open ? 0 : absorb * 0.35;
+      // La energía entra por donde llega el hilo y se esparce por la superficie del planeta, siguiendo sus nubes
+      // Empieza a esparcirse con la primera esfera y alcanza su máximo cuando llega la última
+      const arrived = t - REACH - 1.35;
+      const absorb = phase >= 0 && arrived >= 0 && arrived < 3.6 ? Math.sin(Math.min(arrived / 3.6, 1) * Math.PI) : 0;
+      feedLocal.copy(feedTarget);
+      planet.worldToLocal(world.localToWorld(feedLocal)).normalize();
+      planetMaterial.uniforms.uFeedDir.value.copy(feedLocal);
+      planetMaterial.uniforms.uFeed.value = open ? 0 : absorb;
+      planetMaterial.uniforms.uFeedSpread.value = 0.12 + Math.max(arrived, 0) * 0.5;
       if (open && brain.visible) brainUniforms.uBeat.value += absorb * 0.6;
     }
 
@@ -1019,7 +1035,8 @@
       renderer.setSize(bounds.width, bounds.height, false);
       camera.aspect = bounds.width / bounds.height;
       const mobile = bounds.width < 700;
-      camera.position.z = mobile ? 13.2 : 10.3;
+      cameraRestZ = mobile ? 13.2 : 10.3;
+      camera.position.z = cameraRestZ;
       // Convierte píxeles de pantalla a unidades de la escena para colocar el planeta en celular
       const unitsPerPx = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.position.z / bounds.height;
       const orbRadiusPx = bounds.width * 0.9;
@@ -1060,20 +1077,22 @@
         if (!reducedMotion) updateSpace(delta);
         pointer.x += (target.x - pointer.x) * 0.035;
         pointer.y += (target.y - pointer.y) * 0.035;
-        planet.rotation.y = elapsed * 0.035;
+        // Giro planetario y órbita lunar más visibles, con un ritmo lento y continuo.
+        planet.rotation.y = elapsed * 0.075;
         // La luna arranca abajo y al frente del planeta; en celular, con una órbita más cerrada para que se vea desde el inicio
         const phoneView = window.innerWidth < 700;
-        const moonAngle = phoneView ? 1.75 + elapsed * 0.025 : 1.75 - elapsed * 0.025;
+        const moonAngle = phoneView ? 1.75 + elapsed * 0.055 : 1.75 - elapsed * 0.055;
         const moonOrbit = phoneView ? 2.55 : 3.4;
         moon.position.set(Math.cos(moonAngle) * moonOrbit, 0, Math.sin(moonAngle) * moonOrbit);
         // Al bajar, el planeta gira, se eleva y se aleja un poco
-        world.rotation.x = 0.06 + pointer.y * 0.05 + scroll * 0.3;
-        world.rotation.y = pointer.x * 0.08 + scroll * 0.45;
+        world.rotation.x = 0.06 + pointer.y * 0.05 + scroll * 0.3 + Math.sin(elapsed * 0.16) * 0.012;
+        world.rotation.y = pointer.x * 0.08 + scroll * 0.45 + Math.sin(elapsed * 0.12) * 0.018;
         world.position.y = (window.innerWidth < 700 ? mobileY : 0) + Math.sin(elapsed * 0.3) * 0.03 + scroll * 1.5;
         updateBoom();
         if (!reducedMotion) updateFeed();
         camera.position.x = pointer.x * 0.15 + shake.x;
         camera.position.y = -pointer.y * 0.1 + shake.y;
+        camera.position.z = cameraRestZ + Math.sin(elapsed * 0.18) * 0.1;
         camera.lookAt(shake.x * 0.5, shake.y * 0.5, 0);
         stars.rotation.y = elapsed * 0.008;
         stars.rotation.z = elapsed * 0.003;
