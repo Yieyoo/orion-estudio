@@ -766,6 +766,106 @@
       return Math.exp(-Math.pow(ph / 0.07, 2)) + 0.65 * Math.exp(-Math.pow((ph - 0.24) / 0.07, 2));
     };
 
+    /* ------------------------------------------------------------ La luna alimenta al planeta */
+    // La luna (quien crea) se carga de luz y le dispara un chorro de energía al planeta (su proyecto):
+    // al impactar, el planeta se ilumina; si está abierto, la energía va directo al cerebro y lo hace latir más fuerte
+    const energyTexture = makeGlowTexture([[0, "rgba(255,255,255,1)"], [0.18, "rgba(190,225,255,.85)"], [0.45, "rgba(100,160,255,.3)"], [1, "rgba(60,100,255,0)"]]);
+    const moonGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: energyTexture, color: 0x9fd4ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false }));
+    moon.add(moonGlow);
+    const FEED = 120;
+    const feedPos = new Float32Array(FEED * 3);
+    const feedAlpha = new Float32Array(FEED);
+    const feedSize = new Float32Array(FEED);
+    const feedJitter = Array.from({ length: FEED }, () => new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5));
+    for (let i = 0; i < FEED; i++) feedSize[i] = i < 10 ? 6 - i * 0.35 : 1.6 + Math.random() * 2.2;
+    const feedGeometry = new THREE.BufferGeometry();
+    feedGeometry.setAttribute("position", new THREE.BufferAttribute(feedPos, 3));
+    feedGeometry.setAttribute("aAlpha", new THREE.BufferAttribute(feedAlpha, 1));
+    feedGeometry.setAttribute("aSize", new THREE.BufferAttribute(feedSize, 1));
+    const feed = new THREE.Points(feedGeometry, new THREE.ShaderMaterial({
+      uniforms: { uPixelRatio: { value: renderer.getPixelRatio() } },
+      vertexShader: `
+        attribute float aAlpha;
+        attribute float aSize;
+        uniform float uPixelRatio;
+        varying float vAlpha;
+        void main() {
+          vAlpha = aAlpha;
+          vec4 mv = modelViewMatrix * vec4(position, 1.0);
+          gl_PointSize = aSize * uPixelRatio * (22. / -mv.z);
+          gl_Position = projectionMatrix * mv;
+        }`,
+      fragmentShader: `
+        varying float vAlpha;
+        void main() {
+          float d = length(gl_PointCoord - .5);
+          float glow = smoothstep(.5, .0, d);
+          gl_FragColor = vec4(mix(vec3(.45, .78, 1.), vec3(1.), glow * glow), glow * glow * vAlpha);
+        }`,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending
+    }));
+    feed.frustumCulled = false;
+    feed.visible = false;
+    world.add(feed);
+    const impactFlash = new THREE.Sprite(new THREE.SpriteMaterial({ map: energyTexture, color: 0xbfe2ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+    const impactRing = new THREE.Sprite(new THREE.SpriteMaterial({ map: ringTexture, color: 0x9fd4ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+    const powerHalo = new THREE.Sprite(new THREE.SpriteMaterial({ map: flashTexture, color: 0x4f86ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+    powerHalo.scale.setScalar(3.4);
+    world.add(impactFlash, impactRing, powerHalo);
+    const FEED_EVERY = 6.5;
+    const CHARGE = 0.9;
+    const TRAVEL = 0.75;
+    const SPREAD = 0.55;
+    const moonAt = new THREE.Vector3();
+    const feedTarget = new THREE.Vector3();
+    const bend = new THREE.Vector3();
+    const point = new THREE.Vector3();
+    const bezier = (a, c, b, k, out) => out.copy(a).multiplyScalar((1 - k) * (1 - k)).addScaledVector(c, 2 * (1 - k) * k).addScaledVector(b, k * k);
+    function updateFeed() {
+      const since = elapsed - 2.5;
+      const phase = since < 0 ? -1 : since % FEED_EVERY;
+      const open = boomAt >= 0;
+      // Dónde está la luna dentro del sistema del planeta y a qué punto le pega
+      moon.getWorldPosition(moonAt);
+      world.worldToLocal(moonAt);
+      if (open) feedTarget.set(0, 0.06, 0);
+      else feedTarget.copy(moonAt).add(new THREE.Vector3(0, 0, 2.2)).normalize().multiplyScalar(1.12);
+      bend.copy(moonAt).add(feedTarget).multiplyScalar(0.5).add(new THREE.Vector3(0, 0.75, 0.35));
+      // Carga: la luna brilla cada vez más antes de disparar
+      const charge = phase < 0 ? 0 : phase < CHARGE ? phase / CHARGE : Math.max(0, 1 - (phase - CHARGE) / 0.5);
+      // El brillo se dibuja encima de la nebulosa; se apaga si la luna pasa detrás del planeta
+      const hidden = moonAt.z < 0 && Math.hypot(moonAt.x, moonAt.y) < 1.15;
+      moonGlow.material.opacity = hidden ? 0 : 0.3 + charge * 0.7;
+      moonGlow.scale.setScalar(0.4 + charge * 0.8 + Math.sin(elapsed * 30) * 0.02 * charge);
+      // El chorro: cada partícula sale un poco después de la anterior
+      const shot = phase - CHARGE;
+      feed.visible = shot >= 0 && shot < SPREAD + TRAVEL;
+      if (feed.visible) {
+        for (let i = 0; i < FEED; i++) {
+          const k = (shot - (i / FEED) * SPREAD) / TRAVEL;
+          const alive = k >= 0 && k <= 1;
+          bezier(moonAt, bend, feedTarget, Math.min(Math.max(k, 0), 1), point).addScaledVector(feedJitter[i], 0.07 * Math.sin(Math.PI * Math.min(Math.max(k, 0), 1)));
+          feedPos.set([point.x, point.y, point.z], i * 3);
+          feedAlpha[i] = alive ? (i < 10 ? 1 : 0.8) * Math.min(1, (1 - k) * 4 + 0.4) : 0;
+        }
+        feedGeometry.attributes.position.needsUpdate = true;
+        feedGeometry.attributes.aAlpha.needsUpdate = true;
+      }
+      // Impacto: destello, onda y el planeta (o el cerebro) se enciende
+      const hit = shot - TRAVEL;
+      const glow = hit >= 0 && hit < 1.4 ? Math.exp(-hit * 2.6) : 0;
+      impactFlash.position.copy(feedTarget);
+      impactRing.position.copy(feedTarget);
+      impactFlash.material.opacity = glow * 0.9;
+      impactFlash.scale.setScalar(0.7 + (1 - glow) * 0.7);
+      impactRing.material.opacity = hit >= 0 && hit < 1 ? 0.8 * (1 - hit) : 0;
+      impactRing.scale.setScalar(0.25 + Math.max(hit, 0) * 1.2);
+      powerHalo.material.opacity = open ? 0 : glow * 0.4;
+      if (open && brain.visible) brainUniforms.uBeat.value += glow * 1.2;
+    }
+
     let boomAt = -1;
     const easeInOut = k => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
     const shake = new THREE.Vector2();
@@ -925,6 +1025,7 @@
         world.rotation.y = pointer.x * 0.08 + scroll * 0.45;
         world.position.y = (window.innerWidth < 700 ? mobileY : 0) + Math.sin(elapsed * 0.3) * 0.03 + scroll * 1.5;
         updateBoom();
+        if (!reducedMotion) updateFeed();
         camera.position.x = pointer.x * 0.15 + shake.x;
         camera.position.y = -pointer.y * 0.1 + shake.y;
         camera.lookAt(shake.x * 0.5, shake.y * 0.5, 0);
