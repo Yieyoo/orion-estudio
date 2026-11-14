@@ -6,8 +6,10 @@
   const isSmall = window.innerWidth < 700;
 
   try {
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.7));
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: !isSmall });
+    // The scene fills most of the screen. Capping its backing resolution keeps
+    // GPU work proportional on high-DPI phones and laptops.
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isSmall ? 1.25 : 1.5));
     renderer.setClearColor(0x080d18, 0);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.1;
@@ -158,7 +160,7 @@
           gl_FragColor = vec4(lit, 1.);
         }`
     });
-    const planet = new THREE.Mesh(new THREE.SphereGeometry(1, isSmall ? 112 : 180, isSmall ? 112 : 180), planetMaterial);
+    const planet = new THREE.Mesh(new THREE.SphereGeometry(1, isSmall ? 80 : 144, isSmall ? 80 : 144), planetMaterial);
     world.add(planet);
 
     const atmosphere = new THREE.Mesh(
@@ -445,7 +447,7 @@
 
     /* ------------------------------------------------------------ Explosión al tocar el planeta */
     // El planeta se rompe en partículas y fragmentos, el anillo se dispersa y luego todo se vuelve a armar en espiral
-    const BURST = isSmall ? 5000 : 10000;
+    const BURST = isSmall ? 3200 : 6500;
     const burstStart = new Float32Array(BURST * 3);
     const burstVel = new Float32Array(BURST * 3);
     const burstColor = new Float32Array(BURST * 3);
@@ -539,7 +541,7 @@
       geometry.computeVertexNormals();
       return geometry;
     };
-    const shards = Array.from({ length: isSmall ? 26 : 44 }, () => {
+    const shards = Array.from({ length: isSmall ? 18 : 32 }, () => {
       const shard = new THREE.Mesh(rock(0.015 + Math.pow(Math.random(), 1.6) * 0.045), shardMaterial);
       // Un poco alargados y aplastados, como astillas de roca
       shard.scale.set(1 + Math.random() * 0.7, 0.55 + Math.random() * 0.4, 0.7 + Math.random() * 0.4);
@@ -583,7 +585,7 @@
       const p = new THREE.Vector3(dir.x * 0.26, dir.y * 0.16, dir.z * 0.32).multiplyScalar(depth);
       return p.add(new THREE.Vector3(-0.46, -0.26, 0));
     };
-    const NODES = isSmall ? 1500 : 2800;
+    const NODES = isSmall ? 900 : 1800;
     const nodes = Array.from({ length: NODES }, () => brainPoint().multiplyScalar(1.1));
     // Vecinos cercanos con una cuadrícula, para unir cada punto con los suyos sin revisar todos contra todos
     const LINK = 0.12;
@@ -1062,6 +1064,7 @@
     }
 
     let raf = 0;
+    let heroVisible = true;
     let elapsed = 0;
     const clock = new THREE.Clock();
     function animate() {
@@ -1101,18 +1104,35 @@
         syncShadows();
         renderer.render(scene, camera);
       }
-      if (!reducedMotion) raf = requestAnimationFrame(animate);
+      if (!reducedMotion && heroVisible && !document.hidden) raf = requestAnimationFrame(animate);
     }
+
+    const startAnimation = () => {
+      if (reducedMotion || !heroVisible || document.hidden || raf) return;
+      clock.getDelta();
+      raf = requestAnimationFrame(animate);
+    };
+    const stopAnimation = () => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+    };
 
     resize();
     if ("ResizeObserver" in window) new ResizeObserver(resize).observe(canvas);
     else window.addEventListener("resize", resize);
     if (reducedMotion) window.addEventListener("scroll", () => { clock.getDelta(); animate(); }, { passive: true });
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(([entry]) => {
+        heroVisible = entry.isIntersecting;
+        if (heroVisible) startAnimation();
+        else stopAnimation();
+      }, { threshold: 0 }).observe(canvas);
+    }
     animate();
 
     document.addEventListener("visibilitychange", () => {
-      if (document.hidden) cancelAnimationFrame(raf);
-      else if (!reducedMotion) { clock.getDelta(); animate(); }
+      if (document.hidden) stopAnimation();
+      else startAnimation();
     });
   } catch (error) {
     console.warn("Orion 3D cover could not start:", error);
