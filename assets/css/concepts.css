@@ -661,3 +661,35 @@
 .mn-pitch .mn-try{color:#fff}
 .demo-menu .demo-cta{left:16px;right:auto}
 .ev-summary>small.ev-fine{color:#6b725e;font:11px var(--sans);letter-spacing:0;text-align:center;text-transform:none}
+
+/* Presentación inmersiva de las demos: marco de Orion + navegador amplio */
+.concept-modal{width:min(1500px,calc(100vw - 56px));height:min(940px,calc(100svh - 48px));max-height:calc(100svh - 48px);display:flex;flex-direction:column;gap:0;padding:20px 22px 15px;overflow:hidden;border:1px solid #ffffff1c;border-radius:20px;background:#111318;color:#f7f7f4;box-shadow:0 40px 140px #000a,0 0 0 1px #ffffff08 inset;animation:concept-enter .38s cubic-bezier(.2,.8,.2,1) both}
+.concept-modal::backdrop{background:#07090de8;backdrop-filter:blur(12px)}
+.concept-kicker{display:flex;align-items:center;gap:10px;min-height:34px;margin:0 54px 13px 2px;color:#a4a6ae;font:500 9px var(--mono);letter-spacing:.16em}
+.concept-kicker::before{content:"";width:25px;height:25px;border:1px solid #ffffff26;border-radius:8px;background:linear-gradient(145deg,#ffffff14,#ffffff03);box-shadow:0 0 24px #8d79ff15}
+.concept-kicker::after{content:"DEMO INTERACTIVA";margin-left:auto;color:#8e91a0;font-size:8px;letter-spacing:.13em}
+.concept-kicker span{margin-left:0;color:#c4b9ff}
+.concept-close{top:18px;right:20px;width:34px;height:34px;border:1px solid #ffffff24;border-radius:11px;background:#ffffff0a;color:#fff;font-size:22px;transition:background .2s,transform .2s,border-color .2s}
+.concept-close:hover{transform:rotate(90deg);border-color:#ffffff55;background:#ffffff18}
+.concept-browser{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;border:1px solid #ffffff25;border-radius:13px;background:#fff;box-shadow:0 20px 70px #0008,0 1px 0 #fff3 inset}
+.concept-toolbar{position:relative;flex:none;height:42px;gap:7px;padding:0 15px;border-bottom:1px solid #e7e7eb;background:linear-gradient(#fff,#f5f5f7)}
+.concept-toolbar i{width:9px;height:9px;box-shadow:inset 0 0 0 1px #00000012}
+.concept-toolbar i:first-child{background:#ff6259}.concept-toolbar i:nth-child(2){background:#ffbd2e}.concept-toolbar i:nth-child(3){background:#28c840}
+.concept-toolbar span{position:absolute;left:50%;width:min(40%,420px);overflow:hidden;padding:6px 13px;border:1px solid #e7e7eb;border-radius:7px;background:#fff;color:#777983;font:9px var(--mono);letter-spacing:.02em;text-align:center;text-overflow:ellipsis;white-space:nowrap;transform:translateX(-50%)}
+.concept-site{flex:1;height:auto;min-height:0;max-height:none;padding:0;background:#fff;container-type:inline-size;scroll-behavior:auto}
+.concept-note{flex:none;margin:12px 0 0;color:#9295a1;font-size:10px;line-height:1.4;text-align:left}
+@keyframes concept-enter{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
+@media(max-width:700px){
+  .concept-modal{width:100vw;height:100svh;max-height:100svh;padding:13px 0 0;border:0;border-radius:0;animation:none}
+  .concept-kicker{min-height:31px;margin:0 52px 10px 13px;font-size:8px;letter-spacing:.11em}
+  .concept-kicker::before{width:22px;height:22px;border-radius:7px}
+  .concept-kicker::after{content:"EN VIVO";font-size:7px}
+  .concept-close{top:12px;right:12px;width:32px;height:32px}
+  .concept-browser{border-inline:0;border-radius:0}
+  .concept-toolbar{height:37px;padding:0 12px}
+  .concept-toolbar i{width:8px;height:8px}
+  .concept-toolbar span{width:min(54%,270px);padding:5px 8px;font-size:8px}
+  .concept-site{height:auto;max-height:none;padding:0}
+  .concept-note{display:none}
+}
+@media(prefers-reduced-motion:reduce){.concept-modal{animation:none}}
