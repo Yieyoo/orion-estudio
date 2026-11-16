@@ -47,6 +47,10 @@ Solo el dueño (el primer usuario) puede crear usuarios y elegir qué secciones 
 1. En Supabase, ejecuta `supabase/migrations/006_usuarios.sql`. Marca como dueño a quien ya tenía acceso y aplica los permisos también en la base de datos (no solo en la pantalla).
 2. Crear o eliminar usuarios necesita la clave maestra, que no puede ir en la página. Por eso existe la Edge Function `admin-users`: en Supabase → **Edge Functions → Deploy a new function → Via Editor**, ponle de nombre `admin-users`, pega `supabase/functions/admin-users/index.ts` y dale **Deploy**.
 
+### Instagram y oferta vigente
+
+En Supabase, ejecuta `supabase/migrations/007_instagram_oferta.sql`. Agrega a cada cliente su usuario de Instagram (sin @; no se puede repetir) y la oferta vigente (lo último que se le ofreció), que se edita desde la ficha del cliente.
+
 ## Publicar en GitHub Pages
 
 1. Sube los archivos al repositorio.

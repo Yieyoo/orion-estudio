@@ -85,6 +85,7 @@ function fromRow(r) {
     lastContact: toOffset(r.last_contact), nextStep: toOffset(r.next_step), nextLabel: r.next_label || '—',
     tags: r.tags || [], notes: r.notes || '',
     website: r.website || '', address: r.address || '', placeId: r.place_id || '', mapsUrl: r.maps_url || '',
+    instagram: r.instagram || '', oferta: r.oferta || '',
     history: (r.interactions || [])
       .sort((a, b) => b.created_at.localeCompare(a.created_at))
       .map(i => ({ d: toOffset(i.created_at), s: i.status, t: i.title, n: i.note || '' }))
@@ -119,7 +120,7 @@ function visibleClients() {
   const q = norm(state.query.trim());
   let list = clients.filter(c =>
     (state.filter === 'all' || c.status === state.filter) &&
-    (!q || norm([c.name, c.company, c.email, c.service, ...c.tags].join(' ')).includes(q))
+    (!q || norm([c.name, c.company, c.email, c.service, c.instagram, c.oferta, ...c.tags].join(' ')).includes(q))
   );
   const sorters = {
     recent: (a, b) => (b.lastContact ?? -999) - (a.lastContact ?? -999),
@@ -276,6 +277,8 @@ function renderDrawer() {
           <div><span>Propuesta</span><b>${money(c.value)}</b></div>
           <div><span>Canal</span><b>${CHANNELS[c.channel].label}</b></div>
           <div><span>Próximo paso</span><b>${esc(c.nextLabel)}</b></div>
+          <div><span>Instagram</span><b>${c.instagram ? `<a class="inline-link" href="https://www.instagram.com/${encodeURIComponent(c.instagram)}/" target="_blank" rel="noopener">@${esc(c.instagram)}</a>` : '—'}</b></div>
+          <div class="span-2"><span>Oferta vigente</span><input class="oferta-box" id="oferta-box" value="${esc(c.oferta)}" placeholder="Ej. $2,500 mitad y mitad + $199/mes · se guarda al salir del campo"></div>
           ${c.website ? `<div class="span-2"><span>Sitio web</span><b><a class="inline-link" href="${esc(c.website)}" target="_blank" rel="noopener">${esc(c.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, ''))}</a></b></div>` : ''}
           ${c.address ? `<div class="span-2"><span>Dirección</span><b>${esc(c.address)}${c.mapsUrl ? ` · <a class="inline-link" href="${esc(c.mapsUrl)}" target="_blank" rel="noopener">Ver en Maps</a>` : ''}</b></div>` : ''}
         </div>
@@ -309,6 +312,8 @@ function renderNewForm() {
         <label class="field span-2"><span>Negocio *</span><input name="name" required placeholder="Café Raíz, Clínica Sonríe…"></label>
         <label class="field"><span>Correo</span><input name="email" type="email"></label>
         <label class="field"><span>Teléfono</span><input name="phone" type="tel"></label>
+        <label class="field"><span>Instagram</span><input name="instagram" placeholder="@usuario"></label>
+        <label class="field"><span>Oferta vigente</span><input name="oferta" placeholder="$2,500 mitad y mitad + $199/mes"></label>
         <label class="field"><span>Estado</span><select name="status">${STATUSES.map(s => `<option value="${s.id}">${s.label}</option>`).join('')}</select></label>
         <label class="field"><span>Canal</span><select name="channel">${Object.entries(CHANNELS).map(([k, v]) => `<option value="${k}"${k === 'whatsapp' ? ' selected' : ''}>${v.label}</option>`).join('')}</select></label>
         <label class="field"><span>Servicio</span><input name="service" placeholder="Sitio web, identidad…"></label>
@@ -379,6 +384,18 @@ async function saveNotes(c, notes) {
   toast('Nota guardada');
 }
 
+const cleanIg = v => (v || '').trim().replace(/^https?:\/\/(www\.)?instagram\.com\//i, '').replace(/^@/, '').replace(/[/?].*$/, '').toLowerCase();
+
+async function saveField(c, key, column, value) {
+  if (value === c[key]) return;
+  if (db) {
+    const { error } = await db.from('clients').update({ [column]: value || null }).eq('id', c.id);
+    if (error) return toast('No se pudo guardar: ' + error.message);
+  }
+  c[key] = value;
+  toast('Guardado');
+}
+
 async function createClient(form) {
   const f = Object.fromEntries(new FormData(form));
   const row = {
@@ -387,6 +404,7 @@ async function createClient(form) {
     status: f.status, channel: f.channel, service: f.service.trim() || null,
     value: Number(f.value) || 0, next_step: f.next_step || null, next_label: f.next_label.trim() || null,
     tags: f.tags.split(',').map(t => t.trim()).filter(Boolean), notes: f.notes.trim() || null,
+    instagram: cleanIg(f.instagram) || null, oferta: f.oferta.trim() || null,
     last_contact: f.status === 'nuevo' ? null : toISODate(0)
   };
   const button = form.querySelector('[type=submit]');
@@ -395,7 +413,7 @@ async function createClient(form) {
   if (db) {
     const { data, error } = await db.from('clients').insert(row).select().single();
     button.disabled = false;
-    if (error) return toast('No se pudo crear: ' + error.message);
+    if (error) return toast(error.code === '23505' && /instagram/.test(error.message) ? 'Ya existe un cliente con ese Instagram' : 'No se pudo crear: ' + error.message);
     client = fromRow(data);
     if (row.status !== 'nuevo') {
       const title = statusById[row.status].label;
@@ -831,10 +849,10 @@ async function changePassword(form) {
 }
 
 function exportCsv() {
-  const cols = ['Nombre', 'Empresa', 'Puesto', 'Correo', 'Teléfono', 'Estado', 'Canal', 'Servicio', 'Valor', 'Último contacto', 'Próximo seguimiento', 'Próximo paso', 'Etiquetas', 'Notas', 'Sitio web', 'Dirección'];
+  const cols = ['Nombre', 'Empresa', 'Puesto', 'Correo', 'Teléfono', 'Estado', 'Canal', 'Servicio', 'Valor', 'Último contacto', 'Próximo seguimiento', 'Próximo paso', 'Etiquetas', 'Notas', 'Sitio web', 'Dirección', 'Instagram', 'Oferta vigente'];
   const dateOf = d => d === null ? '' : toISODate(d);
   const rows = clients.map(c => [c.name, c.company, c.role, c.email, c.phone, statusById[c.status].label, CHANNELS[c.channel].label,
-    c.service, c.value, dateOf(c.lastContact), dateOf(c.nextStep), c.nextLabel === '—' ? '' : c.nextLabel, c.tags.join(', '), c.notes || '', c.website || '', c.address || '']);
+    c.service, c.value, dateOf(c.lastContact), dateOf(c.nextStep), c.nextLabel === '—' ? '' : c.nextLabel, c.tags.join(', '), c.notes || '', c.website || '', c.address || '', c.instagram ? '@' + c.instagram : '', c.oferta || '']);
   const csv = [cols, ...rows].map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\r\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));
@@ -888,6 +906,7 @@ $('#drawer').addEventListener('click', e => {
 });
 $('#drawer').addEventListener('change', e => {
   if (e.target.id === 'note-box' && state.openId) saveNotes(findClient(state.openId), e.target.value.trim());
+  if (e.target.id === 'oferta-box' && state.openId) saveField(findClient(state.openId), 'oferta', 'oferta', e.target.value.trim());
 });
 $('#drawer').addEventListener('submit', e => {
   e.preventDefault();

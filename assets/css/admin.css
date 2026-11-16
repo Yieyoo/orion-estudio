@@ -215,6 +215,8 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round
 .info div { padding: 12px 14px; background: var(--card); }
 .info span { display: block; margin-bottom: 4px; color: var(--muted); font: 8px var(--mono); letter-spacing: 1px; text-transform: uppercase; }
 .info b { font-size: 13px; font-weight: 600; word-break: break-word; }
+.oferta-box { width: 100%; padding: 6px 0; border: 0; border-bottom: 1px dashed var(--line); background: transparent; color: var(--ink); font-family: inherit; font-size: 13px; font-weight: 600; outline: none; }
+.oferta-box:focus { border-bottom-color: var(--blue); }
 .tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .tag { padding: 4px 8px; border: 1px solid var(--line); font: 10px var(--mono); color: var(--muted); }
 .timeline { list-style: none; margin: 0; padding: 0; }
