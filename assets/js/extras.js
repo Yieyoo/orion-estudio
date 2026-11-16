@@ -232,18 +232,30 @@
     const stage = make.querySelector(".ox-make-stage");
     stage.addEventListener("pointerenter", event => { if (event.pointerType === "mouse") touring = false; });
     stage.addEventListener("pointerleave", () => { touring = true; });
+    // Solo corre mientras la sección está en pantalla; fuera de vista no gasta cuadros
     let last = performance.now();
+    let onScreen = !("IntersectionObserver" in window);
+    let touringFrame = 0;
     const loop = now => {
-      requestAnimationFrame(loop);
+      touringFrame = onScreen && !reduceMotion ? requestAnimationFrame(loop) : 0;
       const delta = Math.min(now - last, 100);
       last = now;
-      const r = make.getBoundingClientRect();
-      if (!touring || reduceMotion || r.bottom < 0 || r.top > innerHeight) return;
+      if (!touring || reduceMotion || !onScreen) return;
       tour += delta / 14000;
       const k = (1 - Math.cos(Math.min(Math.max((tour % 1) * 1.25 - 0.1, 0), 1) * Math.PI * 2)) / 2;
       [desk, phone].forEach(site => { site.scrollTop = (site.scrollHeight - site.clientHeight) * k; });
     };
-    requestAnimationFrame(loop);
+    if (!onScreen) {
+      new IntersectionObserver(([entry]) => {
+        onScreen = entry.isIntersecting;
+        if (onScreen && !touringFrame && !reduceMotion) {
+          last = performance.now();
+          touringFrame = requestAnimationFrame(loop);
+        }
+      }).observe(make);
+    } else if (!reduceMotion) {
+      touringFrame = requestAnimationFrame(loop);
+    }
 
     renderPanel();
     renderSite();

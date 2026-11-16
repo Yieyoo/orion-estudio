@@ -26,14 +26,19 @@
       words = [...manifesto.querySelectorAll(".mw")];
     };
     split();
-    document.addEventListener("orion:lang", () => { split(); update(); });
+    document.addEventListener("orion:lang", () => { split(); shown = -1; update(); });
+    let shown = -1;
+    let queued = 0;
     const update = () => {
+      queued = 0;
       const r = manifesto.getBoundingClientRect();
       const progress = reduceMotion ? 1 : clamp((innerHeight * 0.85 - r.top) / (r.height + innerHeight * 0.3));
       const lit = Math.round(progress * words.length);
+      if (lit === shown) return;
+      shown = lit;
       words.forEach((word, i) => word.classList.toggle("on", i < lit));
     };
-    addEventListener("scroll", update, { passive: true });
+    addEventListener("scroll", () => { if (!queued) queued = requestAnimationFrame(update); }, { passive: true });
     update();
   }
 
@@ -424,10 +429,12 @@
     const label = ring.firstChild;
     const pos = { x: innerWidth / 2, y: innerHeight / 2 };
     const goal = { ...pos };
+    let following = 0;
     addEventListener("pointermove", event => {
       goal.x = event.clientX;
       goal.y = event.clientY;
       ring.classList.remove("is-hidden");
+      if (!following) following = requestAnimationFrame(follow);
     }, { passive: true });
     document.addEventListener("pointerleave", () => ring.classList.add("is-hidden"));
     document.addEventListener("pointerover", event => {
@@ -437,13 +444,16 @@
       ring.classList.toggle("is-link", Boolean(link) && !tagged);
       if (tagged) label.textContent = tagged.dataset.cursor;
     });
+    // Solo se anima mientras el anillo alcanza al cursor; quieto no gasta cuadros
     const follow = () => {
       pos.x += (goal.x - pos.x) * 0.2;
       pos.y += (goal.y - pos.y) * 0.2;
+      const settled = Math.abs(goal.x - pos.x) < 0.1 && Math.abs(goal.y - pos.y) < 0.1;
+      if (settled) { pos.x = goal.x; pos.y = goal.y; }
       ring.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
       // Dentro de la demo abierta, el cursor normal es suficiente
       ring.style.visibility = document.querySelector(".concept-modal[open]") ? "hidden" : "";
-      requestAnimationFrame(follow);
+      following = settled ? 0 : requestAnimationFrame(follow);
     };
     follow();
   }

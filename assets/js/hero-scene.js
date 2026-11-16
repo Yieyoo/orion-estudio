@@ -9,7 +9,7 @@
     const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: !isSmall });
     // The scene fills most of the screen. Capping its backing resolution keeps
     // GPU work proportional on high-DPI phones and laptops.
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isSmall ? 1.25 : 1.5));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isSmall ? 1.25 : 1));
     renderer.setClearColor(0x080d18, 0);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.1;
@@ -50,7 +50,8 @@
         vec4 m=max(.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.);m=m*m;
         return 42.*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));
       }
-      float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<5;i++){s+=a*snoise(p);p*=2.03;a*=.5;}return s;}`;
+      float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<3;i++){s+=a*snoise(p);p*=2.03;a*=.5;}return s;}
+      float fbmHi(vec3 p){float a=.5,s=0.;for(int i=0;i<5;i++){s+=a*snoise(p);p*=2.03;a*=.5;}return s;}`;
 
     // Densidad del anillo según el radio (0 = borde interior, 1 = exterior), con la división de Cassini
     const ringDensity = `
@@ -160,7 +161,7 @@
           gl_FragColor = vec4(lit, 1.);
         }`
     });
-    const planet = new THREE.Mesh(new THREE.SphereGeometry(1, isSmall ? 80 : 144, isSmall ? 80 : 144), planetMaterial);
+    const planet = new THREE.Mesh(new THREE.SphereGeometry(1, isSmall ? 64 : 96, isSmall ? 64 : 96), planetMaterial);
     world.add(planet);
 
     const atmosphere = new THREE.Mesh(
@@ -266,19 +267,36 @@
         ${noise}
         void main() {
           vec3 p = vec3(vUv * vec2(3.2, 1.9), uTime * .006);
-          float n = fbm(p + fbm(p * 1.6 + 4.) * .9);
+          float n = fbmHi(p + fbmHi(p * 1.6 + 4.) * .9);
           float band = exp(-pow((vUv.y - (vUv.x * .62 + .12)) * 3.4, 2.));
           vec3 color = mix(vec3(.04, .06, .2), vec3(.24, .1, .4), smoothstep(-.2, .6, n));
-          color = mix(color, vec3(.06, .28, .46), smoothstep(.2, .85, fbm(p * 2.2 + 9.)) * .5);
-          float dust = smoothstep(.1, .7, fbm(p * 5. + 2.)) * band;
+          color = mix(color, vec3(.06, .28, .46), smoothstep(.2, .85, fbmHi(p * 2.2 + 9.)) * .5);
+          float dust = smoothstep(.1, .7, fbmHi(p * 5. + 2.)) * band;
           float alpha = smoothstep(-.15, .8, n) * (.22 + .78 * band) * .72 - dust * .3;
           gl_FragColor = vec4(color * max(alpha, 0.) + vec3(.55, .6, .8) * band * .035, 1.);
         }`,
-      transparent: true,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending
+      blending: THREE.NoBlending
     });
-    const nebula = new THREE.Mesh(new THREE.PlaneGeometry(46, 26), nebulaMaterial);
+    // La nebulosa casi no cambia, así que su shader (el más caro) se dibuja una sola vez en una textura
+    const nebulaTarget = new THREE.WebGLRenderTarget(isSmall ? 768 : 1280, isSmall ? 432 : 720, { depthBuffer: false });
+    {
+      const bakeScene = new THREE.Scene();
+      const bakeQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), nebulaMaterial);
+      bakeScene.add(bakeQuad);
+      const previousClear = renderer.getClearAlpha();
+      renderer.setRenderTarget(nebulaTarget);
+      renderer.setClearAlpha(1);
+      renderer.clear();
+      renderer.render(bakeScene, new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1));
+      renderer.setRenderTarget(null);
+      renderer.setClearAlpha(previousClear);
+      bakeQuad.geometry.dispose();
+      nebulaMaterial.dispose();
+    }
+    const nebula = new THREE.Mesh(
+      new THREE.PlaneGeometry(46, 26),
+      new THREE.MeshBasicMaterial({ map: nebulaTarget.texture, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false })
+    );
     nebula.position.z = -14;
     scene.add(nebula);
 
@@ -1067,8 +1085,17 @@
     let heroVisible = true;
     let elapsed = 0;
     const clock = new THREE.Clock();
+    // A 30 cuadros por segundo el movimiento lento del planeta se ve igual y la tarjeta gráfica trabaja la mitad o menos
+    const FRAME = 1 / 30;
+    let pending = 0;
     function animate() {
-      const delta = Math.min(clock.getDelta(), 0.05);
+      pending += clock.getDelta();
+      if (!reducedMotion && pending < FRAME - 0.004) {
+        if (heroVisible && !document.hidden) raf = requestAnimationFrame(animate);
+        return;
+      }
+      const delta = Math.min(pending, 0.05);
+      pending = 0;
       // Solo se dibuja mientras la portada está a la vista
       const heroHeight = canvas.clientHeight || window.innerHeight;
       const scroll = Math.min(window.scrollY / heroHeight, 1.2);
@@ -1076,7 +1103,6 @@
         elapsed += reducedMotion ? 0 : delta;
         starMaterial.uniforms.uTime.value = elapsed;
         planetMaterial.uniforms.uTime.value = elapsed;
-        nebulaMaterial.uniforms.uTime.value = elapsed;
         if (!reducedMotion) updateSpace(delta);
         pointer.x += (target.x - pointer.x) * 0.035;
         pointer.y += (target.y - pointer.y) * 0.035;
